@@ -79,6 +79,8 @@ def BuildOptions():
                         default = default_remote_copy_path,
                         help = '''Path where objects should be copied on the
                         target.''')
+    parser.add_argument('-f', '--filter', action = 'store', default = '*',
+                        help='Quoted (benchmark name) filter pattern.')
     return parser.parse_args()
 
 
@@ -92,9 +94,8 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def get_current_path_files_by_extension(ext, path):
-    return glob.glob(os.path.join(path, '*.' + ext))
-
+def get_files(name_glob, ext, path):
+    return glob.glob(os.path.join(path, '*' + name_glob + '*.' + ext))
 
 # ADB helpers
 
@@ -139,11 +140,16 @@ def BuildBenchmarks(args):
 
 def run_adb(mode, apk, classname):
     dalvikvm = 'dalvikvm%s' % mode
-    command = "cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` dalvikvm -cp %s" % (os.path.dirname(apk), apk)
+    command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
+            % (os.path.dirname(apk), dalvikvm, apk))
     if args.calibrate:
+        # Run the benchmark's time* method(s) via bench_runner_main
         command += " %s %s" % (bench_runner_main, classname)
     else:
-        command = " %s" % (classname)
+        # Run the benchmark as a main class directly
+        command += " %s" % (classname)
+    if verbose:
+        command += " --debug"
     out, err = adb_shell(command)
     return out.decode('UTF-8')
 
@@ -176,19 +182,25 @@ def RunBench(apk, classname,
             sys.stderr.write("  \-> FAILED, continuing anyway\n")
             continue
 
-        for line in out.rstrip().split("\n"):
-            name = line.split(":")[0].rstrip()
-            score = float(line.split(":")[1].strip().split(" ")[0].strip())
+        try:
+            for line in out.rstrip().split("\n"):
+                name = line.split(":")[0].rstrip()
+                # Ignore any java logging from --debug
+                if name not in ['INFO', 'DEBUG', 'ERROR']:
+                    score = float(line.split(":")[1].strip().split(" ")[0].strip())
+                    if name not in result:
+                        result[name] = list()
+                    result[name].append(score)
+        except Exception as e:
+            print(e)
+            print("  \-> Error parsing output from %s" % classname)
+            break
 
-            if name not in result:
-                result[name] = list()
-
-            result[name].append(score)
 
 
 def RunBenchs(apk, bench_names,
               iterations = default_n_iterations, mode = default_mode):
-    VerbosePrint('\n# Running benchmarks')
+    VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
     for bench in bench_names:
         RunBench(apk, bench, iterations = iterations, mode = mode)
 
@@ -210,7 +222,7 @@ if __name__ == "__main__":
     if args.norun:
         sys.exit(0)
 
-    bench_files = get_current_path_files_by_extension('java', dir_benchmarks)
+    bench_files = get_files(args.filter, 'java', dir_benchmarks)
     bench_names = [os.path.basename(f).replace('.java', '') for f in bench_files]
     bench_names.sort()
 

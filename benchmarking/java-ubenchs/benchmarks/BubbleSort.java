@@ -41,17 +41,19 @@ public class BubbleSort {
     }
   }
 
-  public void verify() {
+  public boolean verify() {
     // Verify sorted output.
     for(int i = 0; i < this.inputArr.length; ++i) {
         int expected = this.inputArr.length - i - 1;
         int actual = this.inputArr[i];
         if(expected != actual) {
-          System.out.println(" Mismatch at position " + i +
+          System.out.println("ERROR: Mismatch at position " + i +
                              " Expected " + expected +
                              " Actual " + actual);
+          return false;
         }
     }
+    return true;
   }
 
   public static void main(String[] args) {

@@ -24,7 +24,7 @@ def PrintStats(dict_results, iterations = None):
         M = max(nums)
         ave = statistics.mean(nums)
         d = statistics.pstdev(nums, ave)
-        dp = d / ave * 100 if ave != 0 else infinity
+        dp = d / ave * 100 if ave != 0 else float("inf")
         results.append([benchmark, m, M, ave, d, dp])
     PrintTable(headers, results)
 
@@ -39,11 +39,11 @@ def PrintDiff(res_1, res_2):
     for bench in sorted(benchmarks):
         ave1 = statistics.mean(res_1[bench])
         d1 = statistics.pstdev(res_1[bench], ave1)
-        dp1 = d1 / ave1 * 100 if ave1 != 0 else infinity
+        dp1 = d1 / ave1 * 100 if ave1 != 0 else float("inf")
         ave2 = statistics.mean(res_2[bench])
         d2 = statistics.pstdev(res_2[bench], ave2)
-        dp2 = d2 / ave2 * 100 if ave2 != 0 else infinity
-        diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else infinity
+        dp2 = d2 / ave2 * 100 if ave2 != 0 else float("inf")
+        diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
         results.append([bench, ave1, dp1, ave2, dp2, diff])
     PrintTable(headers, results)
 

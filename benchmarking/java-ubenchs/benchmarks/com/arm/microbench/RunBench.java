@@ -22,25 +22,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class RunBench {
-    // Minimum valid calibration time: 300ms.
-    public final static long DEFAULT_CALIBRATION_MIN_TIME = 30000000L;
+    // Minimum valid calibration time: 400ms.
+    public final static long DEFAULT_CALIBRATION_MIN_TIME_NS = TimeUnit.NANOSECONDS.convert(400, TimeUnit.MILLISECONDS);
     // The target benchmark running time: 2s.
-    public final static long DEFAULT_BENCHMARK_TARGET_RUN_TIME = 2000000000L;
+    public final static long DEFAULT_BENCHMARK_TARGET_RUN_TIME_NS = TimeUnit.NANOSECONDS.convert(2, TimeUnit.SECONDS);
     public final static int ITERATIONS_LIMIT = 0x40000000;
 
     // A method with this name will be executed as a microbenchmark.
     public static final String TESTNAME_PREFIX = "time";
 
     private SimpleLogger log;
-    private long calibrationMinTime;
-    private long benchmarkTargetRunTime;
+    private long calibrationMinTimeNS;
+    private long benchmarkTargetRunTimeNS;
 
     public RunBench() {
         this.log = SimpleLogger.getInstance();
-        calibrationMinTime = DEFAULT_CALIBRATION_MIN_TIME;
-        benchmarkTargetRunTime = DEFAULT_BENCHMARK_TARGET_RUN_TIME;
+        calibrationMinTimeNS = DEFAULT_CALIBRATION_MIN_TIME_NS;
+        benchmarkTargetRunTimeNS = DEFAULT_BENCHMARK_TARGET_RUN_TIME_NS;
     }
 
     public void setLogLevel(SimpleLogger.LogLevel level) {
@@ -87,14 +88,14 @@ public class RunBench {
         } else {
           // Estimate how long it takes to run one iteration.
           iterations = 1;
-          while ((duration < calibrationMinTime) && (iterations < ITERATIONS_LIMIT)) {
+          while ((duration < calibrationMinTimeNS) && (iterations < ITERATIONS_LIMIT)) {
             iterations *= 2;
             duration = timeIterations(instance, method, (int) iterations);
           }
           // Estimate the number of iterations to run based on the calibration
           // phase, and benchmark the function.
           double iter_time = duration / (double) iterations;
-          iterations = (int) Math.max(1.0, benchmarkTargetRunTime / iter_time);
+          iterations = (int) Math.max(1.0, benchmarkTargetRunTimeNS / iter_time);
           duration = timeIterations(instance, method, (int) iterations);
         }
 
@@ -106,37 +107,47 @@ public class RunBench {
                 + "." + method.getName().substring(4) + ":", iteration_time);
     }
 
-    public int runBenchSet(String test, String subtest) {
+    public int runBenchSet(String test, String subtest, boolean verify) {
         if (test == null) {
             return 1;
         }
-        List<Method> methods = new ArrayList<Method>(5);
+        List<Method> benchMethods = new ArrayList<Method>(5);
+        Method verifyMethod = null;
         try {
             Class<?> clazz = Class.forName(test);
             Object instance = clazz.newInstance();
             if (subtest != null) {
                 Method m = clazz.getMethod(TESTNAME_PREFIX + subtest, int.class);
-                methods.add(m);
+                benchMethods.add(m);
             } else {
                 for (Method m : clazz.getDeclaredMethods()) {
                     if (m.getName().startsWith(TESTNAME_PREFIX)) {
-                        methods.add(m);
+                        benchMethods.add(m);
+                    } else if (m.getName().equals("verify") && m.getReturnType() == boolean.class) {
+                        verifyMethod = m;
                     }
                 }
             }
-            // Sort methods by name.
-            Collections.sort(methods, new Comparator<Method>() {
+            // Sort benchMethods by name.
+            Collections.sort(benchMethods, new Comparator<Method>() {
                 @Override
                 public int compare(Method m1, Method m2) {
                     return m1.getName().compareTo(m2.getName());
                 }
             });
 
-            for (Method m : methods) {
+            for (Method m : benchMethods) {
                 // Run each method as a benchmark.
                 runOneBench(instance, m);
             }
 
+            // Optionally verify benchmark results.
+            if (verify && verifyMethod != null) {
+                if (!(Boolean)verifyMethod.invoke(instance)) {
+                    log.error(clazz.getName() + " failed verification.");
+                    return 1;
+                }
+            }
         } catch (Exception e) {
             // TODO: filter exceptions.
             e.printStackTrace();
@@ -148,6 +159,8 @@ public class RunBench {
     public void parseCmdlineAndRun(String[] args) {
         String test = null;
         String subtest = null;
+        boolean verify = true;  // Verify all benchmark results by default.
+
         // TODO: help message
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith("--")) {
@@ -166,23 +179,25 @@ public class RunBench {
                 } else if (option.equals("benchmark_run_time")) {
                     i++;
                     if (i < args.length) {
-                        this.benchmarkTargetRunTime = Long.valueOf(args[i]) * 1000000; // milliseconds
+                        this.benchmarkTargetRunTimeNS = TimeUnit.NANOSECONDS.convert(Long.valueOf(args[i]), TimeUnit.MILLISECONDS);
                     } else {
                         log.fatal("Require time.");
                     }
                 } else if (option.equals("calibration_min_time")) {
                     i++;
                     if (i < args.length) {
-                        this.calibrationMinTime = Long.valueOf(args[i]) * 1000000; // milliseconds
+                        this.calibrationMinTimeNS = TimeUnit.NANOSECONDS.convert(Long.valueOf(args[i]), TimeUnit.MILLISECONDS);
                     } else {
                         log.fatal("Require time.");
                     }
+                } else if (option.equals("noverify")) {
+                    verify = false;
                 }
             } else {
                 test = args[i];
             }
         }
-        if (runBenchSet(test, subtest) != 0) {
+        if (runBenchSet(test, subtest, verify) != 0) {
             log.error("Test failed.");
         }
     }

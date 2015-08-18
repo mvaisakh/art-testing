@@ -33,7 +33,7 @@ Steps to use the automation script:
   . build/envsetup.sh
   lunch
 
-1.3 Build and install perf.
+1.3 Build and install perf (it's part of <AOSP>)
   m -j 64 perf
   adb root
   adb remount
@@ -58,7 +58,9 @@ For example,
 
 3.2. Review output via browser.
 
-  3.2.1. Copy this folder entirely to webserver's html folder. Or make a symbol link in the html
+  Try viewing html/index.html locally. If that doesn't work for you:
+
+  3.2.1. Copy tools/perf/html folder entirely to webserver's html folder. Or make a symbol link in the html
 folder to this folder. For example,
     ln -s $(pwd) /var/www/html/java-test
 
