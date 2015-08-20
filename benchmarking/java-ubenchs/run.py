@@ -34,7 +34,7 @@ dir_benchmarks = os.path.join(dir_pwd, 'benchmarks')
 dir_framework = os.path.join(dir_pwd, 'framework')
 dir_tools = os.path.join(dir_pwd, 'tools')
 dir_build = os.path.join(dir_pwd, 'build')
-dir_build_java_class = os.path.join(dir_build, 'java_class')
+dir_build_java_classes = os.path.join(dir_build, 'classes')
 bench_runner_main = 'com.arm.microbench.RunBench'
 
 # The script must be executed from an Android environment, which will be passed
@@ -119,7 +119,7 @@ def adb_shell(command):
 
 def host_java(command):
     VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, cwd = dir_build_java_class,
+    p = subprocess.Popen(command, cwd = dir_build_java_classes,
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     return p.communicate()
 
