@@ -52,7 +52,6 @@ default_mode = ''
 default_n_iterations = 5
 default_remote_copy_path = '/data/local/tmp'
 host = False
-calibrate = False
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
@@ -62,10 +61,11 @@ def BuildOptions():
     parser.add_argument('--iterations', '-i', metavar = 'N', type = int,
                         default = default_n_iterations,
                         help = "Run <N> iterations of the benchmarks.")
-    parser.add_argument('--auto-calibrate', action='store_true', default = True,
-                        dest = 'calibrate', help='''Do not run the benchmarks'
-                        `main()` function directly. Instead, calibrate to run
-                        each benchmark for a certain amount of time.''')
+    parser.add_argument('--dont-auto-calibrate',
+                        action='store_false', default = True,
+                        dest = 'auto_calibrate', help='''Do not auto-calibrate
+                        the benchmarks. Instead, run each benchmark's `main()`
+                        function directly.''')
     parser.add_argument('--host', action='store_true', default = False,
                         help='Run on host JVM')
     parser.add_argument('--mode', action = 'store',
@@ -142,7 +142,7 @@ def run_adb(mode, apk, classname):
     dalvikvm = 'dalvikvm%s' % mode
     command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
             % (os.path.dirname(apk), dalvikvm, apk))
-    if args.calibrate:
+    if args.auto_calibrate:
         # Run the benchmark's time* method(s) via bench_runner_main
         command += " %s %s" % (bench_runner_main, classname)
     else:
@@ -154,7 +154,7 @@ def run_adb(mode, apk, classname):
     return out.decode('UTF-8')
 
 def run_host(mode, apk, classname):
-    if args.calibrate:
+    if args.auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
         command = ['java', classname]
