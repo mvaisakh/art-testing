@@ -41,7 +41,8 @@ bench_runner_main = 'com.arm.microbench.RunBench'
 # to run the commands.
 environment = os.environ.copy()
 
-# When used as a script, argument parsing will override this value.
+# Use a global `verbose` flag to allow scripts importing this file to override
+# it.
 verbose = False
 
 
@@ -51,7 +52,6 @@ verbose = False
 default_mode = ''
 default_n_iterations = 5
 default_remote_copy_path = '/data/local/tmp'
-host = False
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
@@ -67,7 +67,7 @@ def BuildOptions():
                         the benchmarks. Instead, run each benchmark's `main()`
                         function directly.''')
     parser.add_argument('--host', action='store_true', default = False,
-                        help='Run on host JVM')
+                        dest='run_on_host', help='Run on host JVM')
     parser.add_argument('--mode', action = 'store',
                         choices = ['32', '64', ''], default = default_mode,
                         help='''Run with dalvikvm32, dalvikvm64, or dalvikvm''')
@@ -129,16 +129,16 @@ def DeleteAppInDalvikCache(remote_copy_path):
     # With the current defaults, the pattern is "data@local@tmp@java-benchs.apk*"
     adb_shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'))
 
-def BuildBenchmarks(args):
+def BuildBenchmarks(build_for_host):
     # Call the build script, with warnings treated as errors.
     command = ['./build.sh', '-w']
-    if args.host:
+    if build_for_host:
         # Only build for the host.
         command += ['-H']
     VerbosePrint(' '.join(command))
     subprocess.check_call(command)
 
-def run_adb(mode, apk, classname):
+def RunBenchADB(mode, auto_calibrate, apk, classname):
     dalvikvm = 'dalvikvm%s' % mode
     command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
             % (os.path.dirname(apk), dalvikvm, apk))
@@ -153,8 +153,8 @@ def run_adb(mode, apk, classname):
     out, err = adb_shell(command)
     return out.decode('UTF-8')
 
-def run_host(mode, apk, classname):
-    if args.auto_calibrate:
+def RunBenchHost(mode, auto_calibrate, apk, classname):
+    if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
         command = ['java', classname]
@@ -166,14 +166,12 @@ def run_host(mode, apk, classname):
 result = dict()
 
 def RunBench(apk, classname,
-             run_helper = run_adb,
+             run_helper,
+             auto_calibrate,
              iterations = default_n_iterations, mode = default_mode):
     for iteration in range(iterations):
         try:
-            if args.host:
-                out = run_host(mode, apk, classname)
-            else:
-                out = run_helper(mode, apk, classname)
+            out = run_helper(mode, auto_calibrate, apk, classname)
             out = out.rstrip('\n')
             if verbose:
                 print(out)
@@ -199,20 +197,23 @@ def RunBench(apk, classname,
 
 
 def RunBenchs(apk, bench_names,
+              run_on_host,
+              auto_calibrate,
               iterations = default_n_iterations, mode = default_mode):
     VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
+    run_helper = RunBenchHost if run_on_host else RunBenchADB
     for bench in bench_names:
-        RunBench(apk, bench, iterations = iterations, mode = mode)
+        RunBench(apk, bench, run_helper, auto_calibrate, iterations = iterations, mode = mode)
 
 
 if __name__ == "__main__":
     args = BuildOptions()
     verbose = not args.noverbose
 
-    BuildBenchmarks(args)
+    BuildBenchmarks(args.run_on_host)
 
     remote_apk = None
-    if not args.host:
+    if not args.run_on_host:
         DeleteAppInDalvikCache(args.remote_copy_path)
         apk = './build/bench.apk'
         apk_name = os.path.basename(apk)
@@ -226,7 +227,7 @@ if __name__ == "__main__":
     bench_names = [os.path.basename(f).replace('.java', '') for f in bench_files]
     bench_names.sort()
 
-    RunBenchs(remote_apk, bench_names, args.iterations, args.mode)
+    RunBenchs(remote_apk, bench_names, args.run_on_host, args.auto_calibrate, args.iterations, args.mode)
     utils.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
