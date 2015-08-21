@@ -231,6 +231,14 @@ public class RunBench {
                 runBenchSet(benchmarks.get(0), subtest, verify);
             }
         } else {
+            if (benchmarks.size() == 0) {
+                // No benchmarks were specified on the command line. Run all
+                // benchmarks available.
+                for (int i = 0; i < BenchmarkList.benchmarkList.length; i++) {
+                    benchmarks.add(BenchmarkList.benchmarkList[i]);
+                }
+            }
+            // Run the benchmarks.
             for (int i = 0; i < benchmarks.size(); i++) {
                 if (runBenchSet(benchmarks.get(i), null, verify) != 0) {
                     log.error("Test failed.");
