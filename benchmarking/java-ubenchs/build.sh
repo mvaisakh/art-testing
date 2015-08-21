@@ -108,11 +108,7 @@ shift $((OPTIND - 1))
 pushd $DIR_BENCHMARKS &> /dev/null
 
 RDIR_BENCHMARKS=.
-RDIR_FRAMEWORK=$RDIR_BENCHMARKS/com
-
-# Framework java files are compiled unconditionally.
-JAVA_FRAMEWORK_FILES="$(find $RDIR_FRAMEWORK -type f -name '*'.java)"
-
+RDIR_FRAMEWORK=$RDIR_BENCHMARKS/com/arm/microbench
 
 JAVA_BENCHMARK_FILES=
 FIND_BENCHMARKS_COMMAND="find $RDIR_BENCHMARKS ! -path $RDIR_FRAMEWORK/* -type f"
@@ -130,6 +126,27 @@ else
 fi
 set +f
 
+# Transform the list of java files in a list of strings that will be provided to
+# the benchmark framework to indicate what benchmark classes are available.
+# Remove the `.java` extension.
+JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_FILES//.java/}
+# Remove the leading `./`.
+JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//.\//}
+# Trim trailing whitespaces.
+JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES/%[[:space:]]/}
+# Sort the names.
+IFS=' ' read -a array <<< $JAVA_BENCHMARK_CLASSES
+readarray -t sorted < <(printf '%s\0' "${array[@]}" | sort -z | xargs -0n1)
+JAVA_BENCHMARK_CLASSES=$(echo ${sorted[@]})
+# Make it a list of literal string.
+JAVA_BENCHMARK_CLASSES="\""${JAVA_BENCHMARK_CLASSES//[[:space:]]/\", \"}"\""
+# Write the result file.
+BENCHMARK_LIST_TEMPLATE="$(cat $RDIR_FRAMEWORK/BenchmarkList.java.template)"
+BENCHMARK_LIST_TEMPLATE=${BENCHMARK_LIST_TEMPLATE/<to be filled by the build system>/$JAVA_BENCHMARK_CLASSES}
+echo "$BENCHMARK_LIST_TEMPLATE" > $RDIR_FRAMEWORK/BenchmarkList.java
+
+# Framework java files are compiled unconditionally.
+JAVA_FRAMEWORK_FILES="$(find $RDIR_FRAMEWORK -type f -name '*'.java)"
 
 
 

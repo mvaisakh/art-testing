@@ -156,45 +156,69 @@ public class RunBench {
         return 0;
     }
 
+    public static final String helpMessage =
+        "Usage: java com.arm.microbench.RunBench [OPTIONS] <Benchmark>\n" +
+        "OPTIONS:\n" +
+        "\t--help                              Print this error message.\n" +
+        "\t--verbose                           Be verbose.\n" +
+        "\t--debug                             Be more verbose than the verbose mode.\n" +
+        "\t--list_benchmarks                   List available benchmarks and exit.\n" +
+        /* TODO: Add a `--list_sub_benchmarks` option. */
+        "\t--subtest                           TODO.\n" +
+        "\t--benchmark_run_time <time in s>    Set the target running time for benchmarks.\n" +
+        "\t                                    (default: " + DEFAULT_BENCHMARK_TARGET_RUN_TIME_NS + ")\n" +
+        "\t--calibration_min_time <time in s>  Set the minimum running time for benchmark calibration.\n" +
+        "\t                                    (default: " + DEFAULT_CALIBRATION_MIN_TIME_NS + ")\n" +
+        "";
     public void parseCmdlineAndRun(String[] args) {
         String test = null;
         String subtest = null;
         boolean verify = true;  // Verify all benchmark results by default.
-
-        // TODO: help message
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].startsWith("--")) {
-                String option = args[i].substring(2);
-                if (option.equals("subtest")) {
-                    i++;
-                    if (i < args.length) {
-                        subtest = args[i];
-                    } else {
-                        log.fatal("Require subtest name.");
-                    }
+        for (int arg_index = 0; arg_index < args.length; arg_index++) {
+            if (args[arg_index].startsWith("--")) {
+                String option = args[arg_index].substring(2);
+                if (option.equals("help")) {
+                    System.out.println(helpMessage);
+                    System.exit(0);
                 } else if (option.equals("verbose")) {
                     setLogLevel(SimpleLogger.LogLevel.INFO);
                 } else if (option.equals("debug")) {
                     setLogLevel(SimpleLogger.LogLevel.DEBUG);
+                } else if (option.equals("list_benchmarks")) {
+                    for (int i = 0; i < BenchmarkList.benchmarkList.length; i++) {
+                        System.out.println(BenchmarkList.benchmarkList[i]);
+                    }
+                    System.exit(0);
+                } else if (option.equals("subtest")) {
+                    arg_index++;
+                    if (arg_index < args.length) {
+                        subtest = args[arg_index];
+                    } else {
+                        log.fatal("Require subtest name.");
+                    }
                 } else if (option.equals("benchmark_run_time")) {
-                    i++;
-                    if (i < args.length) {
-                        this.benchmarkTargetRunTimeNS = TimeUnit.NANOSECONDS.convert(Long.valueOf(args[i]), TimeUnit.MILLISECONDS);
+                    arg_index++;
+                    if (arg_index < args.length) {
+                        this.benchmarkTargetRunTimeNS = TimeUnit.NANOSECONDS.convert(Long.valueOf(args[arg_index]), TimeUnit.MILLISECONDS);
                     } else {
                         log.fatal("Require time.");
                     }
                 } else if (option.equals("calibration_min_time")) {
-                    i++;
-                    if (i < args.length) {
-                        this.calibrationMinTimeNS = TimeUnit.NANOSECONDS.convert(Long.valueOf(args[i]), TimeUnit.MILLISECONDS);
+                    arg_index++;
+                    if (arg_index < args.length) {
+                        this.calibrationMinTimeNS = TimeUnit.NANOSECONDS.convert(Long.valueOf(args[arg_index]), TimeUnit.MILLISECONDS);
                     } else {
                         log.fatal("Require time.");
                     }
                 } else if (option.equals("noverify")) {
                     verify = false;
+                } else {
+                    log.error("Unknown option `--" + option + "`.");
+                    System.out.println(helpMessage);
+                    System.exit(1);
                 }
             } else {
-                test = args[i];
+                test = args[arg_index];
             }
         }
         if (runBenchSet(test, subtest, verify) != 0) {
