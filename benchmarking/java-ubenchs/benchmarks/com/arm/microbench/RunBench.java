@@ -157,23 +157,24 @@ public class RunBench {
     }
 
     public static final String helpMessage =
-        "Usage: java com.arm.microbench.RunBench [OPTIONS] <Benchmark>\n" +
+        "Usage: java com.arm.microbench.RunBench [OPTIONS] [Benchmark...]\n" +
         "OPTIONS:\n" +
         "\t--help                              Print this error message.\n" +
         "\t--verbose                           Be verbose.\n" +
         "\t--debug                             Be more verbose than the verbose mode.\n" +
         "\t--list_benchmarks                   List available benchmarks and exit.\n" +
         /* TODO: Add a `--list_sub_benchmarks` option. */
-        "\t--subtest                           TODO.\n" +
+        "\t--subtest <subtest>                 Run a specified subtest. Valid only when a single benchmark is run.\n" +
         "\t--benchmark_run_time <time in s>    Set the target running time for benchmarks.\n" +
         "\t                                    (default: " + DEFAULT_BENCHMARK_TARGET_RUN_TIME_NS + ")\n" +
         "\t--calibration_min_time <time in s>  Set the minimum running time for benchmark calibration.\n" +
         "\t                                    (default: " + DEFAULT_CALIBRATION_MIN_TIME_NS + ")\n" +
         "";
     public void parseCmdlineAndRun(String[] args) {
-        String test = null;
         String subtest = null;
         boolean verify = true;  // Verify all benchmark results by default.
+        List<String> benchmarks = new ArrayList<String>();
+
         for (int arg_index = 0; arg_index < args.length; arg_index++) {
             if (args[arg_index].startsWith("--")) {
                 String option = args[arg_index].substring(2);
@@ -218,11 +219,23 @@ public class RunBench {
                     System.exit(1);
                 }
             } else {
-                test = args[arg_index];
+                benchmarks.add(args[arg_index]);
             }
         }
-        if (runBenchSet(test, subtest, verify) != 0) {
-            log.error("Test failed.");
+
+        if (subtest != null) {
+            if (benchmarks.size() != 1) {
+                log.error("Only one benchmark should be run when specifying a subtest.");
+                System.exit(1);
+            } else {
+                runBenchSet(benchmarks.get(0), subtest, verify);
+            }
+        } else {
+            for (int i = 0; i < benchmarks.size(); i++) {
+                if (runBenchSet(benchmarks.get(i), null, verify) != 0) {
+                    log.error("Test failed.");
+                }
+            }
         }
     }
 
