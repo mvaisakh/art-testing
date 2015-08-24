@@ -96,8 +96,8 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def get_files(name_glob, ext, path):
-    return glob.glob(os.path.join(path, '*' + name_glob + '*.' + ext))
+def get_files(ext, path):
+    return glob.glob(os.path.join(path, '*.' + ext))
 
 # ADB helpers
 
@@ -208,6 +208,28 @@ def RunBenchs(apk, bench_names,
         RunBench(apk, bench, run_helper, auto_calibrate, iterations = iterations, mode = mode)
 
 
+def ListAllBenchmarks():
+    list_benchs = []
+    # List java files in 'benchmarks/'.
+    list_benchs += get_files('java', dir_benchmarks)
+    # List java files in subdirectories of 'benchmarks/', except in 'com' which
+    # contain the framework code.
+    bench_subdirs = [x for x in os.listdir(dir_benchmarks) if os.path.isdir(os.path.join(dir_benchmarks, x)) and x != 'com']
+    for subdir in bench_subdirs:
+        for root, dirs, files in os.walk(os.path.join(dir_benchmarks, subdir)):
+            list_benchs += map(lambda x : os.path.join(root, x), files)
+    list_benchs = list(map(lambda x : os.path.relpath(x, dir_benchmarks), list_benchs))
+    list_benchs = list(map(lambda x : x.replace('.java', ''), list_benchs))
+    list_benchs.sort()
+    return list_benchs
+
+
+def FilterBenchmarks(benchmarks, filter):
+    if filter is not None:
+        benchmarks = [x for x in benchmarks if fnmatch.fnmatch(x, filter)]
+    return benchmarks
+
+
 if __name__ == "__main__":
     args = BuildOptions()
     verbose = not args.noverbose
@@ -225,11 +247,11 @@ if __name__ == "__main__":
     if args.norun:
         sys.exit(0)
 
-    bench_files = get_files(args.filter, 'java', dir_benchmarks)
-    bench_names = [os.path.basename(f).replace('.java', '') for f in bench_files]
-    bench_names.sort()
+    benchmarks = ListAllBenchmarks()
+    benchmarks = FilterBenchmarks(benchmarks, args.filter)
+    bench_class_names = list(map(os.path.basename, benchmarks))
 
-    RunBenchs(remote_apk, bench_names, args.run_on_host, args.auto_calibrate, args.iterations, args.mode)
+    RunBenchs(remote_apk, bench_class_names, args.run_on_host, args.auto_calibrate, args.iterations, args.mode)
     utils.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
