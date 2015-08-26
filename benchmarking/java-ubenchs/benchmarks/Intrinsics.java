@@ -245,25 +245,25 @@ public class Intrinsics {
   public static void main(String[] args) {
     Intrinsics obj = new Intrinsics();
     long before = System.currentTimeMillis();
-    obj.timeNumberOfLeadingZerosInteger(4000000);
-    obj.timeNumberOfLeadingZerosIntegerRandom(4000000);
-    obj.timeNumberOfLeadingZerosLong(4000000);
-    obj.timeNumberOfLeadingZerosLongRandom(4000000);
+    obj.timeNumberOfLeadingZerosInteger(100000);
+    obj.timeNumberOfLeadingZerosIntegerRandom(100000);
+    obj.timeNumberOfLeadingZerosLong(100000);
+    obj.timeNumberOfLeadingZerosLongRandom(100000);
 
-    obj.timeNumberOfTrailingZerosInteger(4000000);
-    obj.timeNumberOfTrailingZerosIntegerRandom(4000000);
-    obj.timeNumberOfTrailingZerosLong(4000000);
-    obj.timeNumberOfTrailingZerosLongRandom(4000000);
+    obj.timeNumberOfTrailingZerosInteger(100000);
+    obj.timeNumberOfTrailingZerosIntegerRandom(100000);
+    obj.timeNumberOfTrailingZerosLong(100000);
+    obj.timeNumberOfTrailingZerosLongRandom(100000);
 
-    obj.timeRotateRightInteger(4000000);
-    obj.timeRotateRightLong(4000000);
-    obj.timeRotateLeftInteger(4000000);
-    obj.timeRotateLeftLong(4000000);
+    obj.timeRotateRightInteger(100000);
+    obj.timeRotateRightLong(100000);
+    obj.timeRotateLeftInteger(100000);
+    obj.timeRotateLeftLong(100000);
 
-    obj.timeRotateRandomInteger(4000000);
-    obj.timeRotateRandomLong(4000000);
+    obj.timeRotateRandomInteger(100000);
+    obj.timeRotateRandomLong(100000);
 
     long after = System.currentTimeMillis();
-    System.out.println("Intrinsics: " + (after - before) + "ns");
+    System.out.println("Intrinsics: " + (after - before));
   }
 }
