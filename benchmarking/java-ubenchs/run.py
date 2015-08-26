@@ -81,6 +81,8 @@ def BuildOptions():
                         target.''')
     parser.add_argument('-f', '--filter', action = 'store', default = '*',
                         help='Quoted (benchmark name) filter pattern.')
+    parser.add_argument('--output-pkl', action = 'store',
+                        help='Specify a name for the output `.pkl` file.')
     return parser.parse_args()
 
 
@@ -231,7 +233,7 @@ if __name__ == "__main__":
     utils.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
-    res_filename = 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
+    res_filename = args.output_pkl if args.output_pkl is not None else 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
     with open(res_filename, 'wb') as pickle_file:
         pickle.dump(result, pickle_file)
         print(('Wrote results to %s.' % res_filename))
