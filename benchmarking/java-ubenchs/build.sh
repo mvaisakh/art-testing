@@ -19,6 +19,8 @@ SCRIPT_PATH=$(dirname $(readlink -e $0))
 
 DIR_BUILD=$SCRIPT_PATH/build
 DIR_BENCHMARKS=benchmarks
+DIR_FRAMEWORK=framework
+
 
 
 # Set to true to only build for the host and not use any android specific
@@ -101,20 +103,11 @@ shift $((OPTIND - 1))
 
 
 
-# Find what Java files we need to compile.
-
-# `javac` requires paths to match class names, so we work directly from the
-# benchmarks directory.
-pushd $DIR_BENCHMARKS &> /dev/null
-
-RDIR_BENCHMARKS=.
-RDIR_FRAMEWORK=$RDIR_BENCHMARKS/org/linaro/bench
-
-JAVA_BENCHMARK_FILES=
-FIND_BENCHMARKS_COMMAND="find $RDIR_BENCHMARKS ! -path $RDIR_FRAMEWORK/* -type f"
 # Disable wildcard expansion.
 set -f
-JAVA_BENCHMARK_FILES+="$($FIND_BENCHMARKS_COMMAND -name '*'.java) "
+# Find what Java files we need to compile.
+JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java) "
+# Reenable wildcard expansion.
 set +f
 
 # Transform the list of java files in a list of strings that will be provided to
@@ -138,12 +131,12 @@ JAVA_BENCHMARK_CLASSES=$(echo ${sorted[@]})
 # Make it a list of literal string.
 JAVA_BENCHMARK_CLASSES="\""${JAVA_BENCHMARK_CLASSES//[[:space:]]/\", \"}"\""
 # Write the result file.
-BENCHMARK_LIST_TEMPLATE="$(cat $RDIR_FRAMEWORK/BenchmarkList.java.template)"
+BENCHMARK_LIST_TEMPLATE="$(cat $DIR_FRAMEWORK/org/linaro/bench/BenchmarkList.java.template)"
 BENCHMARK_LIST_TEMPLATE=${BENCHMARK_LIST_TEMPLATE/<to be filled by the build system>/$JAVA_BENCHMARK_CLASSES}
-echo "$BENCHMARK_LIST_TEMPLATE" > $RDIR_FRAMEWORK/BenchmarkList.java
+echo "$BENCHMARK_LIST_TEMPLATE" > $DIR_FRAMEWORK/org/linaro/bench/BenchmarkList.java
 
 # Framework java files are compiled unconditionally.
-JAVA_FRAMEWORK_FILES="$(find $RDIR_FRAMEWORK -type f -name '*'.java)"
+JAVA_FRAMEWORK_FILES="$(find $DIR_FRAMEWORK -type f -name '*'.java)"
 
 
 
@@ -151,7 +144,7 @@ JAVA_FRAMEWORK_FILES="$(find $RDIR_FRAMEWORK -type f -name '*'.java)"
 
 verbose_safe rm --recursive --force $DIR_BUILD
 verbose_safe mkdir --parents $DIR_BUILD/classes/
-verbose_safe javac -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
+verbose_safe javac -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
 verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
 if ! $HOST_BUILD; then
   if hash dx 2> /dev/null; then
@@ -161,6 +154,3 @@ if ! $HOST_BUILD; then
       "Are you running from an Android environment?"
   fi
 fi
-
-# Leave $DIR_BENCHMARKS
-popd &> /dev/null
