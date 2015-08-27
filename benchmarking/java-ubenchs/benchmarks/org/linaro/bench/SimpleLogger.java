@@ -15,7 +15,7 @@
  *
  */
 
-package com.arm.microbench;
+package org.linaro.bench;
 
 public class SimpleLogger {
     public enum LogLevel {

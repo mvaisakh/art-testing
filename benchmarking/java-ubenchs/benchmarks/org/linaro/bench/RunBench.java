@@ -15,7 +15,7 @@
  *
  */
 
-package com.arm.microbench;
+package org.linaro.bench;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -157,7 +157,7 @@ public class RunBench {
     }
 
     public static final String helpMessage =
-        "Usage: java com.arm.microbench.RunBench [OPTIONS] [Benchmark...]\n" +
+        "Usage: java org.linaro.bench.RunBench [OPTIONS] [Benchmark...]\n" +
         "OPTIONS:\n" +
         "\t--help                              Print this error message.\n" +
         "\t--verbose                           Be verbose.\n" +

@@ -1,2 +1,2 @@
-benchmarks/com/arm/microbench/BenchmarkList.java
+benchmarks/org/linaro/bench/BenchmarkList.java
 build

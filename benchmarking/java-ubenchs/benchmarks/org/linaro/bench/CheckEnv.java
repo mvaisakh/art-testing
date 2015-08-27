@@ -15,7 +15,7 @@
  *
  */
 
-package com.arm.microbench;
+package org.linaro.bench;
 
 public class CheckEnv {
     public static boolean isAndroid() {

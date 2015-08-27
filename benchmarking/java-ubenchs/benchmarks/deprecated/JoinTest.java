@@ -21,7 +21,7 @@ import java.lang.InterruptedException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.arm.microbench.IterationsAnnotation;
+import org.linaro.bench.IterationsAnnotation;
 
 public class JoinTest extends Thread {
 

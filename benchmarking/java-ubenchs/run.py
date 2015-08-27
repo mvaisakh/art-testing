@@ -35,7 +35,7 @@ dir_framework = os.path.join(dir_pwd, 'framework')
 dir_tools = os.path.join(dir_pwd, 'tools')
 dir_build = os.path.join(dir_pwd, 'build')
 dir_build_java_classes = os.path.join(dir_build, 'classes')
-bench_runner_main = 'com.arm.microbench.RunBench'
+bench_runner_main = 'org.linaro.bench.RunBench'
 
 # The script must be executed from an Android environment, which will be passed
 # to run the commands.

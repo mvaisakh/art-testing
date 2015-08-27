@@ -17,7 +17,7 @@
 
 import java.lang.System;
 
-import com.arm.microbench.IterationsAnnotation;
+import org.linaro.bench.IterationsAnnotation;
 
 public class LockTest {
 

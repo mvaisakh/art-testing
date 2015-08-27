@@ -15,11 +15,16 @@
  *
  */
 
-package com.arm.microbench;
+package org.linaro.bench;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class BenchmarkList {
-    public static final String[] benchmarkList = {
-        <to be filled by the build system>
-    };
+@Retention(RetentionPolicy.RUNTIME)
+public @interface IterationsAnnotation {
+    // false: need to warm up. Only valid when calibration is needed.
+    boolean noWarmup() default false;
+
+    // <=0: means we need to calibrate, others: no calibration and use this as iteration count
+    int iterations() default 0;
 }
