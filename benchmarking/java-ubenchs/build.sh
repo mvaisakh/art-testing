@@ -70,7 +70,7 @@ verbose_safe() {
 
 # Arguments handling
 
-usage="Usage: $(basename "$0") [FILTER...]
+usage="Usage: $(basename "$0")
 Build Java benchmark class, APK, and jar files.
 Output files are produced in $DIR_BUILD.
 
@@ -112,18 +112,9 @@ RDIR_FRAMEWORK=$RDIR_BENCHMARKS/org/linaro/bench
 
 JAVA_BENCHMARK_FILES=
 FIND_BENCHMARKS_COMMAND="find $RDIR_BENCHMARKS ! -path $RDIR_FRAMEWORK/* -type f"
+# Disable wildcard expansion.
 set -f
-if [ $# -eq 0 ]; then
-  # No filters have been provided, so compile all benchmarks.
-  JAVA_BENCHMARK_FILES+="$($FIND_BENCHMARKS_COMMAND -name '*'.java) "
-else
-  # Find benchmarks matching the provided filters.
-  FILTERS=("$@")
-  # Disable globbing for the `find` commands.
-  for filter in "${FILTERS[@]}"; do
-    JAVA_BENCHMARK_FILES+="$($FIND_BENCHMARKS_COMMAND -name $filter) "
-  done
-fi
+JAVA_BENCHMARK_FILES+="$($FIND_BENCHMARKS_COMMAND -name '*'.java) "
 set +f
 
 # Transform the list of java files in a list of strings that will be provided to
