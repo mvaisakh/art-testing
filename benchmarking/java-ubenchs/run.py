@@ -79,8 +79,11 @@ def BuildOptions():
                         default = default_remote_copy_path,
                         help = '''Path where objects should be copied on the
                         target.''')
-    parser.add_argument('-f', '--filter', action = 'store', default = '*',
+    parser.add_argument('-f', '--filter', action = 'append',
                         help='Quoted (benchmark name) filter pattern.')
+    parser.add_argument('-F', '--filter-out', action = 'append',
+                        help='''Filter out the benchmarks matching this patern.
+                             (default: [\'deprecated/*\']''')
     parser.add_argument('--output-pkl', action = 'store',
                         help='Specify a name for the output `.pkl` file.')
     return parser.parse_args()
@@ -224,10 +227,16 @@ def ListAllBenchmarks():
     return list_benchs
 
 
-def FilterBenchmarks(benchmarks, filter):
-    if filter is not None:
-        benchmarks = [x for x in benchmarks if fnmatch.fnmatch(x, filter)]
-    return benchmarks
+def FilterBenchmarks(benchmarks, filter, filter_out):
+    res = benchmarks
+    if filter:
+        res = []
+        for f in filter:
+            res += [x for x in benchmarks if fnmatch.fnmatch(x, f)]
+    if filter_out:
+        for f in filter_out:
+            res = [x for x in res if not fnmatch.fnmatch(x, f)]
+    return res
 
 
 if __name__ == "__main__":
@@ -248,7 +257,14 @@ if __name__ == "__main__":
         sys.exit(0)
 
     benchmarks = ListAllBenchmarks()
-    benchmarks = FilterBenchmarks(benchmarks, args.filter)
+
+    # The deprecated benchmarks should not be implicitly filtered out when
+    # filters are explicitly specified on the command line.
+    if args.filter is not None or args.filter_out is not None:
+        filter_out = args.filter_out
+    else:
+        filter_out = ['deprecated/*']
+    benchmarks = FilterBenchmarks(benchmarks, args.filter, filter_out)
     bench_class_names = list(map(os.path.basename, benchmarks))
 
     RunBenchs(remote_apk, bench_class_names, args.run_on_host, args.auto_calibrate, args.iterations, args.mode)
