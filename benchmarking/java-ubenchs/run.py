@@ -26,6 +26,7 @@ import shutil
 import subprocess
 import sys
 import time
+import re
 
 import utils
 
@@ -221,6 +222,7 @@ def ListAllBenchmarks():
     for subdir in bench_subdirs:
         for root, dirs, files in os.walk(os.path.join(dir_benchmarks, subdir)):
             list_benchs += map(lambda x : os.path.join(root, x), files)
+    list_benchs = [f for f in list_benchs if re.match(r'^[\w\/-]+\.java$', f)]
     list_benchs = list(map(lambda x : os.path.relpath(x, dir_benchmarks), list_benchs))
     list_benchs = list(map(lambda x : x.replace('.java', ''), list_benchs))
     list_benchs.sort()
