@@ -83,7 +83,8 @@ def BuildOptions():
                         help='Quoted (benchmark name) filter pattern.')
     parser.add_argument('-F', '--filter-out', action = 'append',
                         help='''Filter out the benchmarks matching this patern.
-                             (default: [\'deprecated/*\']''')
+                             Defaults to \'deprecated/*\' if no other filter is
+                             specified.''')
     parser.add_argument('--output-pkl', action = 'store',
                         help='Specify a name for the output `.pkl` file.')
     return parser.parse_args()
