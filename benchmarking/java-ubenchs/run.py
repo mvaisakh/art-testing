@@ -215,9 +215,8 @@ def ListAllBenchmarks():
     list_benchs = []
     # List java files in 'benchmarks/'.
     list_benchs += get_files('java', dir_benchmarks)
-    # List java files in subdirectories of 'benchmarks/', except in 'com' which
-    # contain the framework code.
-    bench_subdirs = [x for x in os.listdir(dir_benchmarks) if os.path.isdir(os.path.join(dir_benchmarks, x)) and x != 'com']
+    # List java files in subdirectories of 'benchmarks/'.
+    bench_subdirs = [x for x in os.listdir(dir_benchmarks) if os.path.isdir(os.path.join(dir_benchmarks, x))]
     for subdir in bench_subdirs:
         for root, dirs, files in os.walk(os.path.join(dir_benchmarks, subdir)):
             list_benchs += map(lambda x : os.path.join(root, x), files)
