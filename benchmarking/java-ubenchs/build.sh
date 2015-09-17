@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-SCRIPT_PATH=$(dirname $(readlink -e $0))
+SCRIPT_PATH=$(dirname $0)
 
 DIR_BUILD=$SCRIPT_PATH/build
 DIR_BENCHMARKS=benchmarks
@@ -120,8 +120,6 @@ JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//benchmarks\//}
 # Trim trailing whitespaces.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES/%[[:space:]]/}
 IFS=' ' read -a array <<< $JAVA_BENCHMARK_CLASSES
-# Sort the names.
-readarray -t sorted < <(printf '%s\0' "${array[@]}" | sort -z | xargs -0n1)
 JAVA_BENCHMARK_CLASSES=$(echo ${sorted[@]})
 # Make it a list of literal string.
 JAVA_BENCHMARK_CLASSES="\""${JAVA_BENCHMARK_CLASSES//[[:space:]]/\", \"}"\""
@@ -137,8 +135,8 @@ JAVA_FRAMEWORK_FILES="$(find $DIR_FRAMEWORK -type f -name '*'.java)"
 
 # Build everything.
 
-verbose_safe rm --recursive --force $DIR_BUILD
-verbose_safe mkdir --parents $DIR_BUILD/classes/
+verbose_safe rm -rf $DIR_BUILD
+verbose_safe mkdir -p $DIR_BUILD/classes/
 verbose_safe javac -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
 verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
 if ! $HOST_BUILD; then
