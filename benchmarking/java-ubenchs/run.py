@@ -66,8 +66,8 @@ def BuildOptions():
                         dest = 'auto_calibrate', help='''Do not auto-calibrate
                         the benchmarks. Instead, run each benchmark's `main()`
                         function directly.''')
-    parser.add_argument('--host', action='store_true', default = False,
-                        dest='run_on_host', help='Run on host JVM')
+    parser.add_argument('--target', '-t', action='store_true', default = False,
+                        dest='run_on_target', help='Run on target adb device.')
     parser.add_argument('--mode', action = 'store',
                         choices = ['32', '64', ''], default = default_mode,
                         help='''Run with dalvikvm32, dalvikvm64, or dalvikvm''')
@@ -134,10 +134,10 @@ def DeleteAppInDalvikCache(remote_copy_path):
     # With the current defaults, the pattern is "data@local@tmp@java-benchs.apk*"
     adb_shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'))
 
-def BuildBenchmarks(build_for_host):
+def BuildBenchmarks(build_for_target):
     # Call the build script, with warnings treated as errors.
     command = ['./build.sh', '-w']
-    if build_for_host:
+    if not build_for_target:
         # Only build for the host.
         command += ['-H']
     VerbosePrint(' '.join(command))
@@ -202,11 +202,11 @@ def RunBench(apk, classname,
 
 
 def RunBenchs(apk, bench_names,
-              run_on_host,
+              run_on_target,
               auto_calibrate,
               iterations = default_n_iterations, mode = default_mode):
     VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
-    run_helper = RunBenchHost if run_on_host else RunBenchADB
+    run_helper = RunBenchADB if run_on_target else RunBenchHost
     for bench in bench_names:
         RunBench(apk, bench, run_helper, auto_calibrate, iterations = iterations, mode = mode)
 
@@ -243,10 +243,10 @@ if __name__ == "__main__":
     args = BuildOptions()
     verbose = not args.noverbose
 
-    BuildBenchmarks(args.run_on_host)
+    BuildBenchmarks(args.run_on_target)
 
     remote_apk = None
-    if not args.run_on_host:
+    if args.run_on_target:
         DeleteAppInDalvikCache(args.remote_copy_path)
         apk = './build/bench.apk'
         apk_name = os.path.basename(apk)
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     benchmarks = FilterBenchmarks(benchmarks, args.filter, filter_out)
     bench_class_names = list(map(os.path.basename, benchmarks))
 
-    RunBenchs(remote_apk, bench_class_names, args.run_on_host, args.auto_calibrate, args.iterations, args.mode)
+    RunBenchs(remote_apk, bench_class_names, args.run_on_target, args.auto_calibrate, args.iterations, args.mode)
     utils.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
