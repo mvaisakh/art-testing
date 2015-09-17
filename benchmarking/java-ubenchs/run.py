@@ -51,7 +51,7 @@ verbose = False
 # Options
 
 default_mode = ''
-default_n_iterations = 5
+default_n_iterations = 1
 default_remote_copy_path = '/data/local/tmp'
 
 def BuildOptions():

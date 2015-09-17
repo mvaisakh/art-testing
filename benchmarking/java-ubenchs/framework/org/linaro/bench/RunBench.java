@@ -29,7 +29,7 @@ public class RunBench {
     public final static long DEFAULT_CALIBRATION_MIN_TIME_NS = TimeUnit.NANOSECONDS.convert(400, TimeUnit.MILLISECONDS);
     // The target benchmark running time: 2s.
     public final static long DEFAULT_BENCHMARK_TARGET_RUN_TIME_NS = TimeUnit.NANOSECONDS.convert(2, TimeUnit.SECONDS);
-    public final static int ITERATIONS_LIMIT = 0x40000000;
+    public final static int ITERATIONS_LIMIT = 0x400000;
 
     // A method with this name will be executed as a microbenchmark.
     public static final String TESTNAME_PREFIX = "time";
