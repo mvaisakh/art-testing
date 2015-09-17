@@ -57,11 +57,18 @@ def TestBenchmarksOnHost():
     return rc
 
 
+def TestBenchmarkPackages():
+    benchmark_files = []
+    # TODO: Automatically test that each benchmark has the correct package.
+    return 0
+
+
 if __name__ == "__main__":
     args = BuildOptions()
 
     rc = 0
     rc |= TestBenchmarksOnHost()
+    rc |= TestBenchmarkPackages()
 
     if rc != 0:
         print("Tests FAILED.")

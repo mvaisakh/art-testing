@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.micro;
+
 import java.lang.System;
 import java.util.Random;
 import java.util.EnumMap;

@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 import java.lang.System;
 
 public class ControlFlow {

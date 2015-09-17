@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 public class FactorialLong {
   public static void main(String[] args) {
     long before = System.currentTimeMillis();

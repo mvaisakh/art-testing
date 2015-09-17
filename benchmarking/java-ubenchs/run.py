@@ -19,23 +19,18 @@
 
 import argparse
 import fnmatch
-import glob
 import os
 import pickle
 import shutil
 import subprocess
 import sys
 import time
-import re
 
-dir_pwd = os.path.dirname(os.path.realpath(__file__))
-dir_benchmarks = os.path.join(dir_pwd, 'benchmarks')
-dir_framework = os.path.join(dir_pwd, 'framework')
-dir_tools = os.path.join(dir_pwd, 'tools')
-dir_build = os.path.join(dir_pwd, 'build')
-dir_build_java_classes = os.path.join(dir_build, 'classes')
 
+dir_root = os.path.dirname(os.path.realpath(__file__))
+dir_tools = os.path.join(dir_root, 'tools')
 sys.path.insert(0, dir_tools)
+import utils
 import utils_stats
 
 bench_runner_main = 'org.linaro.bench.RunBench'
@@ -86,7 +81,7 @@ def BuildOptions():
                         help='Quoted (benchmark name) filter pattern.')
     parser.add_argument('-F', '--filter-out', action = 'append',
                         help='''Filter out the benchmarks matching this patern.
-                             Defaults to \'deprecated/*\' if no other filter is
+                             Defaults to \'benchmarks/deprecated/*\' if no other filter is
                              specified.''')
     parser.add_argument('--output-pkl', action = 'store',
                         help='Specify a name for the output `.pkl` file.')
@@ -102,9 +97,6 @@ def VerbosePrint(msg):
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
-
-def get_files(ext, path):
-    return glob.glob(os.path.join(path, '*.' + ext))
 
 # ADB helpers
 
@@ -128,7 +120,7 @@ def adb_shell(command):
 
 def host_java(command):
     VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, cwd = dir_build_java_classes,
+    p = subprocess.Popen(command, cwd = utils.dir_build_java_classes,
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     return p.communicate()
 
@@ -216,19 +208,9 @@ def RunBenchs(apk, bench_names,
 
 
 def ListAllBenchmarks():
-    list_benchs = []
-    # List java files in 'benchmarks/'.
-    list_benchs += get_files('java', dir_benchmarks)
-    # List java files in subdirectories of 'benchmarks/'.
-    bench_subdirs = [x for x in os.listdir(dir_benchmarks) if os.path.isdir(os.path.join(dir_benchmarks, x))]
-    for subdir in bench_subdirs:
-        for root, dirs, files in os.walk(os.path.join(dir_benchmarks, subdir)):
-            list_benchs += map(lambda x : os.path.join(root, x), files)
-    list_benchs = [f for f in list_benchs if re.match(r'^[\w\/-]+\.java$', f)]
-    list_benchs = list(map(lambda x : os.path.relpath(x, dir_benchmarks), list_benchs))
-    list_benchs = list(map(lambda x : x.replace('.java', ''), list_benchs))
-    list_benchs.sort()
-    return list_benchs
+    benchs = utils.ListBenchmarkJavaFiles()
+    benchs = list(map(lambda x : x.replace('.java', ''), benchs))
+    return benchs
 
 
 def FilterBenchmarks(benchmarks, filter, filter_out):
@@ -267,11 +249,10 @@ if __name__ == "__main__":
     if args.filter is not None or args.filter_out is not None:
         filter_out = args.filter_out
     else:
-        filter_out = ['deprecated/*']
+        filter_out = ['benchmarks/deprecated/*']
     benchmarks = FilterBenchmarks(benchmarks, args.filter, filter_out)
-    bench_class_names = list(map(os.path.basename, benchmarks))
 
-    RunBenchs(remote_apk, bench_class_names, args.run_on_target, args.auto_calibrate, args.iterations, args.mode)
+    RunBenchs(remote_apk, benchmarks, args.run_on_target, args.auto_calibrate, args.iterations, args.mode)
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.

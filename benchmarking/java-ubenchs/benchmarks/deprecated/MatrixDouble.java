@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 public class MatrixDouble {
 
   public static void main(String[] args) {

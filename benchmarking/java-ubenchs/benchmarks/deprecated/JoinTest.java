@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 import java.lang.System;
 import java.lang.Thread;
 import java.lang.InterruptedException;

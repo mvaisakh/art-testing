@@ -72,6 +72,20 @@ public class RunBench {
         return end - start;
     }
 
+    static String benchmarkIdentifier(Method method) {
+        Pattern format = Pattern.compile("((?:\\w+\\.)*)(\\w+)");
+        Matcher matcher = format.matcher(method.getDeclaringClass().getName());
+        if (! matcher.matches()) {
+            return null;
+        }
+        String path = matcher.group(1);
+        path = path.replace('.', '/');
+        String className = matcher.group(2);
+        // Filter the "time" prefix.
+        String benchName = method.getName().substring(4);
+        return path + className + "." + benchName;
+    }
+
     /*
      * Run one benchmark. May have auto-calibration depends on method's IterationsAnnotation.
      */
@@ -103,10 +117,10 @@ public class RunBench {
 
         iteration_time = duration / (float) iterations;
 
-        log.info(method.getDeclaringClass().getName() + "." + method.getName().substring(4) + ": "
-                + duration + " ns for " + iterations + " iterations");
-        System.out.printf("%-40s%.2f ns per iteration\n", method.getDeclaringClass().getName()
-                + "." + method.getName().substring(4) + ":", iteration_time);
+        log.info(benchmarkIdentifier(method) + ": " +
+                duration + " ns for " + iterations + " iterations");
+        System.out.printf("%-40s%.2f ns per iteration\n",
+                benchmarkIdentifier(method) + ":", iteration_time);
     }
 
     public int runBenchSet(String target, boolean verify) {
@@ -116,19 +130,23 @@ public class RunBench {
 
         // The target format is:
         //    path/to/BenchmarkClass(.Benchmark)?
-        Pattern format = Pattern.compile("(?:\\w+\\/)*(\\w+)(?:.(\\w+))?$");
+        Pattern format = Pattern.compile("((?:\\w+\\/)*)(\\w+)(?:\\.(\\w+))?$");
         Matcher matcher = format.matcher(target);
         if (! matcher.matches()) {
           return 1;
         }
-        String benchmarkClass = matcher.group(1);
-        String benchmark = matcher.group(2);
-
+        String benchmarkClassPath = matcher.group(1);
+        if (!benchmarkClassPath.startsWith("benchmarks/")) {
+            benchmarkClassPath = "benchmarks/" + benchmarkClassPath;
+        }
+        benchmarkClassPath = benchmarkClassPath.replace('/', '.');
+        String benchmarkClass = matcher.group(2);
+        String benchmark = matcher.group(3);
 
         List<Method> benchMethods = new ArrayList<Method>(5);
         Method verifyMethod = null;
         try {
-            Class<?> clazz = Class.forName(benchmarkClass);
+            Class<?> clazz = Class.forName(benchmarkClassPath + benchmarkClass);
             Object instance = clazz.newInstance();
             if (benchmark != null) {
                 Method m = clazz.getMethod(TESTNAME_PREFIX + benchmark, int.class);

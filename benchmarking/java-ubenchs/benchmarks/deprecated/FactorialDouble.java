@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 public class FactorialDouble {
   public static void main(String[] args) {
     long before = System.currentTimeMillis();

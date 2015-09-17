@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 import java.lang.System;
 
 // This benchmark generates primes up to a number.

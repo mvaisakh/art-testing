@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 public class DoNothing {
     public static void main(String[] args) {
         System.out.println("DoNothing: " + 0);

@@ -116,7 +116,6 @@ set +f
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_FILES//.java/}
 # Remove the leading `./` and `benchmarks`.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//.\//}
-JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//benchmarks\//}
 # Trim trailing whitespaces.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES/%[[:space:]]/}
 read -a array <<< $JAVA_BENCHMARK_CLASSES

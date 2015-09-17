@@ -15,6 +15,8 @@
  *
  */
 
+package benchmarks.deprecated;
+
 import java.lang.reflect.Method;
 
 public class MultiplyAdd {
