@@ -53,6 +53,7 @@ def TestBenchmarksOnHost():
     # TODO: Abstract the app name.
     rc |= TestCommand(["java", "org.linaro.bench.RunBench", "BubbleSort"], _cwd=dir_build_classes)
     rc |= TestCommand(["./run.py", "--host", "--iterations=1"], _cwd=dir_root)
+    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=dir_build_classes)
     return rc
 
 
