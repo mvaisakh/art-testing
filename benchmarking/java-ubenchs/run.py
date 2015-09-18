@@ -28,14 +28,16 @@ import sys
 import time
 import re
 
-import utils
-
 dir_pwd = os.path.dirname(os.path.realpath(__file__))
 dir_benchmarks = os.path.join(dir_pwd, 'benchmarks')
 dir_framework = os.path.join(dir_pwd, 'framework')
 dir_tools = os.path.join(dir_pwd, 'tools')
 dir_build = os.path.join(dir_pwd, 'build')
 dir_build_java_classes = os.path.join(dir_build, 'classes')
+
+sys.path.insert(0, dir_tools)
+import utils_stats
+
 bench_runner_main = 'org.linaro.bench.RunBench'
 
 # The script must be executed from an Android environment, which will be passed
@@ -270,7 +272,7 @@ if __name__ == "__main__":
     bench_class_names = list(map(os.path.basename, benchmarks))
 
     RunBenchs(remote_apk, bench_class_names, args.run_on_target, args.auto_calibrate, args.iterations, args.mode)
-    utils.PrintStats(result, iterations = args.iterations)
+    utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
     res_filename = args.output_pkl if args.output_pkl is not None else 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
