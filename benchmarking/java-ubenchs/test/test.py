@@ -49,10 +49,10 @@ def TestCommand(command, _cwd=None):
 
 def TestBenchmarksOnHost():
     rc = 0
-    rc |= TestCommand(["./build.sh", "-H", "-w"], _cwd=dir_root)
+    rc |= TestCommand(["./build.sh", "-w"], _cwd=dir_root)
     # TODO: Abstract the app name.
     rc |= TestCommand(["java", "org.linaro.bench.RunBench", "BubbleSort"], _cwd=dir_build_classes)
-    rc |= TestCommand(["./run.py", "--host", "--iterations=1"], _cwd=dir_root)
+    rc |= TestCommand(["./run.py", "--iterations=1"], _cwd=dir_root)
     rc |= TestCommand(["java", "org.linaro.bench.RunBench", "Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=dir_build_classes)
     return rc
 

@@ -133,9 +133,8 @@ def DeleteAppInDalvikCache(remote_copy_path):
 def BuildBenchmarks(build_for_target):
     # Call the build script, with warnings treated as errors.
     command = ['./build.sh', '-w']
-    if not build_for_target:
-        # Only build for the host.
-        command += ['-H']
+    if build_for_target:
+        command += ['-t']
     VerbosePrint(' '.join(command))
     subprocess.check_call(command)
 

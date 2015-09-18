@@ -23,9 +23,8 @@ DIR_FRAMEWORK=framework
 
 
 
-# Set to true to only build for the host and not use any android specific
-# commands.
-HOST_BUILD=false
+# Set to true to build for the target.
+TARGET_BUILD=false
 # Set to true to print the commands executed.
 VERBOSE=false
 # Set to true to treat warnings as errors, in which case hitting a warning will
@@ -78,16 +77,15 @@ Output files are produced in $DIR_BUILD.
 
 Options:
 	-h	Show this help message.
-	-H	Only build for the host.
-	  	This allows compiling for the host outside of an Android environment.
+	-t	Build for the target. Requires building from an Android environment.
 	-v	Verbose. Print the commands executed.
 	-w	Treat warnings as errors, causing them to abort.
 "
 
-while getopts ':hHlvw' option; do
+while getopts ':htlvw' option; do
   case "$option" in
     h) echo "$usage"; exit ;;
-    H) HOST_BUILD=true ;;
+    t) TARGET_BUILD=true ;;
     v) VERBOSE=true ;;
     w) WERROR=true ;;
     \?)
@@ -138,7 +136,7 @@ verbose_safe rm -rf $DIR_BUILD
 verbose_safe mkdir -p $DIR_BUILD/classes/
 verbose_safe javac -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
 verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
-if ! $HOST_BUILD; then
+if $TARGET_BUILD; then
   if hash dx 2> /dev/null; then
     verbose_safe dx --dex --output $DIR_BUILD/bench.apk $DIR_BUILD/classes/
   else
