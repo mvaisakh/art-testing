@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RunBench {
     // Minimum valid calibration time: 400ms.
@@ -107,17 +109,29 @@ public class RunBench {
                 + "." + method.getName().substring(4) + ":", iteration_time);
     }
 
-    public int runBenchSet(String test, String subtest, boolean verify) {
-        if (test == null) {
+    public int runBenchSet(String target, boolean verify) {
+        if (target == null) {
             return 1;
         }
+
+        // The target format is:
+        //    path/to/BenchmarkClass(.Benchmark)?
+        Pattern format = Pattern.compile("(?:\\w+\\/)*(\\w+)(?:.(\\w+))?$");
+        Matcher matcher = format.matcher(target);
+        if (! matcher.matches()) {
+          return 1;
+        }
+        String benchmarkClass = matcher.group(1);
+        String benchmark = matcher.group(2);
+
+
         List<Method> benchMethods = new ArrayList<Method>(5);
         Method verifyMethod = null;
         try {
-            Class<?> clazz = Class.forName(test);
+            Class<?> clazz = Class.forName(benchmarkClass);
             Object instance = clazz.newInstance();
-            if (subtest != null) {
-                Method m = clazz.getMethod(TESTNAME_PREFIX + subtest, int.class);
+            if (benchmark != null) {
+                Method m = clazz.getMethod(TESTNAME_PREFIX + benchmark, int.class);
                 benchMethods.add(m);
             } else {
                 for (Method m : clazz.getDeclaredMethods()) {
@@ -164,7 +178,6 @@ public class RunBench {
         "\t--debug                             Be more verbose than the verbose mode.\n" +
         "\t--list_benchmarks                   List available benchmarks and exit.\n" +
         /* TODO: Add a `--list_sub_benchmarks` option. */
-        "\t--subtest <subtest>                 Run a specified subtest. Valid only when a single benchmark is run.\n" +
         "\t--benchmark_run_time <time in s>    Set the target running time for benchmarks.\n" +
         "\t                                    (default: " + DEFAULT_BENCHMARK_TARGET_RUN_TIME_NS + ")\n" +
         "\t--calibration_min_time <time in s>  Set the minimum running time for benchmark calibration.\n" +
@@ -190,13 +203,6 @@ public class RunBench {
                         System.out.println(BenchmarkList.benchmarkList[i]);
                     }
                     System.exit(0);
-                } else if (option.equals("subtest")) {
-                    arg_index++;
-                    if (arg_index < args.length) {
-                        subtest = args[arg_index];
-                    } else {
-                        log.fatal("Require subtest name.");
-                    }
                 } else if (option.equals("benchmark_run_time")) {
                     arg_index++;
                     if (arg_index < args.length) {
@@ -223,26 +229,17 @@ public class RunBench {
             }
         }
 
-        if (subtest != null) {
-            if (benchmarks.size() != 1) {
-                log.error("Only one benchmark should be run when specifying a subtest.");
-                System.exit(1);
-            } else {
-                runBenchSet(benchmarks.get(0), subtest, verify);
+        if (benchmarks.size() == 0) {
+            // No benchmarks were specified on the command line. Run all
+            // benchmarks available.
+            for (int i = 0; i < BenchmarkList.benchmarkList.length; i++) {
+                benchmarks.add(BenchmarkList.benchmarkList[i]);
             }
-        } else {
-            if (benchmarks.size() == 0) {
-                // No benchmarks were specified on the command line. Run all
-                // benchmarks available.
-                for (int i = 0; i < BenchmarkList.benchmarkList.length; i++) {
-                    benchmarks.add(BenchmarkList.benchmarkList[i]);
-                }
-            }
-            // Run the benchmarks.
-            for (int i = 0; i < benchmarks.size(); i++) {
-                if (runBenchSet(benchmarks.get(i), null, verify) != 0) {
-                    log.error("Test failed.");
-                }
+        }
+        // Run the benchmarks.
+        for (int i = 0; i < benchmarks.size(); i++) {
+            if (runBenchSet(benchmarks.get(i), verify) != 0) {
+                log.error("Test failed.");
             }
         }
     }
