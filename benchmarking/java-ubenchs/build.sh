@@ -114,17 +114,12 @@ set +f
 # the benchmark framework to indicate what benchmark classes are available.
 # Remove the `.java` extension.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_FILES//.java/}
-# Remove the leading `./`.
+# Remove the leading `./` and `benchmarks`.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//.\//}
+JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//benchmarks\//}
 # Trim trailing whitespaces.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES/%[[:space:]]/}
-# TODO: The java code only knows about basenames. Synchronize the 'names' of
-# benchmarks between the java app, run.py, and the information printed when
-# running benchmarks.
 IFS=' ' read -a array <<< $JAVA_BENCHMARK_CLASSES
-for i in "${!array[@]}"; do
-  array[$i]=$(basename ${array[$i]})
-done
 # Sort the names.
 readarray -t sorted < <(printf '%s\0' "${array[@]}" | sort -z | xargs -0n1)
 JAVA_BENCHMARK_CLASSES=$(echo ${sorted[@]})
