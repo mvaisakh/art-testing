@@ -207,8 +207,10 @@ def RunBenchs(apk, bench_names,
 
 
 def ListAllBenchmarks():
-    benchs = utils.ListBenchmarkJavaFiles()
-    benchs = list(map(lambda x : x.replace('.java', ''), benchs))
+    out = subprocess.check_output(['java', 'org.linaro.bench.RunBench', '--list_benchmarks'],
+                                  cwd=utils.dir_build_java_classes)
+    out = out.decode().rstrip()
+    benchs = out.split('\n')
     return benchs
 
 

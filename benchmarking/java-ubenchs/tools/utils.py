@@ -24,25 +24,3 @@ dir_benchmarks = os.path.join(dir_root, 'benchmarks')
 dir_build = os.path.join(dir_root, 'build')
 dir_build_java_classes = os.path.join(dir_build, 'classes')
 dir_framework = os.path.join(dir_root, 'framework')
-
-
-def GetFiles(ext, path):
-    return glob.glob(os.path.join(path, '*.' + ext))
-
-
-def ListBenchmarkJavaFiles():
-    list_files = []
-    # List java files in 'benchmarks/'.
-    list_files += GetFiles('java', dir_benchmarks)
-    # List java files in subdirectories of 'benchmarks/'.
-    bench_subdirs = [x for x in os.listdir(dir_benchmarks) if os.path.isdir(os.path.join(dir_benchmarks, x))]
-    for subdir in bench_subdirs:
-        for root, dirs, files in os.walk(os.path.join(dir_benchmarks, subdir)):
-            list_files += map(lambda x : os.path.join(root, x), files)
-    list_files = [f for f in list_files if re.match(r'^[\w\/-]+\.java$', f)]
-    list_files = list(map(lambda x : os.path.relpath(x, dir_root), list_files))
-    list_files.sort()
-    return list_files
-
-
-
