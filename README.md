@@ -72,3 +72,10 @@ TODO: Detail all benchmarks here, especially what they are intended to achieve.
 
 Description, License (if any), Main Focus, Secondary Focus, Additional Comments
 
+### Control Flow Recursive
+
+Control flow recursive is ported from:
+https://github.com/WebKit/webkit/blob/master/PerformanceTests/SunSpider/tests/sunspider-1.0.2/controlflow-recursive.js
+
+License is Revised BSD licence:
+http://benchmarksgame.alioth.debian.org/license.html
