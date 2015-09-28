@@ -21,17 +21,17 @@ import java.lang.System;
 
 // This benchmark measures time taken for recursive method calls.
 public class Recursion {
-  private int MAX_VAL = 64;
+  private static final int MAX_VAL = 64;
   private long result;
 
   public Recursion() {
   }
 
-  public int SumSeriesA(int num) {
+  public int sumSeriesA(int num) {
     if (num == 0) {
       return num;
     } else {
-      return num + SumSeriesA(num - 1);
+      return num + sumSeriesA(num - 1);
     }
   }
 
@@ -39,19 +39,19 @@ public class Recursion {
     for (int iter = 0; iter < iterations; ++iter) {
       this.result = 0;
       for (int i = 0; i < MAX_VAL; i++) {
-        this.result += SumSeriesA(i);
+        this.result += sumSeriesA(i);
       }
     }
     return;
   }
 
-  public int SumSeriesB(int num) {
+  public int sumSeriesB(int num) {
     if (num == 0) {
       return num;
     } else if ((num & 0x1) != 0) {
-      return num + 1 + SumSeriesB(num - 1);
+      return num + 1 + sumSeriesB(num - 1);
     } else {
-      return num + SumSeriesB(num - 1);
+      return num + sumSeriesB(num - 1);
     }
   }
 
@@ -59,13 +59,13 @@ public class Recursion {
     for (int iter = 0; iter < iterations; ++iter) {
       this.result = 0;
       for (int i = 0; i < MAX_VAL; i++) {
-        this.result += SumSeriesB(i);
+        this.result += sumSeriesB(i);
       }
     }
     return;
   }
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before;
     long after;
     Recursion obj = new Recursion();

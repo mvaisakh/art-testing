@@ -21,7 +21,7 @@ import java.lang.System;
 
 // This benchmark performs various string operations.
 public class StringOps {
-  public int INNER_LOOP_COUNT = 512;
+  public static final int INNER_LOOP_COUNT = 512;
   public String string1;
   public String string2;
   public String string3;
@@ -38,8 +38,8 @@ public class StringOps {
 
   public int timeAppend(int iterations) {
     StringBuffer str = new StringBuffer(" ");
-    for(int i = 0; i < iterations; ++i) {
-      for(int j = 0; j < this.INNER_LOOP_COUNT; ++j) {
+    for (int i = 0; i < iterations; ++i) {
+      for (int j = 0; j < this.INNER_LOOP_COUNT; ++j) {
         str.append(this.string1);
         str.append(this.string2);
         str.append(this.string3);
@@ -53,19 +53,19 @@ public class StringOps {
   public int timeAppendAndSearch(int iterations) {
     StringBuffer str = new StringBuffer(" ");
     int index = 0;
-    for(int i = 0; i < iterations; ++i) {
-      for(int j = 0; j < this.INNER_LOOP_COUNT; ++j) {
+    for (int i = 0; i < iterations; ++i) {
+      for (int j = 0; j < this.INNER_LOOP_COUNT; ++j) {
         str.append(this.string1);
       }
       str.append(this.string2);
-      for(int j = 0; j < this.INNER_LOOP_COUNT; ++j) {
+      for (int j = 0; j < this.INNER_LOOP_COUNT; ++j) {
         index = str.toString().indexOf(this.string2, j * this.string1.length());
       }
     }
     return index;
   }
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     StringOps obj = new StringOps();
     long before = System.currentTimeMillis();
     obj.timeAppend(1);

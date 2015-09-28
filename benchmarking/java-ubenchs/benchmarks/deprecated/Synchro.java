@@ -21,9 +21,9 @@ import java.lang.System;
 
 public class Synchro {
 
-  public final static int ITERATIONS = 100000;
+  public static final int ITERATIONS = 100000;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     Synchro dummy = new Synchro();
     long before = System.currentTimeMillis();
     dummy.timeInc(ITERATIONS);
@@ -44,17 +44,17 @@ public class Synchro {
   }
 
   public void timeInc(int iters) {
-      for (int i = 0; i < iters; i++) {
-          inc();
-      }
+    for (int i = 0; i < iters; i++) {
+      inc();
+    }
   }
 
   public void inc() {
-    synchronized(lock1) {
-      synchronized(lock2) {
-        synchronized(lock1) {
-          synchronized(lock2) {
-            synchronized(lock3) {
+    synchronized (lock1) {
+      synchronized (lock2) {
+        synchronized (lock1) {
+          synchronized (lock2) {
+            synchronized (lock3) {
               value++;
             }
           }
@@ -63,6 +63,8 @@ public class Synchro {
     }
   }
 
-  public int value() { return value; }
+  public int value() {
+    return value;
+  }
 }
 

@@ -21,9 +21,9 @@ import java.lang.System;
 
 // This benchmark performs various loop operations.
 public class Loop {
-  public int LOOP_COUNT = 500;
-  public int VALUE1 = 50;
-  public int VALUE2 = 90;
+  public static final int LOOP_COUNT = 500;
+  public static final int VALUE1 = 50;
+  public static final int VALUE2 = 90;
   public int result;
 
   public Loop() {
@@ -43,7 +43,7 @@ public class Loop {
     return;
   }
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before;
     long after;
     Loop obj = new Loop();

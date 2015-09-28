@@ -21,69 +21,71 @@ import java.lang.System;
 import java.math.BigInteger;
 
 class MyLong {
-    private long value;
+  private long value;
 
-    public MyLong(long value) {
-        this.value = value;
-    }
+  public MyLong(long value) {
+    this.value = value;
+  }
 
-    public long get() {
-        return value;
-    }
+  public long get() {
+    return value;
+  }
 
-    public void set(long newValue) {
-        value = newValue;
-    }
+  public void set(long newValue) {
+    value = newValue;
+  }
 
-    public int compareTo(MyLong other) {
-        if (value > other.value)
-            return 1;
-        if (value == other.value)
-            return 0;
-        return -1;
+  public int compareTo(MyLong other) {
+    if (value > other.value) {
+      return 1;
     }
+    if (value == other.value) {
+      return 0;
+    }
+    return -1;
+  }
 }
 
 public class ObjFactorial {
 
-    public static void timeBigFact(int iters) {
-        BigInteger bigOne = new BigInteger("1");
-        BigInteger bigInput = new BigInteger("20");
-        BigInteger bigResult = bigOne;
-        for (int x = 0; x < iters; x++) {
-            bigResult = bigOne;
-            for (BigInteger i = bigOne; i.compareTo(bigInput) == -1; i = i.add(bigOne)) {
-                bigResult = bigResult.multiply(i);
-            }
-        }
+  public static void timeBigFact(int iters) {
+    BigInteger bigOne = new BigInteger("1");
+    BigInteger bigInput = new BigInteger("20");
+    BigInteger bigResult = bigOne;
+    for (int x = 0; x < iters; x++) {
+      bigResult = bigOne;
+      for (BigInteger i = bigOne; i.compareTo(bigInput) == -1; i = i.add(bigOne)) {
+        bigResult = bigResult.multiply(i);
+      }
     }
+  }
 
-    public static void timeMyFact(int iters) {
-        MyLong myInput = new MyLong(20);
-        MyLong myResult = new MyLong(1);
-        for (int x = 0; x < iters; x++) {
-            myResult = new MyLong(1);
-            for (MyLong i = new MyLong(1); i.compareTo(myInput) == -1; i.set(i.get() + 1)) {
-                myResult.set(myResult.get() * i.get());
-            }
-        }
+  public static void timeMyFact(int iters) {
+    MyLong myInput = new MyLong(20);
+    MyLong myResult = new MyLong(1);
+    for (int x = 0; x < iters; x++) {
+      myResult = new MyLong(1);
+      for (MyLong i = new MyLong(1); i.compareTo(myInput) == -1; i.set(i.get() + 1)) {
+        myResult.set(myResult.get() * i.get());
+      }
     }
+  }
 
-    public static void main(String[] args) {
+  public static void main(String args[]) {
 
-        final int ITERATIONS_BIG = 1000;
-        final int ITERATIONS_MY = 100000;
+    final int ITERATIONS_BIG = 1000;
+    final int ITERATIONS_MY = 100000;
 
-        long before = System.currentTimeMillis();
-        timeBigFact(ITERATIONS_BIG);
-        long after = System.currentTimeMillis();
-        System.out.println("bigFact: " + (after - before));
+    long before = System.currentTimeMillis();
+    timeBigFact(ITERATIONS_BIG);
+    long after = System.currentTimeMillis();
+    System.out.println("bigFact: " + (after - before));
 
-        before = System.currentTimeMillis();
-        timeMyFact(ITERATIONS_MY);
-        after = System.currentTimeMillis();
+    before = System.currentTimeMillis();
+    timeMyFact(ITERATIONS_MY);
+    after = System.currentTimeMillis();
 
-        System.out.println("myFact: " + (after - before));
+    System.out.println("myFact: " + (after - before));
 
-    }
+  }
 }

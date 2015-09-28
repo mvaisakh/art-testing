@@ -19,7 +19,7 @@ package benchmarks.deprecated;
 
 public class MatrixDouble {
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before = System.currentTimeMillis();
     timeMultiply(5000);
     long after = System.currentTimeMillis();

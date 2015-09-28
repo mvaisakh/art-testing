@@ -17,9 +17,9 @@
 
 package benchmarks.deprecated;
 
+import java.lang.InterruptedException;
 import java.lang.System;
 import java.lang.Thread;
-import java.lang.InterruptedException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -27,75 +27,75 @@ import org.linaro.bench.IterationsAnnotation;
 
 public class JoinTest extends Thread {
 
-    public final static int THREAD_NUMBER = 50;
-    public final static int MAX_PAUSE = 1000;
+  public static final int THREAD_NUMBER = 50;
+  public static final int MAX_PAUSE = 1000;
 
-    @IterationsAnnotation(noWarmup = true, iterations = 1)
-    public static void timeJoinOfFiftyThreads(int iters) {
-        for (int i = 0; i < iters; i++) {
-            Random rnd = new Random(123456789);
-            ArrayList<Thread> list = new ArrayList<Thread>();
-            for (int x = 0; x < THREAD_NUMBER; x++) {
-                list.add(new JoinTest(rnd));
-            }
-            for (Thread t : list) {
-                t.start();
-            }
+  @IterationsAnnotation(noWarmup = true, iterations = 1)
+  public static void timeJoinOfFiftyThreads(int iters) {
+    for (int i = 0; i < iters; i++) {
+      Random rnd = new Random(123456789);
+      ArrayList<Thread> list = new ArrayList<Thread>();
+      for (int x = 0; x < THREAD_NUMBER; x++) {
+        list.add(new JoinTest(rnd));
+      }
+      for (Thread t : list) {
+        t.start();
+      }
 
-            for (Thread t : list) {
-                try {
-                    t.join();
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                    System.out.println("While joining");
-                }
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-
-        long before = System.currentTimeMillis();
-        timeJoinOfFiftyThreads(1);
-        long after = System.currentTimeMillis();
-        System.out.println("join of " + THREAD_NUMBER + ": " + (after - before));
-    }
-
-    public JoinTest() {
-    }
-
-    public JoinTest(Random rnd) {
-        dummy = 0;
-        first_pause = (long) rnd.nextInt(MAX_PAUSE);
-        second_pause = (long) rnd.nextInt(MAX_PAUSE);
-    }
-
-    public void run() {
+      for (Thread t : list) {
         try {
-            sleep(first_pause);
+          t.join();
         } catch (InterruptedException ie) {
-            ie.printStackTrace();
-            System.out.println("While first pause");
+          ie.printStackTrace();
+          System.out.println("While joining");
         }
+      }
+    }
+  }
 
-        synchronized (lock) {
-            dummy++;
-        }
+  public static void main(String args[]) {
 
-        try {
-            sleep(second_pause);
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-            System.out.println("While second pause");
-        }
+    long before = System.currentTimeMillis();
+    timeJoinOfFiftyThreads(1);
+    long after = System.currentTimeMillis();
+    System.out.println("join of " + THREAD_NUMBER + ": " + (after - before));
+  }
+
+  public JoinTest() {
+  }
+
+  public JoinTest(Random rnd) {
+    dummy = 0;
+    firstPause = (long) rnd.nextInt(MAX_PAUSE);
+    secondPause = (long) rnd.nextInt(MAX_PAUSE);
+  }
+
+  public void run() {
+    try {
+      sleep(firstPause);
+    } catch (InterruptedException ie) {
+      ie.printStackTrace();
+      System.out.println("While first pause");
     }
 
-    public int dummy() {
-        return dummy;
+    synchronized (lock) {
+      dummy++;
     }
 
-    private int dummy;
-    private long first_pause;
-    private long second_pause;
-    private static Object lock = new Object();
+    try {
+      sleep(secondPause);
+    } catch (InterruptedException ie) {
+      ie.printStackTrace();
+      System.out.println("While second pause");
+    }
+  }
+
+  public int dummy() {
+    return dummy;
+  }
+
+  private int dummy;
+  private long firstPause;
+  private long secondPause;
+  private static Object lock = new Object();
 }

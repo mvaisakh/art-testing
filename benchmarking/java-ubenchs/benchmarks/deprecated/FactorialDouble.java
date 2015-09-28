@@ -18,19 +18,21 @@
 package benchmarks.deprecated;
 
 public class FactorialDouble {
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before = System.currentTimeMillis();
     double result = 0;
-    for (int i = 0; i < 10000; ++i)
+    for (int i = 0; i < 10000; ++i) {
       result += timeFactorial(i);
+    }
     long after = System.currentTimeMillis();
     System.out.println("factorial double: " + (after - before));
   }
 
-  public static double timeFactorial(int n) {
+  public static double timeFactorial(int iterations) {
     double result = 1;
-    for (int i = 1; i < n; ++i)
+    for (int i = 1; i < iterations; ++i) {
       result *= i;
+    }
     return result;
   }
 }

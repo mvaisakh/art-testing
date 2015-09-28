@@ -21,10 +21,10 @@ import java.lang.System;
 
 public class ControlFlow {
 
-  public final static int ITERATIONS = 100000;
-  public final static int VALUE = 500;
+  public static final int ITERATIONS = 100000;
+  public static final int VALUE = 500;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before = System.currentTimeMillis();
     int sum = timeForUp(ITERATIONS);
     long after = System.currentTimeMillis();

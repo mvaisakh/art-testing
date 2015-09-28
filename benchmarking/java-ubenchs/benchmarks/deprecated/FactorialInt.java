@@ -18,19 +18,21 @@
 package benchmarks.deprecated;
 
 public class FactorialInt {
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before = System.currentTimeMillis();
     long result = 0;
-    for (int i = 0; i < 10000; ++i)
+    for (int i = 0; i < 10000; ++i) {
       result += timeFactorial(i);
+    }
     long after = System.currentTimeMillis();
     System.out.println("factorial int: " + (after - before));
   }
 
   public static int timeFactorial(int n) {
     int result = 1;
-    for (int i = 1; i < n; ++i)
+    for (int i = 1; i < n; ++i) {
       result *= i;
+    }
     return result;
   }
 }

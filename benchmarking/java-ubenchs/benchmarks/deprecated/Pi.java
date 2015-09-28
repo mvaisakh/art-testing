@@ -23,18 +23,17 @@ import java.lang.System;
 public class Pi {
   public double piValue;
 
-  public double timeGeneratePi(int terms)
-  {
+  public double timeGeneratePi(int terms) {
     this.piValue = 0.0D;
     double sign = 1.0D;
     for (int i = 0; i < terms; ++i) {
-      piValue += sign * (1.0D/(2.0D * i + 1.0D));
+      piValue += sign * (1.0D / (2.0D * i + 1.0D));
       sign *= -1;
     }
     return this.piValue;
   }
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     Pi obj = new Pi();
     long before = System.currentTimeMillis();
     obj.timeGeneratePi(10000);

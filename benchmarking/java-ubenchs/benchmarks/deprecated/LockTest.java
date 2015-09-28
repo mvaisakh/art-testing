@@ -23,9 +23,9 @@ import org.linaro.bench.IterationsAnnotation;
 
 public class LockTest {
 
-  public final static int ITERATIONS = 200000;
+  public static final int ITERATIONS = 200000;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before = System.currentTimeMillis();
     timeStaticLockWithDepth1(ITERATIONS);
     long after = System.currentTimeMillis();
@@ -59,41 +59,42 @@ public class LockTest {
   }
 
   public static synchronized void timeStaticLockWithDepth1(int iters) {
-      for (int i = 0; i < iters; i++) {
-          staticLockWithDepth(1);
-      }
+    for (int i = 0; i < iters; i++) {
+      staticLockWithDepth(1);
+    }
   }
 
-  @IterationsAnnotation(noWarmup=true)
+  @IterationsAnnotation(noWarmup = true)
   public static synchronized void timeStaticLockWithDepth2(int iters) {
-      for (int i = 0; i < iters; i++) {
-          staticLockWithDepth(2);
-      }
+    for (int i = 0; i < iters; i++) {
+      staticLockWithDepth(2);
+    }
   }
 
-  @IterationsAnnotation(noWarmup=true)
+  @IterationsAnnotation(noWarmup = true)
   public static synchronized void timeStaticLockWithDepth20(int iters) {
-      for (int i = 0; i < iters; i++) {
-          staticLockWithDepth(20);
-      }
+    for (int i = 0; i < iters; i++) {
+      staticLockWithDepth(20);
+    }
   }
 
   public synchronized void timeDynamicLockWithDepth1(int iters) {
-      for (int i = 0; i < iters; i++) {
-          dynamicLockWithDepth(1);
-      }
+    for (int i = 0; i < iters; i++) {
+      dynamicLockWithDepth(1);
+    }
   }
 
   public synchronized void timeDynamicLockWithDepth2(int iters) {
-      for (int i = 0; i < iters; i++) {
-          dynamicLockWithDepth(2);
-      }
+    for (int i = 0; i < iters; i++) {
+      dynamicLockWithDepth(2);
+    }
   }
-  @IterationsAnnotation(noWarmup=true)
+
+  @IterationsAnnotation(noWarmup = true)
   public synchronized void timeDynamicLockWithDepth20(int iters) {
-      for (int i = 0; i < iters; i++) {
-          dynamicLockWithDepth(20);
-      }
+    for (int i = 0; i < iters; i++) {
+      dynamicLockWithDepth(20);
+    }
   }
 
   public static synchronized void staticLockWithDepth(int depth) {

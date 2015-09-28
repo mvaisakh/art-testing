@@ -18,16 +18,16 @@
 package benchmarks.deprecated;
 
 public class DoNothing {
-    public static void main(String[] args) {
-        System.out.println("DoNothing: " + 0);
-    }
+  public static void main(String args[]) {
+    System.out.println("DoNothing: " + 0);
+  }
 
-    /*
-     * Do nothing in the loop to check the loop overhead.
-     */
-    public static int timeDoNothing(int iters) {
-        for (int i = 0; i < iters; i++) {
-        }
-        return 0;
+  /*
+   * Do nothing in the loop to check the loop overhead.
+   */
+  public static int timeDoNothing(int iters) {
+    for (int i = 0; i < iters; i++) {
     }
+    return 0;
+  }
 }

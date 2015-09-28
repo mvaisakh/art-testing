@@ -25,10 +25,10 @@ import org.linaro.bench.IterationsAnnotation;
 
 public class InstanceTest {
 
-  public final static int ITERATIONS = 1000;
-  public final static int INSTANCES = 1000;
+  public static final int ITERATIONS = 1000;
+  public static final int INSTANCES = 1000;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before = System.currentTimeMillis();
     timeCheckInstances(ITERATIONS);
     long after = System.currentTimeMillis();
@@ -39,24 +39,32 @@ public class InstanceTest {
     Object o = null;
     for (int i = 0; i < INSTANCES; i++) {
       switch (rnd.nextInt(4)) {
-        case 0: o = new A(); break;
-        case 1: o = new B(); break;
-        case 2: o = new C(); break;
-        case 3: o = new D(); break;
+        case 0:
+          o = new A();
+          break;
+        case 1:
+          o = new B();
+          break;
+        case 2:
+          o = new C();
+          break;
+        case 3:
+          o = new D();
+          break;
         default: o = null;
       }
       list.add(o);
     }
   }
 
-  @IterationsAnnotation(noWarmup=true, iterations=1000)
+  @IterationsAnnotation(noWarmup = true, iterations = 1000)
   public static void timeCheckInstances(int iters) {
-      ArrayList<Object> list = new ArrayList<Object>();
-      Random rnd = new Random(123456789);
-      initializeInstances(list, rnd);
-      for (int i = 0; i < iters; i++) {
-          checkInstances(list);
-      }
+    ArrayList<Object> list = new ArrayList<Object>();
+    Random rnd = new Random(123456789);
+    initializeInstances(list, rnd);
+    for (int i = 0; i < iters; i++) {
+      checkInstances(list);
+    }
   }
 
   public static void checkInstances(ArrayList<Object> list) {

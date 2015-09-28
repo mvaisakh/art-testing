@@ -21,44 +21,45 @@ import java.lang.System;
 
 // This benchmark performs bubble sort in the worst case scenario.
 public class BubbleSort {
-  public int[] inputArr;
-  public int ARRAY_COUNT = 512;
+  public int inputArr[];
+  public static final int ARRAY_COUNT = 512;
+
   public void timeSort(int iterations) {
     this.inputArr = new int[ARRAY_COUNT];
-    for(int iter = 0; iter < iterations; ++iter) {
+    for (int iter = 0; iter < iterations; ++iter) {
       // Initialize the array.
-      for(int i = 0; i < this.inputArr.length; ++i) {
-          this.inputArr[i] = i;
+      for (int i = 0; i < this.inputArr.length; ++i) {
+        this.inputArr[i] = i;
       }
       // Perform sort.
-      for(int i = 0; i < this.inputArr.length; ++i) {
-          for(int j = 0; j < this.inputArr.length - 1; ++j) {
-              if (this.inputArr[j] < this.inputArr[j + 1]) {
-                 int temp = this.inputArr[j];
-                 this.inputArr[j] = this.inputArr[j + 1];
-                 this.inputArr[j + 1] = temp;
-              }
+      for (int i = 0; i < this.inputArr.length; ++i) {
+        for (int j = 0; j < this.inputArr.length - 1; ++j) {
+          if (this.inputArr[j] < this.inputArr[j + 1]) {
+            int temp = this.inputArr[j];
+            this.inputArr[j] = this.inputArr[j + 1];
+            this.inputArr[j + 1] = temp;
           }
-       }
+        }
+      }
     }
   }
 
   public boolean verify() {
     // Verify sorted output.
-    for(int i = 0; i < this.inputArr.length; ++i) {
-        int expected = this.inputArr.length - i - 1;
-        int actual = this.inputArr[i];
-        if(expected != actual) {
-          System.out.println("ERROR: Mismatch at position " + i +
-                             " Expected " + expected +
-                             " Actual " + actual);
-          return false;
-        }
+    for (int i = 0; i < this.inputArr.length; ++i) {
+      int expected = this.inputArr.length - i - 1;
+      int actual = this.inputArr[i];
+      if (expected != actual) {
+        System.out.println("ERROR: Mismatch at position " + i
+            + " Expected " + expected
+            + " Actual " + actual);
+        return false;
+      }
     }
     return true;
   }
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     BubbleSort obj = new BubbleSort();
     long before = System.currentTimeMillis();
     obj.timeSort(1);

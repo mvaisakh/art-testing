@@ -21,9 +21,9 @@ import java.lang.System;
 
 public class VolatileTest {
 
-  public final static int ITERATIONS = 1000000;
+  public static final int ITERATIONS = 1000000;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     VolatileTest test = new VolatileTest();
 
     long before = System.currentTimeMillis();
@@ -33,14 +33,15 @@ public class VolatileTest {
   }
 
   public void timeLoadStores(int iters) {
-      for (int i = 0; i < iters; i++) {
-          loadStores();
-      }
+    for (int i = 0; i < iters; i++) {
+      loadStores();
+    }
   }
 
   // from the jsr 133 cook book.
   public void loadStores() {
-    int i, j;
+    int i;
+    int j;
 
     i = a;
     j = b;
@@ -62,7 +63,9 @@ public class VolatileTest {
     a = i;
   }
 
-  private int a, b;
-  private volatile int u, v;
+  private int a;
+  private int b;
+  private volatile int u;
+  private volatile int v;
 }
 

@@ -21,10 +21,10 @@ import java.lang.System;
 
 // This benchmark rotates three dimensional points.
 public class Rotation {
-  public final int NUM_POINTS = 50;
-  public final int MAX_DEGREES = 90;
-  public double[][] point;
-  public double[][] coeff;
+  public static final int NUM_POINTS = 50;
+  public static final int MAX_DEGREES = 90;
+  public double point[][];
+  public double coeff[][];
 
   public Rotation() {
     point = new double[3][NUM_POINTS];
@@ -34,15 +34,15 @@ public class Rotation {
   public void timeRotate(int iterations) {
     for (int iter = 0; iter < iterations; ++iter) {
       for (int degree = 0; degree < MAX_DEGREES; degree += 5) {
-        double sin_value = Math.sin(degree * Math.PI / 180.0D);
-        double cos_value = Math.cos(degree * Math.PI / 180.0D);
+        double sinValue = Math.sin(degree * Math.PI / 180.0D);
+        double cosValue = Math.cos(degree * Math.PI / 180.0D);
 
-        coeff[0][0] = cos_value;
-        coeff[1][0] = sin_value;
+        coeff[0][0] = cosValue;
+        coeff[1][0] = sinValue;
         coeff[2][0] = 0.0D;
 
-        coeff[0][1] = -sin_value;
-        coeff[1][1] = cos_value;
+        coeff[0][1] = -sinValue;
+        coeff[1][1] = cosValue;
         coeff[2][1] = 0.0D;
 
         coeff[0][2] = 0.0D;
@@ -65,7 +65,7 @@ public class Rotation {
     return;
   }
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before;
     long after;
     Rotation obj = new Rotation();

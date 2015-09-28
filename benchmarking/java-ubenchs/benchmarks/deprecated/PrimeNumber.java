@@ -21,12 +21,11 @@ import java.lang.System;
 
 // This benchmark generates primes up to a number.
 public class PrimeNumber {
-  public int[] primes;
-  public int MAX_PRIME = 512;
+  public int primes[];
+  public static final int MAX_PRIME = 512;
   public int numPrimes;
 
-  public int timeGeneratePrime(int iteration)
-  {
+  public int timeGeneratePrime(int iteration) {
     this.primes = new int[this.MAX_PRIME];
     this.numPrimes = 0;
 
@@ -34,18 +33,15 @@ public class PrimeNumber {
       this.primes[0] = 1;
       this.primes[1] = 2;
       this.numPrimes = 2;
-      for (int num = 3; num < this.MAX_PRIME; num++)
-      {
+      for (int num = 3; num < this.MAX_PRIME; num++) {
         boolean isPrime = true;
-        for(int m = 1; m < this.numPrimes && this.primes[m] <= num / 2; m++)
-        {
+        for (int m = 1; m < this.numPrimes && this.primes[m] <= num / 2; m++) {
           if (num % this.primes[m] == 0) {
             isPrime = false;
             break;
           }
         }
-        if (isPrime)
-        {
+        if (isPrime) {
           this.primes[this.numPrimes] = num;
           this.numPrimes++;
         }
@@ -54,7 +50,7 @@ public class PrimeNumber {
     return this.numPrimes;
   }
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     PrimeNumber obj = new PrimeNumber();
     long before = System.currentTimeMillis();
     obj.timeGeneratePrime(1);

@@ -21,11 +21,11 @@ import java.lang.System;
 
 public class Switch {
 
-  public final static int ITERATIONS_DENSE = 20000000;
-  public final static int ITERATIONS_SPARSE = 5000000;
-  public final static int ITERATIONS_IFELSE = 5000000;
+  public static final int ITERATIONS_DENSE = 20000000;
+  public static final int ITERATIONS_SPARSE = 5000000;
+  public static final int ITERATIONS_IFELSE = 5000000;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long before = System.currentTimeMillis();
     timeDense(ITERATIONS_DENSE);
     long after = System.currentTimeMillis();
@@ -47,6 +47,7 @@ public class Switch {
 
     for (int i = 0; i < iters; i++) {
       switch (i & 0x1f) {
+        // CHECKSTYLE.OFF: OneStatementPerLine
         case 0: sum++; break;
         case 1: sum--; break;
         case 2: sum++; break;
@@ -68,6 +69,7 @@ public class Switch {
         case 18: sum++; break;
         case 19: sum--; break;
         default: sum += 2;
+        // CHECKSTYLE.ON: OneStatementPerLine
       }
     }
 
@@ -79,6 +81,7 @@ public class Switch {
 
     for (int i = 0; i < iters; i++) {
       switch (i & 0x7ff) {
+        // CHECKSTYLE.OFF: OneStatementPerLine
         case 0: sum++; break;
         case 11: sum--; break;
         case 22: sum++; break;
@@ -100,6 +103,7 @@ public class Switch {
         case 1818: sum++; break;
         case 1919: sum--; break;
         default: sum += 2;
+        // CHECKSTYLE.ON: OneStatementPerLine
       }
     }
 
@@ -110,6 +114,7 @@ public class Switch {
     int sum = 0;
 
     for (int i = 0; i < iters; i++) {
+      // CHECKSTYLE.OFF: NeedBraces
       int val = i & 0x7ff;
       if (val == 0) sum++;
       else if (val == 11) sum--;
@@ -132,6 +137,7 @@ public class Switch {
       else if (val == 1818) sum++;
       else if (val == 1919) sum--;
       else sum += 2;
+      // CHECKSTYLE.ON: NeedBraces
     }
 
     return sum;

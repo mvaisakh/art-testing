@@ -20,139 +20,140 @@ package benchmarks.deprecated;
 import java.lang.reflect.Method;
 
 public class MultiplyAdd {
-    public final static int ITERATIONS = 100000000;
-    public final static int VALUE = 500;
+  public static final int ITERATIONS = 100000000;
+  public static final int VALUE = 500;
 
-    public static void main(String[] args) {
-        long start, end = 0;
-        MultiplyAdd test = new MultiplyAdd();
+  public static void main(String args[]) {
+    long start = 0;
+    long end = 0;
+    MultiplyAdd test = new MultiplyAdd();
 
-        Method[] methods = test.getClass().getDeclaredMethods();
-        // sort methods by name
-        for (int i = 0; i < methods.length; i++) {
-            for (int j = 0; j < methods.length - i - 1; j++) {
-                if (methods[j].getName().compareTo(methods[j + 1].getName()) > 0) {
-                    Method tmp = methods[j];
-                    methods[j] = methods[j + 1];
-                    methods[j + 1] = tmp;
-                }
-            }
+    Method methods[] = test.getClass().getDeclaredMethods();
+    // sort methods by name
+    for (int i = 0; i < methods.length; i++) {
+      for (int j = 0; j < methods.length - i - 1; j++) {
+        if (methods[j].getName().compareTo(methods[j + 1].getName()) > 0) {
+          Method tmp = methods[j];
+          methods[j] = methods[j + 1];
+          methods[j + 1] = tmp;
         }
-
-        for (int i = 0; i < methods.length; i++) {
-            Method m = methods[i];
-            if (m.getName().startsWith("time")) {
-                start = System.currentTimeMillis();
-                end = start - 1;
-                try {
-                    Object o = m.invoke(test, ITERATIONS);
-                    end = System.currentTimeMillis();
-                } catch (Exception e) {
-                    System.err.println("Invoke method: " + m.toGenericString());
-                }
-                System.out.println(m.getDeclaringClass().getName() + "."
-                        + m.getName().substring(4) + ": " + (end - start));
-            }
-        }
+      }
     }
 
-    public int timeSimpleMaddw(int iters) {
-        int result = 0;
-        for (int i = 0; i < iters; i++) {
-            result += i * i;
+    for (int i = 0; i < methods.length; i++) {
+      Method m = methods[i];
+      if (m.getName().startsWith("time")) {
+        start = System.currentTimeMillis();
+        end = start - 1;
+        try {
+          Object o = m.invoke(test, ITERATIONS);
+          end = System.currentTimeMillis();
+        } catch (Exception e) {
+          System.err.println("Invoke method: " + m.toGenericString());
         }
-        return result;
+        System.out.println(m.getDeclaringClass().getName() + "."
+            + m.getName().substring(4) + ": " + (end - start));
+      }
     }
+  }
 
-    public long timeSimpleMaddx(int iters) {
-        long result = 0;
-        for (int i = 0; i < iters; i++) {
-            long tmp = i;
-            result += tmp * tmp;
-        }
-        return result;
+  public int timeSimpleMaddw(int iters) {
+    int result = 0;
+    for (int i = 0; i < iters; i++) {
+      result += i * i;
     }
+    return result;
+  }
 
-    public int timeSimpleMsubw(int iters) {
-        int result = 0;
-        for (int i = 0; i < iters; i++) {
-            result -= i * i;
-        }
-        return result;
+  public long timeSimpleMaddx(int iters) {
+    long result = 0;
+    for (int i = 0; i < iters; i++) {
+      long tmp = i;
+      result += tmp * tmp;
     }
+    return result;
+  }
 
-    public long timeSimpleMsubx(int iters) {
-        long result = 0;
-        for (int i = 0; i < iters; i++) {
-            long tmp = i;
-            result += tmp * tmp;
-        }
-        return result;
+  public int timeSimpleMsubw(int iters) {
+    int result = 0;
+    for (int i = 0; i < iters; i++) {
+      result -= i * i;
     }
+    return result;
+  }
 
-    public int timeMaddwBack2back(int iters) {
-        int result = 0;
-        int tmp1 = 0;
-        int tmp2 = 0;
-        for (int i = 0; i < iters; i++) {
-            tmp1 += i * i;
-            tmp2 += tmp1 * tmp1;
-            result += tmp2 * tmp2;
-        }
-        return result;
+  public long timeSimpleMsubx(int iters) {
+    long result = 0;
+    for (int i = 0; i < iters; i++) {
+      long tmp = i;
+      result += tmp * tmp;
     }
+    return result;
+  }
 
-    public long timeMaddxBack2back(int iters) {
-        long result = 0;
-        long tmp1 = 0;
-        long tmp2 = 0;
-        for (int i = 0; i < iters; i++) {
-            long a = i;
-            tmp1 += a * a;
-            tmp2 += tmp1 * tmp1;
-            result += tmp2 * tmp2;
-        }
-        return result;
+  public int timeMaddwBack2back(int iters) {
+    int result = 0;
+    int tmp1 = 0;
+    int tmp2 = 0;
+    for (int i = 0; i < iters; i++) {
+      tmp1 += i * i;
+      tmp2 += tmp1 * tmp1;
+      result += tmp2 * tmp2;
     }
+    return result;
+  }
 
-    public int timeMaddwInterleave(int iters) {
-        int result = 0;
-        int tmp1 = 0;
-        int tmp2 = 0;
-        for (int i = 0; i < iters; i++) {
-            tmp1 += i * i;
-            tmp2 = tmp1 + tmp1;
-            result += tmp2 * tmp2;
-        }
-        return result;
+  public long timeMaddxBack2back(int iters) {
+    long result = 0;
+    long tmp1 = 0;
+    long tmp2 = 0;
+    for (int i = 0; i < iters; i++) {
+      long a = i;
+      tmp1 += a * a;
+      tmp2 += tmp1 * tmp1;
+      result += tmp2 * tmp2;
     }
+    return result;
+  }
 
-    public long timeMaddxInterleave(int iters) {
-        long result = 0;
-        long tmp1 = 0;
-        long tmp2 = 0;
-        for (int i = 0; i < iters; i++) {
-            long a = i;
-            tmp1 += a * a;
-            tmp2 += tmp1 + tmp1;
-            result += tmp2 * tmp2;
-        }
-        return result;
+  public int timeMaddwInterleave(int iters) {
+    int result = 0;
+    int tmp1 = 0;
+    int tmp2 = 0;
+    for (int i = 0; i < iters; i++) {
+      tmp1 += i * i;
+      tmp2 = tmp1 + tmp1;
+      result += tmp2 * tmp2;
     }
+    return result;
+  }
 
-    public long timeMixed(int iters) {
-        long result = 0;
-        long tmp = 0;
-        long lt = 12;
-        int a = 0;
-        for (int i = 0; i < iters; i++) {
-            a = (i - 2) + i * i;
-            a = 1 + a * a;
-            tmp = a;
-            result -= tmp * tmp;
-            tmp++;
-            result += tmp * tmp + (tmp >> 2) * tmp + (tmp >> 2) * lt;
-        }
-        return result;
+  public long timeMaddxInterleave(int iters) {
+    long result = 0;
+    long tmp1 = 0;
+    long tmp2 = 0;
+    for (int i = 0; i < iters; i++) {
+      long a = i;
+      tmp1 += a * a;
+      tmp2 += tmp1 + tmp1;
+      result += tmp2 * tmp2;
     }
+    return result;
+  }
+
+  public long timeMixed(int iters) {
+    long result = 0;
+    long tmp = 0;
+    long lt = 12;
+    int a = 0;
+    for (int i = 0; i < iters; i++) {
+      a = (i - 2) + i * i;
+      a = 1 + a * a;
+      tmp = a;
+      result -= tmp * tmp;
+      tmp++;
+      result += tmp * tmp + (tmp >> 2) * tmp + (tmp >> 2) * lt;
+    }
+    return result;
+  }
 }

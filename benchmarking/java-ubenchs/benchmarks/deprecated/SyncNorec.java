@@ -21,9 +21,9 @@ import java.lang.System;
 
 public class SyncNorec {
 
-  public final static int ITERATIONS = 1000000;
+  public static final int ITERATIONS = 1000000;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     SyncNorec dummy = new SyncNorec();
     long before = System.currentTimeMillis();
     dummy.timeInc(ITERATIONS);
@@ -45,9 +45,9 @@ public class SyncNorec {
 
   public void timeInc(int iters) {
     for (int i = 0; i < iters; ++i) {
-      synchronized(lock1) {
-        synchronized(lock2) {
-          synchronized(lock3) {
+      synchronized (lock1) {
+        synchronized (lock2) {
+          synchronized (lock3) {
             value++;
           }
         }
@@ -55,6 +55,8 @@ public class SyncNorec {
     }
   }
 
-  public int value() { return value; }
+  public int value() {
+    return value;
+  }
 }
 

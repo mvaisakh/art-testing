@@ -23,10 +23,10 @@ import org.linaro.bench.IterationsAnnotation;
 
 public class SyncFib {
 
-  public final static int ITERATIONS_SFIB = 300;
-  public final static int ITERATIONS_AFIB = 500;
+  public static final int ITERATIONS_SFIB = 300;
+  public static final int ITERATIONS_AFIB = 500;
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     long sum = 0;
     long before = System.currentTimeMillis();
     timeSfib(ITERATIONS_SFIB);
@@ -39,22 +39,22 @@ public class SyncFib {
     System.out.println("afib: " + (after - before));
   }
 
-  @IterationsAnnotation(noWarmup=true, iterations=600)
+  @IterationsAnnotation(noWarmup = true, iterations = 600)
   public static long timeSfib(int iters) {
-      long sum = 0;
-      for (int i = 0; i < iters; i++) {
-          sum += sfib(20);
-      }
-      return sum;
+    long sum = 0;
+    for (int i = 0; i < iters; i++) {
+      sum += sfib(20);
+    }
+    return sum;
   }
 
-  @IterationsAnnotation(noWarmup=true, iterations=1000)
+  @IterationsAnnotation(noWarmup = true, iterations = 1000)
   public static long timeAfib(int iters) {
-      long sum = 0;
-      for (int i = 0; i < iters; i++) {
-          sum += afib(20);
-      }
-      return sum;
+    long sum = 0;
+    for (int i = 0; i < iters; i++) {
+      sum += afib(20);
+    }
+    return sum;
   }
 
   static synchronized int sfib(int n) {
