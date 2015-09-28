@@ -18,9 +18,9 @@
 package benchmarks.micro;
 
 import java.lang.System;
-import java.util.Random;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Random;
 
 public class Intrinsics {
 
@@ -31,7 +31,7 @@ public class Intrinsics {
   private static final int NUM_RANDS = 1000;
 
   /* Pre-allocated pool of random integers from [0, Integer.MAX_VALUE) */
-  private static final int rand[] = new int[NUM_RANDS];
+  private static final int[] rand = new int[NUM_RANDS];
 
   static {
     // Allocate a pool of random integers to use in benchmarks that
@@ -44,7 +44,7 @@ public class Intrinsics {
   }
 
   /**
-   * NumberOfLeadingZeros
+   * NumberOfLeadingZeros.
    **/
 
   private static int[] resultsNumberOfLeadingZerosInteger = new int[NUM_INVOKES];
@@ -53,40 +53,43 @@ public class Intrinsics {
   private static int[] resultsNumberOfLeadingZerosLongRandom = new int[NUM_INVOKES];
 
   public void timeNumberOfLeadingZerosInteger(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
         resultsNumberOfLeadingZerosInteger[i] =
           Integer.numberOfLeadingZeros(0x80000000 >>> i);
       }
     }
   }
+
   public void timeNumberOfLeadingZerosLong(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
         resultsNumberOfLeadingZerosLong[i] =
           Long.numberOfLeadingZeros(0x8000000000000000L >>> i);
       }
     }
   }
+
   public void timeNumberOfLeadingZerosIntegerRandom(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsNumberOfLeadingZerosIntegerRandom[i] =
-            Integer.numberOfLeadingZeros(rand[i % NUM_RANDS] >>> rand[i % NUM_RANDS]);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsNumberOfLeadingZerosIntegerRandom[i] =
+          Integer.numberOfLeadingZeros(rand[i % NUM_RANDS] >>> rand[i % NUM_RANDS]);
       }
     }
   }
+
   public void timeNumberOfLeadingZerosLongRandom(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsNumberOfLeadingZerosLongRandom[i] =
-            Long.numberOfLeadingZeros(1 << (rand[i % NUM_RANDS] % Long.SIZE));
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsNumberOfLeadingZerosLongRandom[i] =
+          Long.numberOfLeadingZeros(1 << (rand[i % NUM_RANDS] % Long.SIZE));
       }
     }
   }
 
   /**
-   * NumberOfTrailingZeros
+   * NumberOfTrailingZeros.
    **/
 
   private static int[] resultsNumberOfTrailingZerosInteger = new int[NUM_INVOKES];
@@ -95,40 +98,43 @@ public class Intrinsics {
   private static int[] resultsNumberOfTrailingZerosLongRandom = new int[NUM_INVOKES];
 
   public void timeNumberOfTrailingZerosInteger(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
         resultsNumberOfTrailingZerosInteger[i] =
-            Integer.numberOfTrailingZeros(0x80000000 >>> i);
+          Integer.numberOfTrailingZeros(0x80000000 >>> i);
       }
     }
   }
+
   public void timeNumberOfTrailingZerosLong(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
         resultsNumberOfTrailingZerosLong[i] =
-            Long.numberOfTrailingZeros(0x8000000000000000L >>> i);
+          Long.numberOfTrailingZeros(0x8000000000000000L >>> i);
       }
     }
   }
+
   public void timeNumberOfTrailingZerosIntegerRandom(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
         resultsNumberOfTrailingZerosIntegerRandom[i] =
-            Integer.numberOfTrailingZeros(rand[i % NUM_RANDS] >>> rand[i % NUM_RANDS]);
+          Integer.numberOfTrailingZeros(rand[i % NUM_RANDS] >>> rand[i % NUM_RANDS]);
       }
     }
   }
+
   public void timeNumberOfTrailingZerosLongRandom(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
         resultsNumberOfTrailingZerosLongRandom[i] =
-            Long.numberOfTrailingZeros(1 << (rand[i % NUM_RANDS] % Long.SIZE));
+          Long.numberOfTrailingZeros(1 << (rand[i % NUM_RANDS] % Long.SIZE));
       }
     }
   }
 
   /**
-   * RotateRight
+   * RotateRight.
    **/
 
   private static int[] resultsRotateRightInteger = new int[NUM_INVOKES];
@@ -137,36 +143,39 @@ public class Intrinsics {
   private static long[] resultsRotateRightLongConstant = new long[NUM_INVOKES];
 
   public void timeRotateRightInteger(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateRightInteger[i] = Integer.rotateRight(0xFF0000DD, i);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateRightInteger[i] = Integer.rotateRight(0xFF0000DD, i);
       }
     }
   }
+
   public void timeRotateRightIntegerConstant(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateRightIntegerConstant[i] = Integer.rotateRight(0xFF0000DD, 16);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateRightIntegerConstant[i] = Integer.rotateRight(0xFF0000DD, 16);
       }
     }
   }
+
   public void timeRotateRightLong(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateRightLong[i] = Long.rotateRight(0xBBAAAADDFF0000DDL, i);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateRightLong[i] = Long.rotateRight(0xBBAAAADDFF0000DDL, i);
       }
     }
   }
+
   public void timeRotateRightLongConstant(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateRightLongConstant[i] = Long.rotateRight(0xBBAAAADDFF0000DDL, 48);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateRightLongConstant[i] = Long.rotateRight(0xBBAAAADDFF0000DDL, 48);
       }
     }
   }
 
   /**
-   * RotateLeft
+   * RotateLeft.
    **/
 
   private static int[] resultsRotateLeftInteger = new int[NUM_INVOKES];
@@ -175,63 +184,66 @@ public class Intrinsics {
   private static long[] resultsRotateLeftLongConstant = new long[NUM_INVOKES];
 
   public void timeRotateLeftInteger(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateLeftInteger[i] = Integer.rotateLeft(0xFF0000DD, i);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateLeftInteger[i] = Integer.rotateLeft(0xFF0000DD, i);
       }
     }
   }
+
   public void timeRotateLeftIntegerConstant(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateLeftIntegerConstant[i] = Integer.rotateLeft(0xFF0000DD, 16);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateLeftIntegerConstant[i] = Integer.rotateLeft(0xFF0000DD, 16);
       }
     }
   }
+
   public void timeRotateLeftLong(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateLeftLong[i] = Long.rotateLeft(0xBBAAAADDFF0000DDL, i);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateLeftLong[i] = Long.rotateLeft(0xBBAAAADDFF0000DDL, i);
       }
     }
   }
+
   public void timeRotateLeftLongConstant(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateLeftLongConstant[i] = Long.rotateLeft(0xBBAAAADDFF0000DDL, 48);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateLeftLongConstant[i] = Long.rotateLeft(0xBBAAAADDFF0000DDL, 48);
       }
     }
   }
 
   /**
-   * RotateRandom
+   * RotateRandom.
    **/
 
   private static int[] resultsRotateRandomInteger = new int[NUM_INVOKES];
   private static long[] resultsRotateRandomLong = new long[NUM_INVOKES];
 
   public void timeRotateRandomInteger(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateRandomInteger[i] = (rand[i % NUM_RANDS] % 2 > 0)
-            ? Integer.rotateLeft(0xFF0000DD, rand[i % NUM_RANDS])
-            : Integer.rotateRight(0xFF0000DD, rand[i % NUM_RANDS]);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateRandomInteger[i] = (rand[i % NUM_RANDS] % 2 > 0)
+          ? Integer.rotateLeft(0xFF0000DD, rand[i % NUM_RANDS])
+          : Integer.rotateRight(0xFF0000DD, rand[i % NUM_RANDS]);
       }
     }
   }
 
   public void timeRotateRandomLong(int iterations) {
-    for(int iter = 0; iter < iterations; ++iter) {
-      for(int i = 0; i < NUM_INVOKES; ++i) {
-          resultsRotateRandomLong[i] = (rand[i % NUM_RANDS] % 2 > 0)
-            ? Long.rotateLeft(0xBBAAAADDFF0000DDL, rand[i % NUM_RANDS])
-            : Long.rotateRight(0xBBAAAADDFF0000DDL, rand[i % NUM_RANDS]);
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsRotateRandomLong[i] = (rand[i % NUM_RANDS] % 2 > 0)
+          ? Long.rotateLeft(0xBBAAAADDFF0000DDL, rand[i % NUM_RANDS])
+          : Long.rotateRight(0xBBAAAADDFF0000DDL, rand[i % NUM_RANDS]);
       }
     }
   }
 
   /**
-   * Verify
+   * Verify.
    **/
 
   /**
