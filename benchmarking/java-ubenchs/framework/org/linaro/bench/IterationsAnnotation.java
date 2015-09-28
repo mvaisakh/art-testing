@@ -22,9 +22,9 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IterationsAnnotation {
-    // false: need to warm up. Only valid when calibration is needed.
-    boolean noWarmup() default false;
+  // false: need to warm up. Only valid when calibration is needed.
+  boolean noWarmup() default false;
 
-    // <=0: means we need to calibrate, others: no calibration and use this as iteration count
-    int iterations() default 0;
+  // <=0: means we need to calibrate, others: no calibration and use this as iteration count
+  int iterations() default 0;
 }

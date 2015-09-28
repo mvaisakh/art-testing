@@ -19,7 +19,7 @@ package org.linaro.bench;
 
 
 public class BenchmarkList {
-    public static final String[] benchmarkList = {
-        <to be filled by the build system>
-    };
+  public static final String[] benchmarkList = {
+<to be filled by the build system>
+  };
 }

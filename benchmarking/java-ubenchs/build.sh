@@ -118,9 +118,10 @@ JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//.\//}
 # Trim trailing whitespaces.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES/%[[:space:]]/}
 read -a array <<< $JAVA_BENCHMARK_CLASSES
-JAVA_BENCHMARK_CLASSES=$(echo ${array[@]})
 # Make it a list of literal string.
-JAVA_BENCHMARK_CLASSES="\""${JAVA_BENCHMARK_CLASSES//[[:space:]]/\", \"}"\""
+JAVA_BENCHMARK_CLASSES=$(printf "    \"%s\",\n" "${array[@]}")
+# Remove the trailing comma.
+JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES%?}
 # Write the result file.
 BENCHMARK_LIST_TEMPLATE="$(cat $DIR_FRAMEWORK/org/linaro/bench/BenchmarkList.java.template)"
 BENCHMARK_LIST_TEMPLATE=${BENCHMARK_LIST_TEMPLATE/<to be filled by the build system>/$JAVA_BENCHMARK_CLASSES}

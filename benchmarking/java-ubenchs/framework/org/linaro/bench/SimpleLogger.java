@@ -18,72 +18,72 @@
 package org.linaro.bench;
 
 public class SimpleLogger {
-    public enum LogLevel {
-        DEBUG, INFO, WARN, ERROR, FATAL,
-    };
+  public enum LogLevel {
+    DEBUG, INFO, WARN, ERROR, FATAL
+  }
 
-    private LogLevel logLevel;
+  private LogLevel logLevel;
 
-    static class SingletonHolder {
-        // default log level: ERROR.
-        static SimpleLogger instance = new SimpleLogger(LogLevel.ERROR);
+  static class SingletonHolder {
+    // default log level: ERROR.
+    static SimpleLogger instance = new SimpleLogger(LogLevel.ERROR);
+  }
+
+  public static SimpleLogger getInstance() {
+    return SingletonHolder.instance;
+  }
+
+  public void setLogLevel(String level) {
+    if (level.equals("DEBUG")) {
+      setLogLevel(LogLevel.DEBUG);
+    } else if (level.equals("INFO")) {
+      setLogLevel(LogLevel.INFO);
+    } else if (level.equals("WARN")) {
+      setLogLevel(LogLevel.WARN);
+    } else if (level.equals("ERROR")) {
+      setLogLevel(LogLevel.ERROR);
+    } else if (level.equals("FATAL")) {
+      setLogLevel(LogLevel.FATAL);
+    } else {
+      fatal("Unknown log level.");
     }
+  }
 
-    public static SimpleLogger getInstance() {
-        return SingletonHolder.instance;
-    }
+  private SimpleLogger(LogLevel level) {
+    logLevel = level;
+  }
 
-    public void setLogLevel(String level) {
-        if (level.equals("DEBUG")) {
-            setLogLevel(LogLevel.DEBUG);
-        } else if (level.equals("INFO")) {
-            setLogLevel(LogLevel.INFO);
-        } else if (level.equals("WARN")) {
-            setLogLevel(LogLevel.WARN);
-        } else if (level.equals("ERROR")) {
-            setLogLevel(LogLevel.ERROR);
-        } else if (level.equals("FATAL")) {
-            setLogLevel(LogLevel.FATAL);
-        } else {
-            fatal("Unknown log level.");
-        }
-    }
+  public void setLogLevel(LogLevel level) {
+    logLevel = level;
+  }
 
-    private SimpleLogger(LogLevel level) {
-        logLevel = level;
-    }
+  public LogLevel getLogLevel() {
+    return this.logLevel;
+  }
 
-    public void setLogLevel(LogLevel level) {
-        logLevel = level;
+  public void log(LogLevel thisLevel, String msg) {
+    if (thisLevel.ordinal() < logLevel.ordinal()) {
+      return;
     }
+    System.err.println(thisLevel.toString() + ": " + msg);
+    if (thisLevel.compareTo(LogLevel.FATAL) == 0) {
+      System.exit(1);
+    }
+  }
 
-    public LogLevel getLogLevel() {
-        return this.logLevel;
-    }
+  public void info(String msg) {
+    log(LogLevel.INFO, msg);
+  }
 
-    public void log(LogLevel thisLevel, String msg) {
-        if (thisLevel.ordinal() < logLevel.ordinal()) {
-            return;
-        }
-        System.err.println(thisLevel.toString() + ": " + msg);
-        if (thisLevel.compareTo(LogLevel.FATAL) == 0) {
-            System.exit(1);
-        }
-    }
+  public void debug(String msg) {
+    log(LogLevel.DEBUG, msg);
+  }
 
-    public void info(String msg) {
-        log(LogLevel.INFO, msg);
-    }
+  public void error(String msg) {
+    log(LogLevel.ERROR, msg);
+  }
 
-    public void debug(String msg) {
-        log(LogLevel.DEBUG, msg);
-    }
-
-    public void error(String msg) {
-        log(LogLevel.ERROR, msg);
-    }
-
-    public void fatal(String msg) {
-        log(LogLevel.FATAL, msg);
-    }
+  public void fatal(String msg) {
+    log(LogLevel.FATAL, msg);
+  }
 }

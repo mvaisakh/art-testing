@@ -18,39 +18,39 @@
 package org.linaro.bench;
 
 public class CheckEnv {
-    public static boolean isAndroid() {
-        String vmName = System.getProperty("java.vm.name");
-        String runtimeName = System.getProperty("java.runtime.name");
-        if ((vmName != null) && vmName.toLowerCase().startsWith("dalvik")) {
-            return true;
-        }
-        if ((runtimeName != null) && runtimeName.toLowerCase().startsWith("android")) {
-            return true;
-        }
-        return false;
+  public static boolean isAndroid() {
+    String vmName = System.getProperty("java.vm.name");
+    String runtimeName = System.getProperty("java.runtime.name");
+    if ((vmName != null) && vmName.toLowerCase().startsWith("dalvik")) {
+      return true;
     }
+    if ((runtimeName != null) && runtimeName.toLowerCase().startsWith("android")) {
+      return true;
+    }
+    return false;
+  }
 
-    public static boolean isArm() {
-        String osArch = System.getProperty("os.arch");
-        if (osArch == null) {
-            return false;
-        }
-        osArch = osArch.toLowerCase();
-        if (osArch.startsWith("arm") || osArch.startsWith("aarch")) {
-            return true;
-        }
-        return false;
+  public static boolean isArm() {
+    String osArch = System.getProperty("os.arch");
+    if (osArch == null) {
+      return false;
     }
+    osArch = osArch.toLowerCase();
+    if (osArch.startsWith("arm") || osArch.startsWith("aarch")) {
+      return true;
+    }
+    return false;
+  }
 
-    public static boolean isAArch64() {
-        String osArch = System.getProperty("os.arch");
-        if (osArch == null) {
-            return false;
-        }
-        osArch = osArch.toLowerCase();
-        if (osArch.startsWith("aarch64")) {
-            return true;
-        }
-        return false;
+  public static boolean isAArch64() {
+    String osArch = System.getProperty("os.arch");
+    if (osArch == null) {
+      return false;
     }
+    osArch = osArch.toLowerCase();
+    if (osArch.startsWith("aarch64")) {
+      return true;
+    }
+    return false;
+  }
 }
