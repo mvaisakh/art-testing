@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SCRIPT_PATH=$(dirname $0)
+
+CONFIG=$SCRIPT_PATH/config.xml
+CHECKSTYLE_JAR=$SCRIPT_PATH/checkstyle-6.10-all.jar
+
+if [ ! -f $CHECKSTYLE_JAR ]; then
+  echo "ERROR: Could not find ${CHECKSTYLE_JAR}. Did you run $SCRIPT_PATH/download.sh?"
+  exit 1
+fi
+
+output=$(java  -jar $CHECKSTYLE_JAR -c $CONFIG "$@")
+echo "$output"
+
+# We want to return an error code if linting errors were found.
+if echo "$output" | grep "error" &> /dev/null ; then
+  exit 1
+fi
