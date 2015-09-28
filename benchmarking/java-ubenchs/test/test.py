@@ -16,6 +16,7 @@
 #
 
 import argparse
+import multiprocessing
 import os
 import subprocess
 import sys
@@ -24,6 +25,7 @@ dir_test = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_test, '..'))
 dir_tools = os.path.join(dir_root,'tools')
 sys.path.insert(0, dir_tools)
+import lint
 import utils
 
 
@@ -32,6 +34,9 @@ def BuildOptions():
         description = "Run tests for je java benchmarks framework.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--jobs', '-j', metavar='N', type=int, nargs='?',
+                        default=multiprocessing.cpu_count(),
+                        help='Test using N jobs.')
     return parser.parse_args()
 
 
@@ -66,12 +71,17 @@ def TestBenchmarkPackages():
     return 0
 
 
+def TestLint(jobs = 1):
+    return lint.LintFiles(lint.GetJavaFiles(), jobs)
+
+
 if __name__ == "__main__":
     args = BuildOptions()
 
     rc = 0
     rc |= TestBenchmarksOnHost()
     rc |= TestBenchmarkPackages()
+    rc |= TestLint(args.jobs)
 
     if rc != 0:
         print("Tests FAILED.")
