@@ -18,11 +18,13 @@
 import argparse
 import os
 import subprocess
+import sys
 
 dir_test = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_test, '..'))
-dir_build = os.path.join(dir_root, 'build')
-dir_build_classes = os.path.join(dir_build, 'classes')
+dir_tools = os.path.join(dir_root,'tools')
+sys.path.insert(0, dir_tools)
+import utils
 
 
 def BuildOptions():
@@ -49,12 +51,12 @@ def TestCommand(command, _cwd=None):
 
 def TestBenchmarksOnHost():
     rc = 0
-    rc |= TestCommand(["./build.sh", "-w"], _cwd=dir_root)
-    rc |= TestCommand(["./run.py"], _cwd=dir_root)
-    rc |= TestCommand(["./run.py", "--dont-auto-calibrate"], _cwd=dir_root)
+    rc |= TestCommand(["./build.sh", "-w"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py", "--dont-auto-calibrate"], _cwd=utils.dir_root)
     # TODO: Abstract the app name.
-    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=dir_build_classes)
-    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "BubbleSort"], _cwd=dir_build_classes)
+    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=utils.dir_build_java_classes)
+    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "BubbleSort"], _cwd=utils.dir_build_java_classes)
     return rc
 
 
