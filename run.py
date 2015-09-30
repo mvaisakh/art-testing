@@ -257,7 +257,11 @@ if __name__ == "__main__":
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
-    res_filename = args.output_pkl if args.output_pkl is not None else 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
-    with open(res_filename, 'wb') as pickle_file:
+    if args.output_pkl is None:
+      res_file = 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
+      res_file = os.path.join(utils.dir_build, res_file)
+    else:
+      res_file = args.output_pkl
+    with open(res_file, 'wb') as pickle_file:
         pickle.dump(result, pickle_file)
-        print(('Wrote results to %s.' % res_filename))
+        print(('Wrote results to %s.' % res_file))
