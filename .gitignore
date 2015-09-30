@@ -1,3 +1,8 @@
 build
 framework/org/linaro/bench/BenchmarkList.java
 tools/checkstyle/checkstyle-6.10-all.jar
+# Python compiled files.
+*.pyc
+*.pkl
+# Automatically generated.
+BenchmarkList.java
