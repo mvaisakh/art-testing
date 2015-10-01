@@ -18,7 +18,7 @@
 import argparse
 import pickle
 
-import utils
+from tools import utils_stats
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
@@ -36,6 +36,6 @@ if __name__ == "__main__":
     pkl_file_2 = open(args.res_2, 'rb')
     res_1 = pickle.load(pkl_file_1)
     res_2 = pickle.load(pkl_file_2)
-    utils.PrintDiff(res_1, res_2)
+    utils_stats.PrintDiff(res_1, res_2)
     pkl_file_1.close()
     pkl_file_2.close()
