@@ -75,6 +75,14 @@ def TestLint(jobs = 1):
     return lint.LintFiles(lint.GetJavaFiles(), jobs)
 
 
+def TestCompareScript():
+    rc = 0
+    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    return rc
+
+
 if __name__ == "__main__":
     args = BuildOptions()
 
@@ -82,6 +90,7 @@ if __name__ == "__main__":
     rc |= TestBenchmarksOnHost()
     rc |= TestBenchmarkPackages()
     rc |= TestLint(args.jobs)
+    rc |= TestCompareScript()
 
     if rc != 0:
         print("Tests FAILED.")

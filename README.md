@@ -18,6 +18,8 @@ Or on the host, with no adb device:
 Each set of related benchmarks is implemented as a Java class and kept in the
 benchmarks/ folder.
 
+Before contributing, make sure that `test/test.py` passes.
+
 ### Rules
 
 1. Test method names start with "time" -- Test launcher will find all timeXXX()
