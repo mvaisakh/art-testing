@@ -113,8 +113,9 @@ set +f
 # the benchmark framework to indicate what benchmark classes are available.
 # Remove the `.java` extension.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_FILES//.java/}
-# Remove the leading `./` and `benchmarks`.
+# Remove the leading full or relative path.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//.\//}
+JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//$DIR_ROOT\//}
 # Trim trailing whitespaces.
 JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES/%[[:space:]]/}
 read -a array <<< $JAVA_BENCHMARK_CLASSES
