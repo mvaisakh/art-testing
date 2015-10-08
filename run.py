@@ -64,8 +64,8 @@ def BuildOptions():
                         dest = 'auto_calibrate', help='''Do not auto-calibrate
                         the benchmarks. Instead, run each benchmark's `main()`
                         function directly.''')
-    parser.add_argument('--target', '-t', action='store_true', default = False,
-                        dest='run_on_target', help='Run on target adb device.')
+    parser.add_argument('--target', '-t', action='store', nargs='?', default=None, const='<default>',
+                        dest='target', help='Run on target adb device.')
     parser.add_argument('--mode', action = 'store',
                         choices = ['32', '64', ''], default = default_mode,
                         help='''Run with dalvikvm32, dalvikvm64, or dalvikvm''')
@@ -100,8 +100,10 @@ def ensure_dir(path):
 
 # ADB helpers
 
-def adb_push(f, target_path = default_remote_copy_path):
+def adb_push(f, target_path = default_remote_copy_path, target = None):
     command = ['adb', 'push', f, target_path]
+    if target != '<default>':
+        command = ['adb', '-s', target, 'push', f, target_path]
     VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, env = environment,
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
@@ -109,11 +111,13 @@ def adb_push(f, target_path = default_remote_copy_path):
 
 
 # `command` is expected to be a string, not a list.
-def adb_shell(command):
+def adb_shell(command_arg, target):
     # We need to quote the actual command in the text printed so it can be
     # copy-pasted and executed.
-    VerbosePrint('adb shell ' + "\"%s\"" % command)
-    command = ['adb', 'shell', command]
+    command = ['adb', 'shell', command_arg]
+    if target != '<default>':
+        command = ['adb', '-s', target, 'shell', command_arg]
+    VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, env = environment,
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     return p.communicate()
@@ -124,11 +128,11 @@ def host_java(command):
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     return p.communicate()
 
-def DeleteAppInDalvikCache(remote_copy_path):
+def DeleteAppInDalvikCache(remote_copy_path, target):
     # We delete the entire dalvik-cache in the test path.
     # Delete any cached version of the benchmark app.
     # With the current defaults, the pattern is "data@local@tmp@java-benchs.apk*"
-    adb_shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'))
+    adb_shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'), target)
 
 def BuildBenchmarks(build_for_target):
     # Call the build script, with warnings treated as errors.
@@ -138,7 +142,7 @@ def BuildBenchmarks(build_for_target):
     VerbosePrint(' '.join(command))
     subprocess.check_call(command)
 
-def RunBenchADB(mode, auto_calibrate, apk, classname):
+def RunBenchADB(mode, auto_calibrate, apk, classname, target):
     dalvikvm = 'dalvikvm%s' % mode
     command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
             % (os.path.dirname(apk), dalvikvm, apk))
@@ -150,10 +154,10 @@ def RunBenchADB(mode, auto_calibrate, apk, classname):
         command += " %s" % (classname)
     if verbose:
         command += " --debug"
-    out, err = adb_shell(command)
+    out, err = adb_shell(command, target)
     return out.decode('UTF-8')
 
-def RunBenchHost(mode, auto_calibrate, apk, classname):
+def RunBenchHost(mode, auto_calibrate, apk, classname, target):
     if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
@@ -168,10 +172,12 @@ result = dict()
 def RunBench(apk, classname,
              run_helper,
              auto_calibrate,
-             iterations = default_n_iterations, mode = default_mode):
+             iterations = default_n_iterations,
+             mode = default_mode,
+             target = None):
     for iteration in range(iterations):
         try:
-            out = run_helper(mode, auto_calibrate, apk, classname)
+            out = run_helper(mode, auto_calibrate, apk, classname, target)
             out = out.rstrip('\n')
             if verbose:
                 print(out)
@@ -197,13 +203,13 @@ def RunBench(apk, classname,
 
 
 def RunBenchs(apk, bench_names,
-              run_on_target,
+              target,
               auto_calibrate,
               iterations = default_n_iterations, mode = default_mode):
     VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
-    run_helper = RunBenchADB if run_on_target else RunBenchHost
+    run_helper = RunBenchADB if target else RunBenchHost
     for bench in bench_names:
-        RunBench(apk, bench, run_helper, auto_calibrate, iterations = iterations, mode = mode)
+        RunBench(apk, bench, run_helper, auto_calibrate, iterations = iterations, mode = mode, target = target)
 
 
 def ListAllBenchmarks():
@@ -230,14 +236,14 @@ if __name__ == "__main__":
     args = BuildOptions()
     verbose = not args.noverbose
 
-    BuildBenchmarks(args.run_on_target)
+    BuildBenchmarks(args.target)
 
     remote_apk = None
-    if args.run_on_target:
-        DeleteAppInDalvikCache(args.remote_copy_path)
+    if args.target:
+        DeleteAppInDalvikCache(args.remote_copy_path, args.target)
         apk = './build/bench.apk'
         apk_name = os.path.basename(apk)
-        adb_push(apk, args.remote_copy_path)
+        adb_push(apk, args.remote_copy_path, args.target)
         remote_apk = os.path.join(args.remote_copy_path, apk_name)
 
     if args.norun:
@@ -253,7 +259,7 @@ if __name__ == "__main__":
         filter_out = ['benchmarks/deprecated/*']
     benchmarks = FilterBenchmarks(benchmarks, args.filter, filter_out)
 
-    RunBenchs(remote_apk, benchmarks, args.run_on_target, args.auto_calibrate, args.iterations, args.mode)
+    RunBenchs(remote_apk, benchmarks, args.target, args.auto_calibrate, args.iterations, args.mode)
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
