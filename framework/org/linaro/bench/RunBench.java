@@ -206,7 +206,8 @@ public class RunBench {
       + "\t                     (default: " + DEFAULT_CALIBRATION_MIN_TIME_NS + ")\n"
       + "";
 
-  public void parseCmdlineAndRun(String args[]) {
+  public int parseCmdlineAndRun(String args[]) {
+    int errors = 0;
     String subtest = null;
     boolean verify = true;  // Verify all benchmark results by default.
     List<String> benchmarks = new ArrayList<String>();
@@ -265,13 +266,17 @@ public class RunBench {
     for (int i = 0; i < benchmarks.size(); i++) {
       if (runBenchSet(benchmarks.get(i), verify) != 0) {
         log.error("Test failed.");
+        errors++;
       }
     }
+
+    return errors;
   }
 
   public static void main(String args[]) {
     RunBench bench = new RunBench();
     // Set default log level.
-    bench.parseCmdlineAndRun(args);
+    int errors = bench.parseCmdlineAndRun(args);
+    System.exit(errors);
   }
 }

@@ -120,13 +120,17 @@ def adb_shell(command_arg, target):
     VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, env = environment,
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    return p.communicate()
+    rc = p.wait()
+    out, err = p.communicate()
+    return rc, out, err
 
 def host_java(command):
     VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, cwd = utils.dir_build_java_classes,
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    return p.communicate()
+    rc = p.wait()
+    out, err = p.communicate()
+    return rc, out, err
 
 def DeleteAppInDalvikCache(remote_copy_path, target):
     # We delete the entire dalvik-cache in the test path.
@@ -154,16 +158,16 @@ def RunBenchADB(mode, auto_calibrate, apk, classname, target):
         command += " %s" % (classname)
     if verbose:
         command += " --debug"
-    out, err = adb_shell(command, target)
-    return out.decode('UTF-8')
+    rc, out, err = adb_shell(command, target)
+    return rc, out.decode(), err.decode()
 
 def RunBenchHost(mode, auto_calibrate, apk, classname, target):
     if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
         command = ['java', classname]
-    out, err = host_java(command)
-    return out.decode('UTF-8')
+    rc, out, err = host_java(command)
+    return rc, out.decode(), err.decode()
 
 
 # TODO: Avoid using global variables.
@@ -175,15 +179,26 @@ def RunBench(apk, classname,
              iterations = default_n_iterations,
              mode = default_mode,
              target = None):
+    rc = 0
     for iteration in range(iterations):
         try:
-            out = run_helper(mode, auto_calibrate, apk, classname, target)
+            local_rc, out, err = run_helper(mode,
+                                            auto_calibrate,
+                                            apk,
+                                            classname,
+                                            target)
+            rc += local_rc
             out = out.rstrip('\n')
-            if verbose:
+            if local_rc != 0:
+                print("ERROR:")
+                print(err)
+                print(out)
+            elif verbose:
                 print(out)
         except Exception as e:
             print(e)
             sys.stderr.write("  \-> FAILED, continuing anyway\n")
+            rc += 1
             continue
 
         try:
@@ -198,7 +213,10 @@ def RunBench(apk, classname,
         except Exception as e:
             print(e)
             print("  \-> Error parsing output from %s" % classname)
+            rc += 1
             break
+
+    return rc
 
 
 
@@ -206,10 +224,18 @@ def RunBenchs(apk, bench_names,
               target,
               auto_calibrate,
               iterations = default_n_iterations, mode = default_mode):
+    rc = 0
     VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
     run_helper = RunBenchADB if target else RunBenchHost
     for bench in bench_names:
-        RunBench(apk, bench, run_helper, auto_calibrate, iterations = iterations, mode = mode, target = target)
+        rc += RunBench(apk,
+                       bench,
+                       run_helper,
+                       auto_calibrate,
+                       iterations = iterations,
+                       mode = mode,
+                       target = target)
+    return rc
 
 
 def ListAllBenchmarks():
@@ -259,7 +285,12 @@ if __name__ == "__main__":
         filter_out = ['benchmarks/deprecated/*']
     benchmarks = FilterBenchmarks(benchmarks, args.filter, filter_out)
 
-    RunBenchs(remote_apk, benchmarks, args.target, args.auto_calibrate, args.iterations, args.mode)
+    rc = RunBenchs(remote_apk,
+                   benchmarks,
+                   args.target,
+                   args.auto_calibrate,
+                   args.iterations,
+                   args.mode)
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
@@ -273,3 +304,7 @@ if __name__ == "__main__":
     with open(res_file, 'wb') as pickle_file:
         pickle.dump(result, pickle_file)
         print(('Wrote results to %s.' % res_file))
+
+    if rc != 0:
+        print("ERROR: The benchmarks did *not* run successfully. (rc = %d)", rc)
+    sys.exit(rc)
