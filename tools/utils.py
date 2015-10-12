@@ -24,3 +24,8 @@ dir_benchmarks = os.path.join(dir_root, 'benchmarks')
 dir_build = os.path.join(dir_root, 'build')
 dir_build_java_classes = os.path.join(dir_build, 'classes')
 dir_framework = os.path.join(dir_root, 'framework')
+
+
+def ensure_dir(path_name):
+  if not os.path.exists(path_name):
+    os.makedirs(path_name)

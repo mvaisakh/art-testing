@@ -258,10 +258,12 @@ if __name__ == "__main__":
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
     if args.output_pkl is None:
-      res_file = 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
-      res_file = os.path.join(utils.dir_build, res_file)
+        default_pkl_out_dir = os.path.join(utils.dir_root, 'pkl')
+        utils.ensure_dir(default_pkl_out_dir)
+        res_file = 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
+        res_file = os.path.join(default_pkl_out_dir, res_file)
     else:
-      res_file = args.output_pkl
+        res_file = args.output_pkl
     with open(res_file, 'wb') as pickle_file:
         pickle.dump(result, pickle_file)
         print(('Wrote results to %s.' % res_file))
