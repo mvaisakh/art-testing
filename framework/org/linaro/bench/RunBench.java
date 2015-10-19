@@ -146,7 +146,7 @@ public class RunBench {
     String benchmark = matcher.group(3);
 
     List<Method> benchMethods = new ArrayList<Method>(5);
-    Method verifyMethod = null;
+    List<Method> verifyMethods = new ArrayList<Method>(2);
     try {
       Class<?> clazz = Class.forName(benchmarkClassPath + benchmarkClass);
       Object instance = clazz.newInstance();
@@ -157,8 +157,9 @@ public class RunBench {
         for (Method method : clazz.getDeclaredMethods()) {
           if (method.getName().startsWith(TESTNAME_PREFIX)) {
             benchMethods.add(method);
-          } else if (method.getName().equals("verify") && method.getReturnType() == boolean.class) {
-            verifyMethod = method;
+          } else if (method.getName().startsWith("verify") &&
+                     method.getReturnType() == boolean.class) {
+            verifyMethods.add(method);
           }
         }
       }
@@ -175,10 +176,16 @@ public class RunBench {
         runOneBench(instance, method);
       }
 
-      // Optionally verify benchmark results.
-      if (verify && verifyMethod != null) {
-        if (!(Boolean)verifyMethod.invoke(instance)) {
-          log.error(clazz.getName() + " failed verification.");
+      // Optionally run all verify* methods to check benchmark's work.
+      if (verify) {
+        int verifyFailures = 0;
+        for (Method verifyMethod : verifyMethods) {
+          if (!(Boolean)verifyMethod.invoke(instance)) {
+            log.error(verifyMethod.getName() + " failed.");
+            verifyFailures++;
+          }
+        }
+        if (verifyFailures > 0) {
           return 1;
         }
       }
