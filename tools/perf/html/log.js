@@ -15,6 +15,8 @@
  *
  */
 
+// Load and display console output of micro-benchmark.
+
 function onLoadData(data) {
   var pre = document.createElement("pre");
   pre.textContent = data;
@@ -22,5 +24,9 @@ function onLoadData(data) {
 }
 
 function init() {
-  Utils.loadData(Utils.getDataURL(), onLoadData);
+  var title = "Console output of " + Utils.getURLParam("title");
+  document.getElementsByTagName("title")[0].innerHTML = title;
+  document.getElementById("title").innerHTML = title;
+
+  Utils.loadData(Utils.getURLParam("data"), onLoadData);
 }

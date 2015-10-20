@@ -17,5 +17,24 @@
 
 . $(dirname $0)/common.sh
 
-safe git clone https://github.com/brendangregg/FlameGraph.git $SCRIPT_PATH/FlameGraph
+usage() {
+  echo "Usage: $(basename "$0") \"<command>\" <out_folder>"
+  echo "  Capture events defined in events.sh"
+  echo "Example:"
+  echo "  $(basename "$0") \"find > /dev/null\" perf-out/find"
+}
+
+if [ $# -ne 2 ] ; then
+  usage
+  exit
+fi
+
+cmd=$1
+out=$2
+# Load events from events.sh
+. $(dirname "$0")/config/events.sh
+
+for event in $events ; do
+  $(dirname "$0")/record-one.sh "$cmd" $out $event
+done
 

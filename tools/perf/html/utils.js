@@ -15,26 +15,20 @@
  *
  */
 
+// Common utilities.
+
 var Utils = {
   getURLParam : function(name) {
     if (Utils.url_params == undefined) {
       var url_params = {};
       window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
         function(m, key, value) {
-          url_params[key] = value;
+          url_params[key] = unescape(value);
         }
       );
       Utils.url_params = url_params;
     }
     return Utils.url_params[name];
-  },
-
-  getDataURL : function() {
-    return Utils.getURLParam("data");
-    // Get full path, but the relative path should work.
-    return window.location.origin
-      + window.location.pathname.replace(/\\/g,'/').replace(/\/[^\/]*$/, '')
-      + "/" + Utils.getURLParam("data");
   },
 
   loadData : function(url, onload) {
@@ -44,6 +38,6 @@ var Utils = {
     };
     xhr.open("get", url, true);
     xhr.send();
-  }
+  },
 
 };

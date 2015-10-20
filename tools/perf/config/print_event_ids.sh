@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #    Copyright 2015 ARM Limited
 #
@@ -15,7 +15,17 @@
 # limitations under the License.
 #
 
-. $(dirname $0)/common.sh
+usage() {
+  echo "Usage: $(basename "$0") <event_def_js_file>"
+  echo "  Print all event ids defined in the js file, which can be used to modify events.sh."
+  echo "Example:"
+  echo "  $(basename "$0") events-generic.js"
+}
 
-safe git clone https://github.com/brendangregg/FlameGraph.git $SCRIPT_PATH/FlameGraph
+if [ $# -lt 1 ] ; then
+  usage
+  exit
+fi
+
+echo $(grep EventCode $* | cut -d'"' -f 4 | sed 's/^0x/r/')
 
