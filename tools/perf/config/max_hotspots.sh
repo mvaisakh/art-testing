@@ -15,7 +15,5 @@
 # limitations under the License.
 #
 
-cd ubenchs-out/plan_src
-perf report -v --objdump=aarch64-linux-android-objdump -k $(pwd)/vmlinux --symfs $ANDROID_PRODUCT_OUT/symbols -i ../../$1
-cd -
+max_hotspots=5
 

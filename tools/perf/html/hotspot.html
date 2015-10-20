@@ -20,14 +20,31 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="style.css">
-  <title>Report</title>
+  <title>Hotspot</title>
+  <script type="text/javascript">
+    var bench_result = [];
+  </script>
+  <script type="text/javascript" src="../perf-out/bench_result.js"></script>
   <script type="text/javascript" src="./utils.js"></script>
-  <script type="text/javascript" src="./report.js"></script>
+  <script type="text/javascript" src="./hotspot.js"></script>
+  <script type="text/javascript" src="../config/events-generic.js"></script>
+  <script type="text/javascript" src="../config/events-pmu.js"></script>
 </head>
 
 <body onload="init();">
   <h2 id="title"></h2>
-  <div id="content" style="line-height:0"></div>
+  Significant events threshold : <input type="number" id="threshold" value="2"><button onclick="resetTable()">Set</button>
+  <table>
+    <thead>
+      <tr>
+        <th class="benchmarkTableHead2">Event</th>
+        <th class="benchmarkTableHead2">Percentage</th>
+        <th class="benchmarkTableHead2">Event Description</th>
+      </tr>
+    </thead>
+    <tbody id="benchs">
+    </tbody>
+  </table>
 </body>
 
 </html>

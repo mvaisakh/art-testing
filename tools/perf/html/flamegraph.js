@@ -15,10 +15,15 @@
  *
  */
 
+// Load FlameGraph.
+
 function init() {
-  var url = Utils.getURLParam("data");
+  var title = "FlameGraph of " + Utils.getURLParam("title");
+  document.getElementsByTagName("title")[0].innerHTML = title;
+  document.getElementById("title").innerHTML = title;
+
   var iframe = document.createElement("iframe");
-  iframe.src = url;
+  iframe.src = Utils.getURLParam("data");
   iframe.style.height=window.innerHeight + "px";
   document.body.appendChild(iframe);
 }

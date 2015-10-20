@@ -1,25 +1,37 @@
 Below lists all files which are for profiling automation.
 
-perf/
-├── download-flamegraph.sh               # Scipt to download FrameGraph.
-├── html                                 # HTML for review the perf outputs.
+perf
+├── analyze.sh                         # Script to analyze the perf data captured by record-events.sh.
+├── build-wrapper.sh                   # Script to build java micro benchmark.
+├── common.sh                          # Common definitions and script utilities.
+├── config                             # Configuration files.
+│   ├── commands.sh                    # Additional commands need to be profiled.
+│   ├── events-generic.js              # Generic perf events definition. Used by JS files.
+│   ├── events-pmu.js                  # PMU events definition. Used by JS files.
+│   ├── events.sh                      # Define events which should be captured by record-events.sh.
+│   ├── max_hotspots.sh                # Define max number of hotspots which should be annotated.
+│   └── print_event_ids.sh             # Helper script which gathers the events defined in js files.
+├── download-flamegraph.sh             # Script to download FrameGraph.
+├── html                               # HTML for review the perf outputs.
 │   ├── annotation.html
 │   ├── annotation.js
 │   ├── flamegraph.html
 │   ├── flamegraph.js
-│   ├── index.html                       # index.html
+│   ├── hotspot.html
+│   ├── hotspot.js
+│   ├── index.html                     # index.html
 │   ├── index.js
-│   ├── rawview.html
-│   ├── rawview.js
+│   ├── log.html
+│   ├── log.js
 │   ├── report.html
 │   ├── report.js
 │   ├── style.css
 │   └── utils.js
-├── perf-java-ubenchs.sh                 # Script to profile java micro-benchmarks.
-├── PERF.README                          # This file.
-├── perf-report-for-java-ubenchs.sh      # Script to review perf output interactively.
-└── symbolize.sh                         # Helper script to symbolize all oat files on target.
-
+├── PERF.README                        # This file.
+├── perf-report-with-java-sources.sh   # Script to review perf output interactively.
+├── profile.sh                         # Script to profile java micro-benchmarks and other commands.
+├── record-events.sh                   # Script to capture multple events.
+└── record-one.sh                      # Script to capture one events.
 
 Steps to use the automation script:
 
@@ -47,26 +59,30 @@ Steps to use the automation script:
   cp <kernel_symbol_file> .             # Named as vmlinux.
 
 2. Generate the profiling data.
-  ./perf-java-ubenchs.sh
+2.1 Generate profiling data for java micro benchmarks.
+  ./profile.sh
+2.2 Generate profiling data for customized commands. For example,
+  ./record-events.sh "find /system" perf-out/find
+  ./analyze.sh perf-out/find find perf-out/bench_result.js
 
 3. Review output
 
-3.1. Review perf report.
-  ./perf-report-for-java-ubenchs.sh <perf_data_file>
+3.1. Review perf report. (The below script can be also used for native commands.)
+  ./perf-report-with-java-sources.sh <perf_data_file>
 For example,
-  ./perf-report-for-java-ubenchs.sh ubenchs-out/perf/Linpack.perf64.data
+  ./perf-report-with-java-sources.sh perf-out/Matrix_dalvikvm/cycles.perf.data
 
 3.2. Review output via browser.
 
   Try viewing html/index.html locally. If that doesn't work for you:
 
-  3.2.1. Copy tools/perf/html folder entirely to webserver's html folder. Or make a symbol link in the html
-folder to this folder. For example,
+  3.2.1. Copy tools/perf folder entirely to webserver's html folder. Or make a symbol link in the
+html folder to this folder. For example,
     ln -s $(pwd) /var/www/html/java-test
 
   3.2.2. Open the index.html in the brower from the webserver. The URL might be:
     http://localhost/java-test/html/index.html
-    Note: It cannot be viewed locally! XMLHttpRequest has been used to load output data in
+    Note: Some pages cannot be viewed locally! XMLHttpRequest has been used to load output data in
 javascript. But accessing local data or cross domain is forbidden according to the HTML spec due to
 security reason.
 

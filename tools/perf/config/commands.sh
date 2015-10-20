@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #    Copyright 2015 ARM Limited
 #
@@ -15,7 +15,10 @@
 # limitations under the License.
 #
 
-. $(dirname $0)/common.sh
+# This file will be read by profile.sh which will try to gather profile
+# information for the commands defined in the file.
 
-safe git clone https://github.com/brendangregg/FlameGraph.git $SCRIPT_PATH/FlameGraph
+# Sample commands definition.
+# echo_hello="echo hello"
+# echo_world="echo world"
 

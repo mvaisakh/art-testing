@@ -17,5 +17,9 @@
 
 . $(dirname $0)/common.sh
 
-safe git clone https://github.com/brendangregg/FlameGraph.git $SCRIPT_PATH/FlameGraph
+perf_data=$(realpath $1)
+
+safe cd perf-out/plan_src
+safe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG -i $perf_data
+safe cd -
 

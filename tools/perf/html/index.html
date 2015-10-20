@@ -21,39 +21,48 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <title>Perf Output of Micro-benchmarks</title>
-  <script type="text/javascript" src="../ubenchs-out/perf/ubenchs.js"></script>
+  <script type="text/javascript">
+    var bench_result = [];
+  </script>
+  <script type="text/javascript" src="../perf-out/bench_result.js"></script>
   <script type="text/javascript" src="./utils.js"></script>
   <script type="text/javascript" src="./index.js"></script>
 </head>
 
 <body onload="init();">
   <h2>Perf output of Java micro-benchmarks.</h2>
+  Hotspot format : "[number of significant events] &lt;cycles percentage&gt; &lt;symbol name&gt;"
+  <br>
+  Events will be marked as significant if event_percentage > cycles_percentage ^ (1/threshold).
+  <br>
+  Significant events threshold :
+  <input type="number" id="threshold" value="2">
+  <button onclick="resetTable()">Set</button>
+  <!-- Use input instead of js variable, so that the value can be kept by browser. -->
+  <input type="number" id="showNative" value="1" style="display:none">
+  <button onclick="toggleNative()" id="toggleNative"></button>
+  <input type="number" id="showJava" value="1" style="display:none">
+  <button onclick="toggleJava()" id="toggleJava"></button>
+  <br>
   <table>
     <thead>
       <tr>
         <th class="benchmarkTableHead1"></th>
         <th class="benchmarkTableHead1" colspan="3">
-          ARM32
-          <a href="../ubenchs-out/cfg/ubenchs.jar.32.cfg">CFG</a>
-          (<a href="rawview.html?data=../ubenchs-out/cfg/ubenchs.jar.32.cfg">raw view</a>)
+          Summary
         </th>
-        <th class="benchmarkTableHead1" colspan="3">
-          ARM64
-          <a href="../ubenchs-out/cfg/ubenchs.jar.64.cfg">CFG</a>
-          (<a href="rawview.html?data=../ubenchs-out/cfg/ubenchs.jar.64.cfg">raw view</a>)
+        <th class="benchmarkTableHead1" id="annotation_head">
+          Annotation
         </th>
       </tr>
-      <tr>
+      <tr id="head2">
         <th class="benchmarkTableHead2">Benchmark Name</th>
         <th class="benchmarkTableHead2">Flame Graph</th>
         <th class="benchmarkTableHead2">Report</th>
-        <th class="benchmarkTableHead2">Annotation</th>
-        <th class="benchmarkTableHead2">Flame Graph</th>
-        <th class="benchmarkTableHead2">Report</th>
-        <th class="benchmarkTableHead2">Annotation</th>
+        <th class="benchmarkTableHead2">Output</th>
       </tr>
     </thead>
-    <tbody id="ubenchs">
+    <tbody id="benchs">
     </tbody>
   </table>
 </body>
