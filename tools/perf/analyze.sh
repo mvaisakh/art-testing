@@ -127,7 +127,7 @@ while [ $i -le $max_hotspots ] ; do
       rate=0
     fi
 # Annotate in plan_src folder if exists, since we do not have path information for java sources.
-    test -d $PLAN_SOURCE_FOLDER && safe cd $PLAN_SOURCE_FOLDER
+    test -d $STRUCTURED_SOURCE_FOLDER && safe cd $STRUCTURED_SOURCE_FOLDER
 # FIXME: run, safe and unsafe don't work well with "
     print_info Annotating $event in $hotspot.
     # TODO: Ideally we would like to run `perf` with the `-i` option but the
@@ -143,7 +143,7 @@ while [ $i -le $max_hotspots ] ; do
     # Remove the local copy of perf.data
     # TODO: Remove the below line, once the local copy is no longer needed.
     safe rm -f ./perf.data
-    test -d $PLAN_SOURCE_FOLDER && safe cd -
+    test -d $STRUCTURED_SOURCE_FOLDER && safe cd -
 # Append information to temp js file.
     echo -n "
         {name:'$event',rate:$rate,file:'hotspot_${i}.${event}.perf.annotate'}," >> $temp_js_file

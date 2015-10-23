@@ -19,7 +19,7 @@
 
 perf_data=$(realpath $1)
 
-safe cd perf-out/plan_src
+safe cd $STRUCTURED_SOURCE_FOLDER
 safe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG -i $perf_data
 safe cd -
 

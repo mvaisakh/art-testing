@@ -17,12 +17,13 @@
 
 // Load annotation result and format the lines with different color.
 
-var annotation_color_table = [
+var instruction_color_table = [
   "black",
   "green",
   "orange",
   "red",
 ]
+var non_instruction_color = "blue";
 
 function onLoadData(data) {
   var content = document.getElementById("content");
@@ -30,20 +31,28 @@ function onLoadData(data) {
   var max_percentage = 0;
   var percentage = [];
   for (var i = 0; i < data.length; i++) {
-    var current_percentage = data[i].split(":")[0].split("%") * 1;
-    percentage[i] = isNaN(current_percentage) ? 0 : current_percentage;
-    max_percentage = max_percentage > percentage[i] ? max_percentage : percentage[i];
+    var current_percentage = data[i].split(":")[0].split("%")[0];
+    if (current_percentage.search(/^\s*[0-9|\.]+\s*$/) < 0) {
+      percentage[i] = NaN;
+    } else {
+      percentage[i] = current_percentage * 1;
+    }
+    // max_percentage < percentage[i] is false if percentage[i] is NaN.
+    max_percentage = max_percentage < percentage[i] ? percentage[i] : max_percentage;
   }
   for (var i = 0; i < data.length; i++) {
     var pre = document.createElement("pre");
     pre.textContent = data[i];
-    var color_index = Math.floor(percentage[i] / max_percentage * annotation_color_table.length);
-    color_index = color_index >= annotation_color_table.length ? color_index - 1 : color_index;
-    pre.style.color = annotation_color_table[color_index];
-    if (color_index > 0) {
-      pre.style.fontWeight = "bold";
+    if (isNaN(percentage[i])) {
+      pre.style.color = non_instruction_color;
+    } else {
+      var color_index = Math.floor(percentage[i] / max_percentage * instruction_color_table.length);
+      color_index = color_index >= instruction_color_table.length ? color_index - 1 : color_index;
+      pre.style.color = instruction_color_table[color_index];
+      if (color_index > 0) {
+        pre.style.fontWeight = "bold";
+      }
     }
-
     content.appendChild(pre);
   }
 }

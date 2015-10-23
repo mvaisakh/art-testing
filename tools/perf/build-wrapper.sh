@@ -39,7 +39,7 @@ adb shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/*boot.oat | xargs -n 1 bash $A
 print_info Pulling compiled benchmark
 adb shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE | xargs -n 1 -i adb pull {} $ANDROID_PRODUCT_OUT/symbols/{}
 
-# File paths are not stored in the debug section. We need source code putting in a plan folder.
-safe mkdir -p $PLAN_SOURCE_FOLDER
-safe find $UBENCH_SRC_FOLDER -name "*.java" -exec cp -f {} $PLAN_SOURCE_FOLDER \;
+# Copy files into a folder structure which matches the debug information.
+safe mkdir -p $STRUCTURED_SOURCE_FOLDER
+safe cp -rt $STRUCTURED_SOURCE_FOLDER $UBENCH_ROOT/benchmarks $UBENCH_ROOT/framework/*
 
