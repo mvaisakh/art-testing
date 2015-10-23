@@ -94,3 +94,10 @@ https://github.com/WebKit/webkit/blob/master/PerformanceTests/SunSpider/tests/su
 
 License is Revised BSD licence:
 http://benchmarksgame.alioth.debian.org/license.html
+
+### HashMapBench
+
+Benchmark for hash map, which is converted from:
+http://browserbench.org/JetStream/sources/hash-map.js
+
+License is Apache 2.0.
