@@ -15,17 +15,19 @@
 import math
 import statistics
 
-def PrintStats(dict_results, iterations = None):
-    headers = ['', 'min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
-    results = []
-    for benchmark in sorted(dict_results):
-        nums = dict_results[benchmark]
+def ComputeStats(nums):
         m = min(nums)
         M = max(nums)
         ave = statistics.mean(nums)
         d = statistics.pstdev(nums, ave)
         dp = d / ave * 100 if ave != 0 else float("inf")
-        results.append([benchmark, m, M, ave, d, dp])
+        return m, M, ave, d, dp
+
+def PrintStats(dict_results, iterations = None):
+    headers = ['', 'min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
+    results = []
+    for benchmark in sorted(dict_results):
+        results.append([benchmark] + list(ComputeStats(dict_results[benchmark])))
     PrintTable(headers, results)
 
 
@@ -37,12 +39,8 @@ def PrintDiff(res_1, res_2):
                '(mean2 - mean1) / mean1 * 100']
     results = []
     for bench in sorted(benchmarks):
-        ave1 = statistics.mean(res_1[bench])
-        d1 = statistics.pstdev(res_1[bench], ave1)
-        dp1 = d1 / ave1 * 100 if ave1 != 0 else float("inf")
-        ave2 = statistics.mean(res_2[bench])
-        d2 = statistics.pstdev(res_2[bench], ave2)
-        dp2 = d2 / ave2 * 100 if ave2 != 0 else float("inf")
+        m1, M1, ave1, d1, dp1 = ComputeStats(res_1[bench])
+        m2, M2, ave2, d2, dp2 = ComputeStats(res_2[bench])
         diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
         results.append([bench, ave1, dp1, ave2, dp2, diff])
     PrintTable(headers, results)

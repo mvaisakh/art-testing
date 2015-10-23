@@ -87,6 +87,7 @@ def TestCompareScript():
     rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./compare.py", "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
 
