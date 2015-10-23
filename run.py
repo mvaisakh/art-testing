@@ -306,5 +306,5 @@ if __name__ == "__main__":
         print(('Wrote results to %s.' % res_file))
 
     if rc != 0:
-        print("ERROR: The benchmarks did *not* run successfully. (rc = %d)", rc)
+        print("ERROR: The benchmarks did *not* run successfully. (rc = %d)" % rc)
     sys.exit(rc)
