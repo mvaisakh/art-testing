@@ -48,10 +48,13 @@ else
 max_annotate_jobs=$num_cpus
 fi
 
+if $NEED_PERF_DATA_WORK_AROUND ; then
 # TODO: Remove the limination once we can use `-i` with `perf`.
 # Since all annotate jobs rely on the local copy of `perf.data`, we cannot
 # annotate hotspots in parallel.
-max_annotate_jobs=1
+  print_warning Disable parallel annotating for $(perf version)
+  max_annotate_jobs=1
+fi
 
 # Load events from events.sh
 . $SCRIPT_PATH/config/events.sh
@@ -78,20 +81,21 @@ fi
 # of perf distributed in Ubuntu 15.04 (3.19.3 at least) has a bug that ignore
 # the `-i` option for `perf annotate`. So instead we locally copy the
 # `perf.data` file.
-safe cp -f $data/cycles.perf.data ./perf.data
+$NEED_PERF_DATA_WORK_AROUND && safe cp -f $data/cycles.perf.data ./perf.data
 # Note: Only report and flame graph for cycles event is generated.
 # Generate report.
-unsafe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG > $data/cycles.perf.report
+$NEED_PERF_DATA_WORK_AROUND && unsafe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG > $data/cycles.perf.report
+$NEED_PERF_DATA_WORK_AROUND || unsafe $PERF_REPORT -i $data/cycles.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG > $data/cycles.perf.report
 # Generate script
-unsafe $PERF_SCRIPT $PERF_SYMBOL_FLAG > $data/cycles.perf.script
+$NEED_PERF_DATA_WORK_AROUND && unsafe $PERF_SCRIPT $PERF_SYMBOL_FLAG > $data/cycles.perf.script
+$NEED_PERF_DATA_WORK_AROUND || unsafe $PERF_SCRIPT -i $data/cycles.perf.data $PERF_SYMBOL_FLAG > $data/cycles.perf.script
 # Stack collapse.
 unsafe $SCRIPT_PATH/FlameGraph/stackcollapse-perf.pl $data/cycles.perf.script > $data/cycles.perf.stackcollapse
 # Flame graph.
 unsafe $SCRIPT_PATH/FlameGraph/flamegraph.pl $data/cycles.perf.stackcollapse > $data/cycles.perf.html
 # Remove the local copy of perf.data
 # TODO: Remove the below line, once the local copy is no longer needed.
-safe rm -f ./perf.data
-
+$NEED_PERF_DATA_WORK_AROUND && safe rm -f ./perf.data
 
 # Write information to temp js file.
 echo -n "
@@ -118,11 +122,15 @@ while [ $i -le $max_hotspots ] ; do
     # version of perf distributed in Ubuntu 15.04 (3.19.3 at least) has a bug
     # that ignore the `-i` option for `perf annotate`. So instead we locally
     # copy the `perf.data` file.
-    safe cp -f $data/${event}.perf.data ./perf.data
-    rate=$(echo $(unsafe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
+    $NEED_PERF_DATA_WORK_AROUND && safe cp -f $data/${event}.perf.data ./perf.data
+    if $NEED_PERF_DATA_WORK_AROUND ; then
+      rate=$(echo $(unsafe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
+    else
+      rate=$(echo $(unsafe $PERF_REPORT -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
+    fi
     # Remove the local copy of perf.data
     # TODO: Remove the below line, once the local copy is no longer needed.
-    safe rm -f ./perf.data
+    $NEED_PERF_DATA_WORK_AROUND && safe rm -f ./perf.data
     if [ "$rate" = "" ] ; then
       rate=0
     fi
@@ -134,15 +142,16 @@ while [ $i -le $max_hotspots ] ; do
     # version of perf distributed in Ubuntu 15.04 (3.19.3 at least) has a bug
     # that ignore the `-i` option for `perf annotate`. So instead we locally
     # copy the `perf.data` file.
-    safe cp -f $data/${event}.perf.data ./perf.data
-    $PERF_ANNOTATE $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG "$hotspot" > $data/hotspot_${i}.${event}.perf.annotate &
+    $NEED_PERF_DATA_WORK_AROUND && safe cp -f $data/${event}.perf.data ./perf.data
+    $NEED_PERF_DATA_WORK_AROUND && $PERF_ANNOTATE $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG "$hotspot" > $data/hotspot_${i}.${event}.perf.annotate &
+    $NEED_PERF_DATA_WORK_AROUND || $PERF_ANNOTATE -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG "$hotspot" > $data/hotspot_${i}.${event}.perf.annotate &
 # Wait if the number of annotation tasks reaches its limitation.
     while [ $(jobs -p | wc -l) -ge $max_annotate_jobs ] ; do
       safe wait -n
     done
     # Remove the local copy of perf.data
     # TODO: Remove the below line, once the local copy is no longer needed.
-    safe rm -f ./perf.data
+    $NEED_PERF_DATA_WORK_AROUND && safe rm -f ./perf.data
     test -d $STRUCTURED_SOURCE_FOLDER && safe cd -
 # Append information to temp js file.
     echo -n "

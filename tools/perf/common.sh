@@ -47,6 +47,13 @@ PERF_SCRIPT="$HOST_PERF_BINARY script"
 PERF_ANNOTATE="$HOST_PERF_BINARY annotate"
 PERF_OUT=$SCRIPT_PATH/perf-out
 STRUCTURED_SOURCE_FOLDER=$PERF_OUT/structured_src
+# Need to work around `--input` issue for perf from version 3.14 ~ 3.19 .
+HOST_PERF_VERSION=$($HOST_PERF_BINARY version | grep -Eo '[0-9]+\.[0-9]+')
+if [ $(bc <<< "3.14 <= $HOST_PERF_VERSION && $HOST_PERF_VERSION <= 3.19") -eq 1 ] ; then
+  NEED_PERF_DATA_WORK_AROUND=true
+else
+  NEED_PERF_DATA_WORK_AROUND=false
+fi
 
 # Helpers.
 COLOR_RED="\033[31m"
