@@ -302,7 +302,8 @@ if __name__ == "__main__":
     else:
         res_file = args.output_pkl
     with open(res_file, 'wb') as pickle_file:
-        pickle.dump(result, pickle_file)
+        # We create a python2-compatible pickle dump.
+        pickle.dump(result, pickle_file, 2)
         print(('Wrote results to %s.' % res_file))
 
     if rc != 0:
