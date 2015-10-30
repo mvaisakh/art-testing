@@ -26,6 +26,7 @@ import subprocess
 import sys
 import time
 
+from collections import OrderedDict
 
 dir_root = os.path.dirname(os.path.realpath(__file__))
 dir_tools = os.path.join(dir_root, 'tools')
@@ -291,6 +292,7 @@ if __name__ == "__main__":
                    args.auto_calibrate,
                    args.iterations,
                    args.mode)
+    result = OrderedDict(sorted(result.items()))
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.

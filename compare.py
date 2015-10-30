@@ -18,6 +18,8 @@
 import argparse
 import pickle
 
+from collections import OrderedDict
+
 from tools import utils_stats
 
 def BuildOptions():
@@ -27,6 +29,9 @@ def BuildOptions():
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('res_1', metavar = 'res_1.pkl')
     parser.add_argument('res_2', metavar = 'res_2.pkl')
+    parser.add_argument('--order-by-diff', '-o',
+                        action = 'store_true', default = False,
+                        help = 'Show results with bigger differences first.')
     parser.add_argument('--significant-changes', '-s',
                         action = 'store_true', default = False,
                         help = '''Only show significant changes between the two
@@ -66,6 +71,39 @@ def FilterSignificantChanges(in_1, in_2, diff_threshold, dev_threshold):
     return out_1, out_2
 
 
+def OrderResultsByDifference(in_1, in_2):
+    regressions = {}
+    improvements = {}
+    regressions_1 = OrderedDict({})
+    regressions_2 = OrderedDict({})
+    improvements_1 = OrderedDict({})
+    improvements_2 = OrderedDict({})
+    benchmarks = set(in_1.keys()).intersection(set(in_2.keys()))
+    for bench in benchmarks:
+        m1, M1, ave1, d1, dp1 = utils_stats.ComputeStats(in_1[bench])
+        m2, M2, ave2, d2, dp2 = utils_stats.ComputeStats(in_2[bench])
+        diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
+        if diff < 0:
+            regressions[bench] = diff
+        else:
+            improvements[bench] = diff
+
+    order_regressions = \
+        list(bench for bench in \
+             sorted(regressions, key = lambda x: -abs(regressions[x])))
+    for bench in order_regressions:
+        regressions_1[bench] = in_1[bench]
+        regressions_2[bench] = in_2[bench]
+    order_improvements = \
+        list(bench for bench \
+             in sorted(improvements, key = lambda x: -abs(improvements[x])))
+    for bench in order_improvements:
+        improvements_1[bench] = in_1[bench]
+        improvements_2[bench] = in_2[bench]
+
+    return (regressions_1, regressions_2), (improvements_1, improvements_2)
+
+
 if __name__ == "__main__":
     args = BuildOptions()
     pkl_file_1 = open(args.res_1, 'rb')
@@ -78,8 +116,13 @@ if __name__ == "__main__":
             FilterSignificantChanges(res_1, res_2,
                                      args.significant_diff_threshold,
                                      args.significant_deviation_threshold)
-
-    utils_stats.PrintDiff(res_1, res_2)
+    if args.order_by_diff:
+        regressions, improvements = OrderResultsByDifference(res_1, res_2)
+        utils_stats.PrintDiff(regressions[0], regressions[1], "REGRESSIONS")
+        print("")
+        utils_stats.PrintDiff(improvements[0], improvements[1], "IMPROVEMENTS")
+    else:
+        utils_stats.PrintDiff(res_1, res_2)
 
     pkl_file_1.close()
     pkl_file_2.close()

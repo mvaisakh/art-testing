@@ -26,19 +26,20 @@ def ComputeStats(nums):
 def PrintStats(dict_results, iterations = None):
     headers = ['', 'min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
     results = []
-    for benchmark in sorted(dict_results):
+    for benchmark in dict_results:
         results.append([benchmark] + list(ComputeStats(dict_results[benchmark])))
     PrintTable(headers, results)
 
 
 # Print a table showing the difference between two runs of benchmarks.
-def PrintDiff(res_1, res_2):
+def PrintDiff(res_1, res_2, title = ''):
     # Only print results for benchmarks present in both sets of results.
-    benchmarks = set(res_1.keys()).intersection(set(res_2.keys()))
-    headers = ['', 'mean1', 'stdev1 (% of mean1)', 'mean2', 'stdev2 (% of mean2)',
+    # Pay attention to maintain the order of the keys.
+    benchmarks = [b for b in res_1.keys() if b in res_2.keys()]
+    headers = [title, 'mean1', 'stdev1 (% of mean1)', 'mean2', 'stdev2 (% of mean2)',
                '(mean2 - mean1) / mean1 * 100']
     results = []
-    for bench in sorted(benchmarks):
+    for bench in benchmarks:
         m1, M1, ave1, d1, dp1 = ComputeStats(res_1[bench])
         m2, M2, ave2, d2, dp2 = ComputeStats(res_2[bench])
         diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
