@@ -23,13 +23,19 @@ safe ./build.sh -t
 safe adb push $UBENCH_LOCAL $UBENCH_REMOTE
 safe cd -
 
-# Clear dalvik cache
-safe adb shell rm -f /data/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE
+# Clear dalvik cache.
+safe adb shell rm -f $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE
 
+for dalvikvm in $REMOTE_DALVIKVMS ; do
+  vm=$(basename $dalvikvm)
 # Trigger the build with debug symbols generated.
-safe adb shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR dalvikvm -Xcompiler-option -g -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
-safe adb shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR dalvikvm32 -Xcompiler-option -g -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
-safe adb shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR dalvikvm64 -Xcompiler-option -g -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
+  safe adb shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $vm -Xcompiler-option -g -Xcompiler-option -j1 -Xcompiler-option --dump-cfg=$UBENCH_REMOTE_DIR/bench.${vm}.cfg -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
+# Pull CFG file.
+  safe mkdir -p $CFG_FOLDER
+  safe adb pull $UBENCH_REMOTE_DIR/bench.${vm}.cfg $CFG_FOLDER
+# Extract disassembly information from the CFG file.
+  safe $SCRIPT_PATH/shrink-cfg.sh disassembly < $CFG_FOLDER/bench.${vm}.cfg > $CFG_FOLDER/bench.${vm}.disassembly
+done
 
 # Symbolize boot.oat.
 print_info Symbolizing boot.oat

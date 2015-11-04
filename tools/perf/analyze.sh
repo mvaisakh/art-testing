@@ -38,7 +38,7 @@ elif [ $# -eq 1 ] ; then
   js_file=/dev/null
 else
   usage
-  exit
+  exit 1
 fi
 
 num_cpus=$(grep -c ^processor /proc/cpuinfo)
@@ -64,7 +64,7 @@ for event in cycles $events ; do
   if [ ! -f $data/${event}.perf.data ] ; then
     print_error Missing ${event}.perf.data
     usage
-    exit
+    exit 1
   fi
 done
 
@@ -84,15 +84,15 @@ fi
 $NEED_PERF_DATA_WORK_AROUND && safe cp -f $data/cycles.perf.data ./perf.data
 # Note: Only report and flame graph for cycles event is generated.
 # Generate report.
-$NEED_PERF_DATA_WORK_AROUND && unsafe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG > $data/cycles.perf.report
-$NEED_PERF_DATA_WORK_AROUND || unsafe $PERF_REPORT -i $data/cycles.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG > $data/cycles.perf.report
+$NEED_PERF_DATA_WORK_AROUND && safe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG > $data/cycles.perf.report
+$NEED_PERF_DATA_WORK_AROUND || safe $PERF_REPORT -i $data/cycles.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG > $data/cycles.perf.report
 # Generate script
-$NEED_PERF_DATA_WORK_AROUND && unsafe $PERF_SCRIPT $PERF_SYMBOL_FLAG > $data/cycles.perf.script
-$NEED_PERF_DATA_WORK_AROUND || unsafe $PERF_SCRIPT -i $data/cycles.perf.data $PERF_SYMBOL_FLAG > $data/cycles.perf.script
+$NEED_PERF_DATA_WORK_AROUND && safe $PERF_SCRIPT $PERF_SYMBOL_FLAG > $data/cycles.perf.script
+$NEED_PERF_DATA_WORK_AROUND || safe $PERF_SCRIPT -i $data/cycles.perf.data $PERF_SYMBOL_FLAG > $data/cycles.perf.script
 # Stack collapse.
-unsafe $SCRIPT_PATH/FlameGraph/stackcollapse-perf.pl $data/cycles.perf.script > $data/cycles.perf.stackcollapse
+safe $SCRIPT_PATH/FlameGraph/stackcollapse-perf.pl $data/cycles.perf.script > $data/cycles.perf.stackcollapse
 # Flame graph.
-unsafe $SCRIPT_PATH/FlameGraph/flamegraph.pl $data/cycles.perf.stackcollapse > $data/cycles.perf.html
+safe $SCRIPT_PATH/FlameGraph/flamegraph.pl $data/cycles.perf.stackcollapse > $data/cycles.perf.html
 # Remove the local copy of perf.data
 # TODO: Remove the below line, once the local copy is no longer needed.
 $NEED_PERF_DATA_WORK_AROUND && safe rm -f ./perf.data
@@ -124,9 +124,9 @@ while [ $i -le $max_hotspots ] ; do
     # copy the `perf.data` file.
     $NEED_PERF_DATA_WORK_AROUND && safe cp -f $data/${event}.perf.data ./perf.data
     if $NEED_PERF_DATA_WORK_AROUND ; then
-      rate=$(echo $(unsafe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
+      rate=$(echo $(safe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
     else
-      rate=$(echo $(unsafe $PERF_REPORT -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
+      rate=$(echo $(safe $PERF_REPORT -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
     fi
     # Remove the local copy of perf.data
     # TODO: Remove the below line, once the local copy is no longer needed.
@@ -136,17 +136,16 @@ while [ $i -le $max_hotspots ] ; do
     fi
 # Annotate in plan_src folder if exists, since we do not have path information for java sources.
     test -d $STRUCTURED_SOURCE_FOLDER && safe cd $STRUCTURED_SOURCE_FOLDER
-# FIXME: run, safe and unsafe don't work well with "
-    print_info Annotating $event in $hotspot.
     # TODO: Ideally we would like to run `perf` with the `-i` option but the
     # version of perf distributed in Ubuntu 15.04 (3.19.3 at least) has a bug
     # that ignore the `-i` option for `perf annotate`. So instead we locally
     # copy the `perf.data` file.
     $NEED_PERF_DATA_WORK_AROUND && safe cp -f $data/${event}.perf.data ./perf.data
-    $NEED_PERF_DATA_WORK_AROUND && $PERF_ANNOTATE $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG "$hotspot" > $data/hotspot_${i}.${event}.perf.annotate &
-    $NEED_PERF_DATA_WORK_AROUND || $PERF_ANNOTATE -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG "$hotspot" > $data/hotspot_${i}.${event}.perf.annotate &
+    $NEED_PERF_DATA_WORK_AROUND && safe $PERF_ANNOTATE $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG "$hotspot" > $data/hotspot_${i}.${event}.perf.annotate &
+    $NEED_PERF_DATA_WORK_AROUND || safe $PERF_ANNOTATE -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG "$hotspot" > $data/hotspot_${i}.${event}.perf.annotate &
 # Wait if the number of annotation tasks reaches its limitation.
     while [ $(jobs -p | wc -l) -ge $max_annotate_jobs ] ; do
+# Perf annotate will create sub-tasks. Failure from the sub-tasks acceptable.
       safe wait -n
     done
     # Remove the local copy of perf.data
@@ -172,6 +171,7 @@ echo "
 # Append temp js file to js file.
 cat $temp_js_file >> $js_file
 
+# Perf annotate will create sub-tasks. Failure from the sub-tasks acceptable.
 # Wait for all background annotation tasks.
 safe wait
 
