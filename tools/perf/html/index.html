@@ -31,9 +31,9 @@
 
 <body onload="init();">
   <h2>Perf output of Java micro-benchmarks.</h2>
-  Hotspot format : "[number of significant events] &lt;cycles percentage&gt; &lt;symbol name&gt;"
+  Hotspot format : "<span style="font-weight:bold">[number of significant events] &lt;cycles percentage&gt; &lt;symbol name&gt;</span>"
   <br>
-  Events will be marked as significant if event_percentage > cycles_percentage ^ (1/threshold).
+  Events will be marked as significant if <span style="font-weight:bold">event_percentage > cycles_percentage ^ (1/threshold)</span>.
   <br>
   Significant events threshold :
   <input type="number" id="threshold" value="2">

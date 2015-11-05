@@ -26,6 +26,7 @@ UBENCH_REMOTE_DIR=/data/local/tmp
 UBENCH_REMOTE=$UBENCH_REMOTE_DIR/$UBENCH_NAME
 UBENCH_REMOTE_CACHE_FILE=${UBENCH_REMOTE//\//@}@classes.dex
 UBENCH_REMOTE_CACHE_FILE=${UBENCH_REMOTE_CACHE_FILE/@/}
+REMOTE_DALVIKVMS=$(adb shell ls /system/bin/dalvikvm* | xargs -n 1 adb shell realpath | sort -u)
 VMLINUX=$(realpath $SCRIPT_PATH/vmlinux)
 REMOTE_PERF_DATA=/data/local/tmp/perf.data
 ANDROID_SYMBOL_FOLDER=$ANDROID_PRODUCT_OUT/symbols
@@ -46,6 +47,7 @@ PERF_REPORT="$HOST_PERF_BINARY report"
 PERF_SCRIPT="$HOST_PERF_BINARY script"
 PERF_ANNOTATE="$HOST_PERF_BINARY annotate"
 PERF_OUT=$SCRIPT_PATH/perf-out
+CFG_FOLDER=$PERF_OUT/cfg
 STRUCTURED_SOURCE_FOLDER=$PERF_OUT/structured_src
 # Need to work around `--input` issue for perf from version 3.14 ~ 3.19 .
 HOST_PERF_VERSION=$($HOST_PERF_BINARY version | grep -Eo '[0-9]+\.[0-9]+')
@@ -67,12 +69,11 @@ if [ ! -t 1 ]; then
   COLOR_GREEN=
   COLOR_YELLOW=
   COLOR_NORMAL=
-  # Redirect log information to stdout.
-  exec 3>&1
-else
-  # Redirect log information to stderr.
-  exec 3>&2
 fi
+
+# Some command need to save stdin. Redirect log information to stderr to avoid
+# mess up the information.
+exec 3>&2
 
 print_error() {
   echo -e "${COLOR_RED}ERROR: $*${COLOR_NORMAL}" >&3
@@ -91,26 +92,33 @@ error() {
   exit 1
 }
 
-STD_ERR_TMP_FILE=/tmp/run.tmp.log
+STD_ERR_TMP_FILE=/tmp/err.tmp.log
 
+# run, safe, unsafe won't show the output from stderr unless a command returns
+# with failure. So do not use below helpers to run a script if you need the
+# output from stderr.
 run() {
   print_info "Executing command: $*"
-  $@ 2>$STD_ERR_TMP_FILE
+  "$@" 2>$STD_ERR_TMP_FILE
 }
 
 safe() {
-  run $@
+  run "$@"
+  local error=$?
   if [ $? -ne 0 ] ; then
     cat $STD_ERR_TMP_FILE 1>&3
-    error "FAILED command: $*"
+    print_error "FAILED command: $*"
+    error "error number: $error"
   fi
 }
 
 unsafe() {
-  run $@
-  if [ $? -ne 0 ] ; then
+  run "$@"
+  local error=$?
+  if [ $error -ne 0 ] ; then
     cat $STD_ERR_TMP_FILE 1>&3
     print_warning "FAILED command: $*"
+    print_warning "error number: $error"
   fi
 }
 

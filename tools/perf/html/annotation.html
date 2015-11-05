@@ -27,6 +27,11 @@
 
 <body onload="init();">
   <h2 id="title"></h2>
+  <h4 style="color:red;">Note: Some blocks without assebmly inside might be inserted in the wrong order.</h2>
+  <button onclick="toggleNonInstruction()">Toggle non-instruction</button>
+  <button onclick="toggleInstruction()">Toggle instruction</button>
+  <button onclick="toggleHIR()">Toggle HIR</button>
+  <button onclick="toggleHIRDisassembly()">Toggle HIR disassembly</button>
   <div id="content" style="line-height:0"></div>
 </body>
 

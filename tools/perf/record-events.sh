@@ -35,6 +35,6 @@ out=$2
 . $(dirname "$0")/config/events.sh
 
 for event in $events ; do
-  $(dirname "$0")/record-one.sh "$cmd" $out $event
+  $(dirname "$0")/record-one.sh "$cmd" $out $event || exit 1
 done
 

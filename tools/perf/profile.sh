@@ -28,10 +28,9 @@ fi
 safe cd $(dirname $UBENCH_SRC_FOLDER)
 bench_sources=$(find $(basename $UBENCH_SRC_FOLDER) -name "*.java")
 safe cd -
-virtual_machines=$(adb shell ls /system/bin/dalvikvm*)
 
 # Build benchmark.
-$SCRIPT_PATH/build-wrapper.sh
+$SCRIPT_PATH/build-wrapper.sh || exit 1
 
 # Initialize js file.
 safe mkdir -p $PERF_OUT
@@ -46,13 +45,13 @@ analyze_pid=0
 for bench in $bench_sources ; do
   bench_name=${bench%.java}
   bench_name=${bench_name//\//.}
-  for dalvikvm in $virtual_machines ; do
+  for dalvikvm in $REMOTE_DALVIKVMS ; do
     vm=$(basename $dalvikvm)
     print_info Recording events for $bench_name on $vm
-    $SCRIPT_PATH/record-events.sh "$vm -cp /data/local/tmp/bench.apk $bench_name" $PERF_OUT/${bench_name}_${vm}
+    $SCRIPT_PATH/record-events.sh "$vm -cp /data/local/tmp/bench.apk $bench_name" $PERF_OUT/${bench_name}_${vm} || exit 1
     test $analyze_pid -eq 0 || safe wait $analyze_pid
     print_info Analyzing profile data for $bench_name on $vm
-    $SCRIPT_PATH/analyze.sh $PERF_OUT/${bench_name}_${vm} ${bench_name}_${vm} $PERF_OUT/bench_result.js &
+    $SCRIPT_PATH/analyze.sh $PERF_OUT/${bench_name}_${vm} ${bench_name}_${vm} $PERF_OUT/bench_result.js || exit 1 &
     analyze_pid=$!
     print_info analyze.sh pid : $analyze_pid
   done
@@ -64,10 +63,10 @@ benchs=$(grep -vP "^#" $SCRIPT_PATH/config/commands.sh | grep "=" | cut -d= -f1)
 for bench in $benchs ; do
   eval cmd=\$$bench
   print_info Recording events for "$cmd"
-  $SCRIPT_PATH/record-events.sh "$cmd" $PERF_OUT/$bench
+  $SCRIPT_PATH/record-events.sh "$cmd" $PERF_OUT/$bench || exit 1
   test $analyze_pid -eq 0 || safe wait $analyze_pid
   print_info Analyzing profile data for "$cmd"
-  $SCRIPT_PATH/analyze.sh $PERF_OUT/$bench $bench $PERF_OUT/bench_result.js &
+  $SCRIPT_PATH/analyze.sh $PERF_OUT/$bench $bench $PERF_OUT/bench_result.js || exit 1 &
   analyze_pid=$!
 done
 

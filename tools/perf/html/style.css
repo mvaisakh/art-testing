@@ -41,3 +41,19 @@ iframe {
   border: 0;
   width: 100%;
 }
+
+.non-instruction {
+  color: blue;
+}
+
+.instruction {
+}
+
+.HIR {
+  color: purple;
+  font-weight: bold;
+}
+
+.HIR-disassembly {
+  color: purple;
+}
