@@ -19,6 +19,7 @@
 
 import argparse
 import fnmatch
+import json
 import os
 import pickle
 import shutil
@@ -91,6 +92,10 @@ def BuildOptions():
     utils.ensure_dir(os.path.dirname(default_out_pkl))
     parser.add_argument('--output-pkl', default = default_out_pkl,
                         help='Results will be dumped to this `.pkl` file.')
+    default_out_json = out_file_format.format(type = 'json')
+    utils.ensure_dir(os.path.dirname(default_out_json))
+    parser.add_argument('--output-json', default = default_out_json,
+                        help='Results will be dumped to this `.json` file.')
     return parser.parse_args()
 
 
@@ -300,11 +305,15 @@ if __name__ == "__main__":
     result = OrderedDict(sorted(result.items()))
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
+
     # Write the results to a file so they can later be used with `compare.py`.
     with open(args.output_pkl, 'wb') as pickle_file:
         # We create a python2-compatible pickle dump.
         pickle.dump(result, pickle_file, 2)
         print(('Wrote results to %s.' % args.output_pkl))
+    with open(args.output_json, 'w') as json_file:
+        print(json.dumps(result), file = json_file)
+        print(('Wrote results to %s.' % args.output_json))
 
     if rc != 0:
         print("ERROR: The benchmarks did *not* run successfully. (rc = %d)" % rc)
