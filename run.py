@@ -84,8 +84,13 @@ def BuildOptions():
                         help='''Filter out the benchmarks matching this patern.
                              Defaults to \'benchmarks/deprecated/*\' if no other filter is
                              specified.''')
-    parser.add_argument('--output-pkl', action = 'store',
-                        help='Specify a name for the output `.pkl` file.')
+    out_file_name = time.strftime("%Y.%m.%d-%H:%M:%S") + '.{type}'
+    out_file_format = os.path.relpath(
+        os.path.join(utils.dir_root, '{type}', out_file_name))
+    default_out_pkl = out_file_format.format(type = 'pkl')
+    utils.ensure_dir(os.path.dirname(default_out_pkl))
+    parser.add_argument('--output-pkl', default = default_out_pkl,
+                        help='Results will be dumped to this `.pkl` file.')
     return parser.parse_args()
 
 
@@ -296,17 +301,10 @@ if __name__ == "__main__":
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
     # Write the results to a file so they can later be used with `compare.py`.
-    if args.output_pkl is None:
-        default_pkl_out_dir = os.path.join(utils.dir_root, 'pkl')
-        utils.ensure_dir(default_pkl_out_dir)
-        res_file = 'res.' + time.strftime("%Y.%m.%d-%H:%M:%S") + '.pkl'
-        res_file = os.path.join(default_pkl_out_dir, res_file)
-    else:
-        res_file = args.output_pkl
-    with open(res_file, 'wb') as pickle_file:
+    with open(args.output_pkl, 'wb') as pickle_file:
         # We create a python2-compatible pickle dump.
         pickle.dump(result, pickle_file, 2)
-        print(('Wrote results to %s.' % res_file))
+        print(('Wrote results to %s.' % args.output_pkl))
 
     if rc != 0:
         print("ERROR: The benchmarks did *not* run successfully. (rc = %d)" % rc)
