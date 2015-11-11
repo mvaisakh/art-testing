@@ -68,7 +68,7 @@ def TestBenchmarksOnHost():
     rc |= TestCommand(["rm", "-rf", non_root_path])
     # TODO: Abstract the app name.
     rc |= TestCommand(["java", "org.linaro.bench.RunBench", "benchmarks/micro/Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=utils.dir_build_java_classes)
-    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "benchmarks/deprecated/BubbleSort"], _cwd=utils.dir_build_java_classes)
+    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "benchmarks/algorithm/CryptoMD5"], _cwd=utils.dir_build_java_classes)
     return rc
 
 
