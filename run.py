@@ -62,8 +62,8 @@ def BuildOptions():
                         default = default_n_iterations,
                         help = "Run <N> iterations of the benchmarks.")
     parser.add_argument('--dont-auto-calibrate',
-                        action='store_false', default = True,
-                        dest = 'auto_calibrate', help='''Do not auto-calibrate
+                        action='store_true', default = False,
+                        dest = 'no_auto_calibrate', help='''Do not auto-calibrate
                         the benchmarks. Instead, run each benchmark's `main()`
                         function directly.''')
     parser.add_argument('--target', '-t', action='store', nargs='?', default=None, const='<default>',
@@ -161,7 +161,7 @@ def RunBenchADB(mode, auto_calibrate, apk, classname, target):
     dalvikvm = 'dalvikvm%s' % mode
     command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
             % (os.path.dirname(apk), dalvikvm, apk))
-    if args.auto_calibrate:
+    if auto_calibrate:
         # Run the benchmark's time* method(s) via bench_runner_main
         command += " %s %s" % (bench_runner_main, classname)
     else:
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     rc = RunBenchs(remote_apk,
                    benchmarks,
                    args.target,
-                   args.auto_calibrate,
+                   not args.no_auto_calibrate,
                    args.iterations,
                    args.mode)
     result = OrderedDict(sorted(result.items()))
