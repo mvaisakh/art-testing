@@ -45,7 +45,19 @@ adb shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/*boot.oat | xargs -n 1 bash $A
 print_info Pulling compiled benchmark
 adb shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE | xargs -n 1 -i adb pull {} $ANDROID_PRODUCT_OUT/symbols/{}
 
-# Copy files into a folder structure which matches the debug information.
+# Copy files or make symbolic links into a folder structure which matches the
+# debug information. It might be a bit ugly to do so. But there are issues with
+# '--prefix' option of aarch64-linux-android-objdump.
+# Note: Steps to identify the issue:
+# 1. Take a look at how debug information is encoded in the symbol files.
+#  readelf --debug-dump $ANDROID_PRODUCT_OUT/symbols/system/bin/dalvikvm64
+# 2. Try to dump the content with disassebmly and source lines.
+#  aarch64-linux-android-objdump --prefix=$ANDROID_BUILD_TOP --prefix-strip=3 -dS $ANDROID_PRODUCT_OUT/symbols/system/bin/dalvikvm64
+#  No source code intermixed.
+# 3. Try the host version.
+#  objdump --prefix=$ANDROID_BUILD_TOP --prefix-strip=3 -dS $ANDROID_BUILD_TOP/out/host/linux-x86/bin/dalvikvm64
+#  Source code intermixed perfectly.
 safe mkdir -p $STRUCTURED_SOURCE_FOLDER
 safe cp -rt $STRUCTURED_SOURCE_FOLDER $UBENCH_ROOT/benchmarks $UBENCH_ROOT/framework/*
+ls -1 $ANDROID_BUILD_TOP | safe xargs -n 1 -i ln -s $ANDROID_BUILD_TOP/{} $STRUCTURED_SOURCE_FOLDER/
 
