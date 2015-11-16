@@ -15,6 +15,18 @@
 # limitations under the License.
 #
 
+usage() {
+  echo "Usage: $(basename "$0") \"<regex to match passname> ...\""
+  echo "  Read CFG from stdin and write HIRs in matched passes to stdout."
+  echo "Example:"
+  echo "  $(basename "$0") disassebmly < perf-out/cfg/bench.dalvikvm64.cfg > perf-out/cfg/bench.dalvikvm64.disassembly"
+}
+
+if [ $# -ne 3 ] ; then
+  usage
+  exit
+fi
+
 tmp_prefix=/tmp/
 tmp_suffix=.tmp
 sort_file=${tmp_prefix}cfg_sort${tmp_suffix}
