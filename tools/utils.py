@@ -13,10 +13,8 @@
 # limitations under the License.
 #
 
-import glob
 import os
-import re
-
+import subprocess
 
 dir_tools = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_tools, '..'))
@@ -25,7 +23,23 @@ dir_build = os.path.join(dir_root, 'build')
 dir_build_java_classes = os.path.join(dir_build, 'classes')
 dir_framework = os.path.join(dir_root, 'framework')
 
+verbose = True
 
-def ensure_dir(path_name):
-  if not os.path.exists(path_name):
-    os.makedirs(path_name)
+def ensure_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+def BuildBenchmarks(build_for_target):
+    # Call the build script, with warnings treated as errors.
+    command = [os.path.join(dir_root, 'build.sh'), '-w']
+    if build_for_target:
+        command += ['-t']
+    VerbosePrint(' '.join(command))
+    subprocess.check_call(command)
+
+def SetVerbosity(verbosity):
+    global verbose
+    verbose = verbosity
+
+def VerbosePrint(msg):
+    if verbose: print(msg)

@@ -22,7 +22,6 @@ import fnmatch
 import json
 import os
 import pickle
-import shutil
 import subprocess
 import sys
 import time
@@ -33,21 +32,15 @@ dir_root = os.path.dirname(os.path.realpath(__file__))
 dir_tools = os.path.join(dir_root, 'tools')
 sys.path.insert(0, dir_tools)
 import utils
+import utils_adb
 import utils_stats
 
 bench_runner_main = 'org.linaro.bench.RunBench'
-
-# Use a global `verbose` flag to allow scripts importing this file to override
-# it.
-verbose = False
-
-
 
 # Options
 
 default_mode = ''
 default_n_iterations = 1
-default_remote_copy_path = '/data/local/tmp'
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
@@ -72,7 +65,7 @@ def BuildOptions():
     parser.add_argument('--noverbose', action='store_true', default = False,
                         help='Do not print extra information and commands run.')
     parser.add_argument('--remote_copy_path', action = 'store',
-                        default = default_remote_copy_path,
+                        default = utils_adb.default_remote_copy_path,
                         help = '''Path where objects should be copied on the
                         target.''')
     parser.add_argument('-f', '--filter', action = 'append',
@@ -94,64 +87,15 @@ def BuildOptions():
                         help='Results will be dumped to this `.json` file.')
     return parser.parse_args()
 
-
-
-# Utils
-
-def VerbosePrint(msg):
-    if verbose: print(msg)
-
-def ensure_dir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-# ADB helpers
-
-def adb_push(f, target_path = default_remote_copy_path, target = None):
-    command = ['adb', 'push', f, target_path]
-    if target != '<default>':
-        command = ['adb', '-s', target, 'push', f, target_path]
-    VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    return p.communicate()
-
-
-# `command` is expected to be a string, not a list.
-def adb_shell(command_arg, target):
-    # We need to quote the actual command in the text printed so it can be
-    # copy-pasted and executed.
-    command = ['adb', 'shell', command_arg]
-    if target != '<default>':
-        command = ['adb', '-s', target, 'shell', command_arg]
-    VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    rc = p.wait()
-    out, err = p.communicate()
-    return rc, out, err
-
 def host_java(command):
-    VerbosePrint(' '.join(command))
+    utils.VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, cwd = utils.dir_build_java_classes,
                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     rc = p.wait()
     out, err = p.communicate()
     return rc, out, err
 
-def DeleteAppInDalvikCache(remote_copy_path, target):
-    # We delete the entire dalvik-cache in the test path.
-    # Delete any cached version of the benchmark app.
-    # With the current defaults, the pattern is "data@local@tmp@java-benchs.apk*"
-    adb_shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'), target)
-
-def BuildBenchmarks(build_for_target):
-    # Call the build script, with warnings treated as errors.
-    command = [os.path.join(utils.dir_root, 'build.sh'), '-w']
-    if build_for_target:
-        command += ['-t']
-    VerbosePrint(' '.join(command))
-    subprocess.check_call(command)
-
-def RunBenchADB(mode, auto_calibrate, apk, classname, target):
+def RunBenchADB(mode, auto_calibrate, apk, classname, target, verbose):
     dalvikvm = 'dalvikvm%s' % mode
     command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
             % (os.path.dirname(apk), dalvikvm, apk))
@@ -163,10 +107,10 @@ def RunBenchADB(mode, auto_calibrate, apk, classname, target):
         command += " %s" % (classname)
     if verbose:
         command += " --debug"
-    rc, out, err = adb_shell(command, target)
+    rc, out, err = utils_adb.shell(command, target)
     return rc, out.decode(), err.decode()
 
-def RunBenchHost(mode, auto_calibrate, apk, classname, target):
+def RunBenchHost(mode, auto_calibrate, apk, classname, target, verbose):
     if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
@@ -181,6 +125,7 @@ result = dict()
 def RunBench(apk, classname,
              run_helper,
              auto_calibrate,
+             verbose,
              iterations = default_n_iterations,
              mode = default_mode,
              target = None):
@@ -191,7 +136,8 @@ def RunBench(apk, classname,
                                             auto_calibrate,
                                             apk,
                                             classname,
-                                            target)
+                                            target,
+                                            verbose)
             rc += local_rc
             out = out.rstrip('\n')
             if local_rc != 0:
@@ -228,15 +174,17 @@ def RunBench(apk, classname,
 def RunBenchs(apk, bench_names,
               target,
               auto_calibrate,
+              verbose,
               iterations = default_n_iterations, mode = default_mode):
     rc = 0
-    VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
+    utils.VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
     run_helper = RunBenchADB if target else RunBenchHost
     for bench in bench_names:
         rc += RunBench(apk,
                        bench,
                        run_helper,
                        auto_calibrate,
+                       verbose,
                        iterations = iterations,
                        mode = mode,
                        target = target)
@@ -265,16 +213,15 @@ def FilterBenchmarks(benchmarks, filter, filter_out):
 
 if __name__ == "__main__":
     args = BuildOptions()
-    verbose = not args.noverbose
-
-    BuildBenchmarks(args.target)
+    utils.SetVerbosity(not args.noverbose)
+    utils.BuildBenchmarks(args.target)
 
     remote_apk = None
     if args.target:
-        DeleteAppInDalvikCache(args.remote_copy_path, args.target)
+        utils_adb.DeleteAppInDalvikCache(args.remote_copy_path, args.target)
         apk = os.path.join(utils.dir_root, 'build/bench.apk')
         apk_name = os.path.basename(apk)
-        adb_push(apk, args.remote_copy_path, args.target)
+        utils_adb.push(apk, args.remote_copy_path, args.target)
         remote_apk = os.path.join(args.remote_copy_path, apk_name)
 
     if args.norun:
@@ -294,6 +241,7 @@ if __name__ == "__main__":
                    benchmarks,
                    args.target,
                    not args.no_auto_calibrate,
+                   not args.noverbose,
                    args.iterations,
                    args.mode)
     result = OrderedDict(sorted(result.items()))
