@@ -37,10 +37,6 @@ import utils_stats
 
 bench_runner_main = 'org.linaro.bench.RunBench'
 
-# The script must be executed from an Android environment, which will be passed
-# to run the commands.
-environment = os.environ.copy()
-
 # Use a global `verbose` flag to allow scripts importing this file to override
 # it.
 verbose = False
@@ -116,8 +112,7 @@ def adb_push(f, target_path = default_remote_copy_path, target = None):
     if target != '<default>':
         command = ['adb', '-s', target, 'push', f, target_path]
     VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, env = environment,
-                         stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     return p.communicate()
 
 
@@ -129,8 +124,7 @@ def adb_shell(command_arg, target):
     if target != '<default>':
         command = ['adb', '-s', target, 'shell', command_arg]
     VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, env = environment,
-                         stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     rc = p.wait()
     out, err = p.communicate()
     return rc, out, err
