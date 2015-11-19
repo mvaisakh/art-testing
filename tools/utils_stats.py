@@ -15,6 +15,9 @@
 import math
 import statistics
 
+def GetRelativeDiff(x1, x2):
+    return (x2 - x1) / x1 * 100 if x1 else float("inf")
+
 def ComputeStats(nums):
         m = min(nums)
         M = max(nums)
@@ -28,8 +31,7 @@ def PrintStats(dict_results, iterations = None):
     results = []
     for benchmark in dict_results:
         results.append([benchmark] + list(ComputeStats(dict_results[benchmark])))
-    PrintTable(headers, results)
-
+    PrintTable(headers, ['.3f'] * len(headers), results)
 
 # Print a table showing the difference between two runs of benchmarks.
 def PrintDiff(res_1, res_2, title = ''):
@@ -44,8 +46,7 @@ def PrintDiff(res_1, res_2, title = ''):
         m2, M2, ave2, d2, dp2 = ComputeStats(res_2[bench])
         diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
         results.append([bench, ave1, dp1, ave2, dp2, diff])
-    PrintTable(headers, results)
-
+    PrintTable(headers, ['.3f'] * len(headers), results)
 
 # Pretty-prints a table. The arguments must look like:
 # - headers: a list of strings
@@ -53,12 +54,9 @@ def PrintDiff(res_1, res_2, title = ''):
 # - lines: a list of lists of data.
 #     [['name1', 0.123, 0.456],
 #      ['name2', 1.1, 2.2]]
-def PrintTable(headers, lines):
+def PrintTable(headers, line_format, lines):
     expected_number_of_fields = len(headers)
     col_lengths = [len(field) for field in headers]
-
-    data_format_code = '.3f'
-    data_format = '{0:%s}' % data_format_code
 
     # Scan through the inputs to compute the maximum column lengths.
     # Pay attention to correctly format the data.
@@ -69,7 +67,7 @@ def PrintTable(headers, lines):
                   (expected_number_of_fields, n_fields))
             raise Exception
         col_lengths = [max(col_lengths[0], len(line[0]))] + \
-            [max(col_lengths[i], len(data_format.format(float(line[i])))) \
+            [max(col_lengths[i], len(('{0:%s}' % line_format[i]).format(line[i]))) \
              for i in range(1, len(line))]
 
     # Compute the format strings.
@@ -78,7 +76,7 @@ def PrintTable(headers, lines):
     formats_list = ['{0:<%d} ' % col_lengths[0]]
     for i in range(1, len(col_lengths)):
         headers_formats_list += ['{%d:>%d} ' % (i, col_lengths[i])]
-        formats_list += ['{%d:>%d%s} ' % (i, col_lengths[i], data_format_code)]
+        formats_list += ['{%d:>%d%s} ' % (i, col_lengths[i], line_format[i])]
 
     # Print the table.
     headers_format = '  '.join(headers_formats_list)

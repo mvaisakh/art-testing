@@ -3,15 +3,21 @@
 
 ## How to Run
 
-You can run the benchmarks with the `run.py` script. The Android environment
-must be set up, and the board connected via adb. See `run.py --help` for
-details.
+You can run the benchmarks with the `run.py` script, and obtain compilation
+statistics from a target adb device using `compile_stats.py`. Running on a
+device requires that the Android environment be set up, and the device be
+connected via adb. See either `run.py --help` or `compile_stats.py --help`
+for details.
 
 For example you can run on a target adb device:
-       ./run.py --iterations 5 --mode 64 --target
+      ./run.py --iterations 5 --mode 64 --target
 
 Or on the host, with no adb device:
       ./run.py --iterations 5
+
+Running 5 iterations of the compilation process with the benchmarks and all
+APK files in ~/apk:
+      ./compile_stats.py -i5 build/bench.apk ~/apk
 
 ## How to Write a Benchmark
 
