@@ -37,9 +37,5 @@ def BuildBenchmarks(build_for_target):
     VerbosePrint(' '.join(command))
     subprocess.check_call(command)
 
-def SetVerbosity(verbosity):
-    global verbose
-    verbose = verbosity
-
 def VerbosePrint(msg):
     if verbose: print(msg)

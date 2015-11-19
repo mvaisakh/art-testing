@@ -95,7 +95,7 @@ def host_java(command):
     out, err = p.communicate()
     return rc, out, err
 
-def RunBenchADB(mode, auto_calibrate, apk, classname, target, verbose):
+def RunBenchADB(mode, auto_calibrate, apk, classname, target):
     dalvikvm = 'dalvikvm%s' % mode
     command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
             % (os.path.dirname(apk), dalvikvm, apk))
@@ -105,12 +105,12 @@ def RunBenchADB(mode, auto_calibrate, apk, classname, target, verbose):
     else:
         # Run the benchmark as a main class directly
         command += " %s" % (classname)
-    if verbose:
+    if utils.verbose:
         command += " --debug"
     rc, out, err = utils_adb.shell(command, target)
     return rc, out.decode(), err.decode()
 
-def RunBenchHost(mode, auto_calibrate, apk, classname, target, verbose):
+def RunBenchHost(mode, auto_calibrate, apk, classname, target):
     if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
@@ -125,7 +125,6 @@ result = dict()
 def RunBench(apk, classname,
              run_helper,
              auto_calibrate,
-             verbose,
              iterations = default_n_iterations,
              mode = default_mode,
              target = None):
@@ -136,15 +135,14 @@ def RunBench(apk, classname,
                                             auto_calibrate,
                                             apk,
                                             classname,
-                                            target,
-                                            verbose)
+                                            target)
             rc += local_rc
             out = out.rstrip('\n')
             if local_rc != 0:
                 print("ERROR:")
                 print(err)
                 print(out)
-            elif verbose:
+            elif utils.verbose:
                 print(out)
         except Exception as e:
             print(e)
@@ -174,7 +172,6 @@ def RunBench(apk, classname,
 def RunBenchs(apk, bench_names,
               target,
               auto_calibrate,
-              verbose,
               iterations = default_n_iterations, mode = default_mode):
     rc = 0
     utils.VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
@@ -184,7 +181,6 @@ def RunBenchs(apk, bench_names,
                        bench,
                        run_helper,
                        auto_calibrate,
-                       verbose,
                        iterations = iterations,
                        mode = mode,
                        target = target)
@@ -213,7 +209,7 @@ def FilterBenchmarks(benchmarks, filter, filter_out):
 
 if __name__ == "__main__":
     args = BuildOptions()
-    utils.SetVerbosity(not args.noverbose)
+    utils.verbose = not args.noverbose
     utils.BuildBenchmarks(args.target)
 
     remote_apk = None
@@ -241,7 +237,6 @@ if __name__ == "__main__":
                    benchmarks,
                    args.target,
                    not args.no_auto_calibrate,
-                   not args.noverbose,
                    args.iterations,
                    args.mode)
     result = OrderedDict(sorted(result.items()))
