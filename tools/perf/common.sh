@@ -18,6 +18,7 @@
 # Common defintions.
 SCRIPT_NAME=$(basename $0)
 SCRIPT_PATH=$(realpath $(dirname $0))
+ADB=$SCRIPT_PATH/adb-wrapper.sh
 UBENCH_ROOT=$(realpath $SCRIPT_PATH/../..)
 UBENCH_SRC_FOLDER=$UBENCH_ROOT/benchmarks
 UBENCH_NAME=bench.apk
@@ -26,7 +27,7 @@ UBENCH_REMOTE_DIR=/data/local/tmp
 UBENCH_REMOTE=$UBENCH_REMOTE_DIR/$UBENCH_NAME
 UBENCH_REMOTE_CACHE_FILE=${UBENCH_REMOTE//\//@}@classes.dex
 UBENCH_REMOTE_CACHE_FILE=${UBENCH_REMOTE_CACHE_FILE/@/}
-REMOTE_DALVIKVMS=$(adb shell ls /system/bin/dalvikvm* | xargs -n 1 adb shell realpath | sort -u)
+REMOTE_DALVIKVMS=$($ADB shell ls /system/bin/dalvikvm* | xargs -n 1 $ADB shell realpath | sort -u)
 VMLINUX=$(realpath $SCRIPT_PATH/vmlinux)
 REMOTE_PERF_DATA=/data/local/tmp/perf.data
 ANDROID_SYMBOL_FOLDER=$ANDROID_PRODUCT_OUT/symbols

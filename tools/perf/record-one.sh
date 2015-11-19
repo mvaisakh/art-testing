@@ -40,6 +40,6 @@ else
 fi
 
 safe mkdir -p $out
-safe adb shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $PERF_RECORD -g -e $event -o $REMOTE_PERF_DATA $cmd > $bench_log
-safe adb pull $REMOTE_PERF_DATA $out/${event}.perf.data
+safe $ADB shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $PERF_RECORD -g -e $event -o $REMOTE_PERF_DATA $cmd > $bench_log
+safe $ADB pull $REMOTE_PERF_DATA $out/${event}.perf.data
 

@@ -18,7 +18,7 @@
 . $(dirname $0)/common.sh
 
 # Check if the AOSP build matches the target board.
-board=$(adb shell getprop ro.build.product)
+board=$($ADB shell getprop ro.build.product)
 print_info Board : $board
 print_info ANDROID_PRODUCT_OUT : $ANDROID_PRODUCT_OUT
 if [ "$(basename $ANDROID_PRODUCT_OUT)" != "$board" ] ; then

@@ -20,30 +20,30 @@
 # Build bench apk and push it to target device.
 safe cd $UBENCH_ROOT
 safe ./build.sh -t
-safe adb push $UBENCH_LOCAL $UBENCH_REMOTE
+safe $ADB push $UBENCH_LOCAL $UBENCH_REMOTE
 safe cd -
 
 # Clear dalvik cache.
-safe adb shell rm -f $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE
+safe $ADB shell rm -f $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE
 
 for dalvikvm in $REMOTE_DALVIKVMS ; do
   vm=$(basename $dalvikvm)
 # Trigger the build with debug symbols generated.
-  safe adb shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $vm -Xcompiler-option -g -Xcompiler-option -j1 -Xcompiler-option --dump-cfg=$UBENCH_REMOTE_DIR/bench.${vm}.cfg -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
+  safe $ADB shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $vm -Xcompiler-option -g -Xcompiler-option -j1 -Xcompiler-option --dump-cfg=$UBENCH_REMOTE_DIR/bench.${vm}.cfg -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
 # Pull CFG file.
   safe mkdir -p $CFG_FOLDER
-  safe adb pull $UBENCH_REMOTE_DIR/bench.${vm}.cfg $CFG_FOLDER
+  safe $ADB pull $UBENCH_REMOTE_DIR/bench.${vm}.cfg $CFG_FOLDER
 # Extract disassembly information from the CFG file.
   safe $SCRIPT_PATH/shrink-cfg.sh disassembly < $CFG_FOLDER/bench.${vm}.cfg > $CFG_FOLDER/bench.${vm}.disassembly
 done
 
 # Symbolize boot.oat.
 print_info Symbolizing boot.oat
-adb shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/*boot.oat | xargs -n 1 bash $ANDROID_BUILD_TOP/art/tools/symbolize.sh
+$ADB shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/*boot.oat | xargs -n 1 bash $ANDROID_BUILD_TOP/art/tools/symbolize.sh
 
 # Pull compiled benchmark.
 print_info Pulling compiled benchmark
-adb shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE | xargs -n 1 -i adb pull {} $ANDROID_PRODUCT_OUT/symbols/{}
+$ADB shell ls -1 $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE | xargs -n 1 -i $ADB pull {} $ANDROID_PRODUCT_OUT/symbols/{}
 
 # Copy files or make symbolic links into a folder structure which matches the
 # debug information. It might be a bit ugly to do so. But there are issues with
