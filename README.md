@@ -101,3 +101,13 @@ Benchmark for hash map, which is converted from:
 http://browserbench.org/JetStream/sources/hash-map.js
 
 License is Apache 2.0.
+
+### BitfieldRotate
+
+Large portions Copyright (c) 2000-2015 The Legion of the Bouncy Castle Inc. (http://www.bouncycastle.org)
+
+See BitfieldRotate.java header for license text.
+
+License iS BSD-like.
+
+
