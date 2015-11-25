@@ -62,7 +62,7 @@ def FilterSignificantChanges(in_1, in_2, diff_threshold, dev_threshold):
     for bench in benchmarks:
         m1, M1, ave1, d1, dp1 = utils_stats.ComputeStats(in_1[bench])
         m2, M2, ave2, d2, dp2 = utils_stats.ComputeStats(in_2[bench])
-        diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
+        diff = utils_stats.GetRelativeDiff(ave1, ave2)
         if abs(diff) >= diff_threshold \
                 or dp1 >= dev_threshold \
                 or dp2 >= dev_threshold:
@@ -82,7 +82,7 @@ def OrderResultsByDifference(in_1, in_2):
     for bench in benchmarks:
         m1, M1, ave1, d1, dp1 = utils_stats.ComputeStats(in_1[bench])
         m2, M2, ave2, d2, dp2 = utils_stats.ComputeStats(in_2[bench])
-        diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
+        diff = utils_stats.GetRelativeDiff(ave1, ave2)
         if diff > 0:
             regressions[bench] = diff
         else:

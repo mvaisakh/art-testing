@@ -31,14 +31,6 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def BuildBenchmarks(build_for_target):
-    # Call the build script, with warnings treated as errors.
-    command = [os.path.join(dir_root, 'build.sh'), '-w']
-    if build_for_target:
-        command += ['-t']
-    VerbosePrint(' '.join(command))
-    subprocess.check_call(command)
-
 def GetTimeValue(value, si_prefix):
     return value * si_factors[si_prefix] if si_prefix else value
 

@@ -95,6 +95,20 @@ def host_java(command):
     out, err = p.communicate()
     return rc, out, err
 
+def DeleteAppInDalvikCache(remote_copy_path, target):
+    # We delete the entire dalvik-cache in the test path.
+    # Delete any cached version of the benchmark app.
+    # With the current defaults, the pattern is "data@local@tmp@java-benchs.apk*"
+    utils_adb.shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'), target)
+
+def BuildBenchmarks(build_for_target):
+    # Call the build script, with warnings treated as errors.
+    command = [os.path.join(dir_root, 'build.sh'), '-w']
+    if build_for_target:
+        command += ['-t']
+    utils.VerbosePrint(' '.join(command))
+    subprocess.check_call(command)
+
 def RunBenchADB(mode, auto_calibrate, apk, classname, target):
     dalvikvm = 'dalvikvm%s' % mode
     command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
@@ -210,11 +224,11 @@ def FilterBenchmarks(benchmarks, filter, filter_out):
 if __name__ == "__main__":
     args = BuildOptions()
     utils.verbose = not args.noverbose
-    utils.BuildBenchmarks(args.target)
+    BuildBenchmarks(args.target)
 
     remote_apk = None
     if args.target:
-        utils_adb.DeleteAppInDalvikCache(args.remote_copy_path, args.target)
+        DeleteAppInDalvikCache(args.remote_copy_path, args.target)
         apk = os.path.join(utils.dir_root, 'build/bench.apk')
         apk_name = os.path.basename(apk)
         utils_adb.push(apk, args.remote_copy_path, args.target)
