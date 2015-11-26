@@ -16,6 +16,8 @@
 import os
 import subprocess
 
+si_factors = {'m' : 0.001, 'n' : 0.000000001, 'u' : 0.000001}
+
 dir_tools = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_tools, '..'))
 dir_benchmarks = os.path.join(dir_root, 'benchmarks')
@@ -36,6 +38,20 @@ def BuildBenchmarks(build_for_target):
         command += ['-t']
     VerbosePrint(' '.join(command))
     subprocess.check_call(command)
+
+def GetTimeValue(value, si_prefix):
+    return value * si_factors[si_prefix] if si_prefix else value
+
+def PrettySIFactor(value):
+    si_factor = float('inf')
+    si_prefix = ''
+
+    for i in si_factors.items():
+        if i[1] < si_factor and value < i[1] * 1000:
+            si_factor = i[1]
+            si_prefix = i[0]
+
+    return si_factor, si_prefix
 
 def VerbosePrint(msg):
     if verbose: print(msg)

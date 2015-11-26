@@ -20,6 +20,13 @@ import utils
 
 default_remote_copy_path = '/data/local/tmp'
 
+def pull(f, local_path, target = '<default>'):
+    command = ['adb'] + (['-s', target] if target != '<default>' else []) + \
+              ['pull', f, local_path]
+    utils.VerbosePrint(' '.join(command))
+    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    return p.communicate()
+
 def push(f, target_path = default_remote_copy_path, target = None):
     command = ['adb', 'push', f, target_path]
     if target != '<default>':
