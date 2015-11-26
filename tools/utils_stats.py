@@ -44,7 +44,7 @@ def PrintDiff(res_1, res_2, title = ''):
     for bench in benchmarks:
         m1, M1, ave1, d1, dp1 = ComputeStats(res_1[bench])
         m2, M2, ave2, d2, dp2 = ComputeStats(res_2[bench])
-        diff = (ave2 - ave1) / ave1 * 100 if ave1 != 0 else float("inf")
+        diff = GetRelativeDiff(ave1, ave2)
         results.append([bench, ave1, dp1, ave2, dp2, diff])
     PrintTable(headers, ['.3f'] * len(headers), results)
 
