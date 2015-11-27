@@ -50,22 +50,12 @@ def BuildOptions():
                         generated executable (total, .bss, .rodata, and .text section sizes).''',
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    utils.AddCommonRunOptions(parser)
-    parser.add_argument('--noverbose', action='store_true', default = False,
-                        help='Do not print extra information and commands run.')
-    out_file_name = time.strftime("%Y.%m.%d-%H:%M:%S") + '.{type}'
-    out_file_format = os.path.relpath(
-        os.path.join(utils.dir_out, '{type}', 'compilation_statistics', out_file_name))
-    default_out_pkl = out_file_format.format(type = 'pkl')
-    utils.ensure_dir(os.path.dirname(default_out_pkl))
-    parser.add_argument('--output-pkl', default = default_out_pkl,
-                        help='Results will be dumped to this `.pkl` file.')
-    default_out_json = out_file_format.format(type = 'json')
-    utils.ensure_dir(os.path.dirname(default_out_json))
-    parser.add_argument('--output-json', default = default_out_json,
-                        help='Results will be dumped to this `.json` file.')
     parser.add_argument('pathnames', nargs = '+', help='''Path containing APK files or a file
                         name for which compilation statistics should be collected.''')
+    utils.AddCommonRunOptions(parser)
+    utils.AddOutputFormatOptions(parser, utils.default_output_formats)
+    parser.add_argument('--noverbose', action='store_true', default = False,
+                        help='Do not print extra information and commands run.')
 
     # TODO: Support running on host?
     # For now override the default value for the `--target`.
@@ -236,11 +226,5 @@ if __name__ == "__main__":
         PrintStatsTable(apk, stats[apk])
         print('')
 
-    with open(args.output_pkl, 'wb') as pickle_file:
-        # Create a python2-compatible pickle dump.
-        pickle.dump(stats, pickle_file, 2)
-        print('Wrote results to %s.' % args.output_pkl)
-
-    with open(args.output_json, 'w') as json_file:
-        print(json.dumps(stats), file = json_file)
-        print('Wrote results to %s.' % args.output_json)
+    utils.OutputObject(stats, 'pkl', args.output_pkl)
+    utils.OutputObject(stats, 'json', args.output_json)

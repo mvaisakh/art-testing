@@ -18,10 +18,9 @@
 # TODO: error handling
 
 import argparse
+import csv
 import fnmatch
-import json
 import os
-import pickle
 import subprocess
 import sys
 import time
@@ -48,6 +47,7 @@ def BuildOptions():
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     utils.AddCommonRunOptions(parser)
+    utils.AddOutputFormatOptions(parser, utils.default_output_formats + ['csv'])
     parser.add_argument('--dont-auto-calibrate',
                         action='store_true', default = False,
                         dest = 'no_auto_calibrate', help='''Do not auto-calibrate
@@ -63,17 +63,6 @@ def BuildOptions():
                         help='''Filter out the benchmarks matching this patern.
                              Defaults to \'benchmarks/deprecated/*\' if no other filter is
                              specified.''')
-    out_file_name = time.strftime("%Y.%m.%d-%H:%M:%S") + '.{type}'
-    out_file_format = os.path.relpath(
-        os.path.join(utils.dir_out, '{type}', out_file_name))
-    default_out_pkl = out_file_format.format(type = 'pkl')
-    utils.ensure_dir(os.path.dirname(default_out_pkl))
-    parser.add_argument('--output-pkl', default = default_out_pkl,
-                        help='Results will be dumped to this `.pkl` file.')
-    default_out_json = out_file_format.format(type = 'json')
-    utils.ensure_dir(os.path.dirname(default_out_json))
-    parser.add_argument('--output-json', default = default_out_json,
-                        help='Results will be dumped to this `.json` file.')
 
     args = parser.parse_args()
 
@@ -252,14 +241,19 @@ if __name__ == "__main__":
     utils_stats.PrintStats(result, iterations = args.iterations)
     print('')
 
-    # Write the results to a file so they can later be used with `compare.py`.
-    with open(args.output_pkl, 'wb') as pickle_file:
-        # We create a python2-compatible pickle dump.
-        pickle.dump(result, pickle_file, 2)
-        print(('Wrote results to %s.' % args.output_pkl))
-    with open(args.output_json, 'w') as json_file:
-        print(json.dumps(result), file = json_file)
-        print(('Wrote results to %s.' % args.output_json))
+    utils.OutputObject(result, 'pkl', args.output_pkl)
+    utils.OutputObject(result, 'json', args.output_json)
+    # Output in CSV format.
+    # Transform the dictionary into a list of lists.
+    output_filename = args.output_csv
+    utils.ensure_dir(os.path.dirname(output_filename))
+    data = []
+    for bench in result:
+        data += [[bench] + result[bench]]
+    with open(output_filename, 'w') as output_file:
+        writer = csv.writer(output_file, delimiter=',')
+        writer.writerows(data)
+        print('Wrote results to %s.' % output_filename)
 
     if rc != 0:
         print("ERROR: The benchmarks did *not* run successfully. (rc = %d)" % rc)

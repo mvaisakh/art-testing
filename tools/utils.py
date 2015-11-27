@@ -13,9 +13,13 @@
 # limitations under the License.
 #
 
+import json
 import os
+import pickle
 import subprocess
 import sys
+import time
+
 
 dir_tools = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_tools, '..'))
@@ -78,6 +82,39 @@ def AddCommonRunOptions(parser):
                       default = adb_default_target_copy_path,
                       help = '''Path where objects should be copied on the
                       target.''')
+
+
+default_output_formats = ['pkl', 'json']
+
+def OutputObject(object, format, output_filename):
+    if format not in default_output_formats:
+        Error('Unexpected format: ' + format)
+    else:
+        ensure_dir(os.path.dirname(output_filename))
+        if format == 'pkl':
+            with open(output_filename, 'wb') as output_file:
+                # Create a python2-compatible pickle dump.
+                pickle.dump(object, output_file, 2)
+                print('Wrote results to %s.' % output_filename)
+        elif format == 'json':
+            with open(output_filename, 'w') as output_file:
+                print(json.dumps(object), file=output_file)
+                print('Wrote results to %s.' % output_filename)
+
+def AddOutputFormatOptions(parser, formats=default_output_formats):
+    opts = parser.add_argument_group('output formats')
+    format_output_filename = os.path.relpath(
+        os.path.join(dir_out,
+                     '{type}',
+                     time.strftime("%Y.%m.%d-%H:%M:%S") + '.{type}'))
+    format_help_message = 'Dump results to the given file in {type} format.'
+    for f in formats:
+        const_output_filename = format_output_filename.format(type=f)
+        opts.add_argument('--output-%s' % f,
+                          nargs='?', default=const_output_filename,
+                          metavar='FILE',
+                          help=format_help_message.format(type=f))
+
 
 # Common arguments for `compare` scripts.
 def AddCommonCompareOptions(parser):
