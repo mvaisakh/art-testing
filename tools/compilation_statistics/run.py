@@ -50,19 +50,9 @@ def BuildOptions():
                         generated executable (total, .bss, .rodata, and .text section sizes).''',
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--iterations', '-i', metavar = 'N', type = int, default = 10,
-                        help = "Run <N> iterations of the compilation process; the higher" \
-                        " the value, the more accurate timing results are.")
-    parser.add_argument('--target', '-t', action='store', nargs='?', default='<default>',
-                        const='<default>', help='Run on target adb device.')
-    parser.add_argument('--mode', action = 'store', choices = ['32', '64', ''], default = '',
-                        help='Choose 32-, 64-bit, or default mode.')
+    utils.AddCommonRunOptions(parser)
     parser.add_argument('--noverbose', action='store_true', default = False,
                         help='Do not print extra information and commands run.')
-    parser.add_argument('--remote_copy_path', action = 'store',
-                        default = utils_adb.default_remote_copy_path,
-                        help = '''Path where objects should be copied on the
-                        target.''')
     out_file_name = time.strftime("%Y.%m.%d-%H:%M:%S") + '.{type}'
     out_file_format = os.path.relpath(
         os.path.join(utils.dir_out, '{type}', 'compilation_statistics', out_file_name))
@@ -76,7 +66,19 @@ def BuildOptions():
                         help='Results will be dumped to this `.json` file.')
     parser.add_argument('pathnames', nargs = '+', help='''Path containing APK files or a file
                         name for which compilation statistics should be collected.''')
-    return parser.parse_args()
+
+    # TODO: Support running on host?
+    # For now override the default value for the `--target`.
+    parser.set_defaults(target=utils.adb_default_target_string)
+
+    args = parser.parse_args()
+
+    # This cannot fire for now since this script always runs on target, but
+    # eventually we may want to run on host as well.
+    if args.mode and not args.target:
+        utils.Error('The `--mode` option is only valid when `--target` is specified.')
+
+    return args
 
 def GetMemoryEntries(stats):
     res = [['Memory usage', '']]
@@ -116,8 +118,8 @@ def PrintStatsTable(apk, stats):
     utils_stats.PrintTable([apk, ''], ['s', 's'], GetTimeEntries(stats) + GetMemoryEntries(stats) + \
                                                   GetSizeEntries(stats))
 
-def GetStats(apk, target, isa, remote_copy_path, iterations, alloc_parser, size_parser, work_dir):
-    apk_path = os.path.join(remote_copy_path, apk)
+def GetStats(apk, target, isa, target_copy_path, iterations, alloc_parser, size_parser, work_dir):
+    apk_path = os.path.join(target_copy_path, apk)
     oat = apk_path + '.oat'
     # Only the output of the first command is necessary; execute in a subshell to guarantee PID value;
     # only one thread is used for compilation to reduce measurement noise.
@@ -194,7 +196,7 @@ def GetISA(target, mode):
 
     return isa
 
-def CollectStats(target, mode, remote_copy_path, iterations, pathnames):
+def CollectStats(target, mode, target_copy_path, iterations, pathnames):
     alloc_parser = re.compile('.*?took (.*?)([mnu]{,1})s.*?=([0-9]+)([GKM]{,1})B' \
                               '.*?=([0-9]+)([GKM]{,1})B.*?=([0-9]+)([GKM]{,1})B' \
                               '.*?=([0-9]+)([GKM]{,1})B')
@@ -212,8 +214,8 @@ def CollectStats(target, mode, remote_copy_path, iterations, pathnames):
                                         if os.path.isfile(dentry)]
 
     for apk in apk_list:
-        utils_adb.push(apk, remote_copy_path, target)
-        res.update(GetStats(os.path.basename(apk), target, isa, remote_copy_path,
+        utils_adb.push(apk, target_copy_path, target)
+        res.update(GetStats(os.path.basename(apk), target, isa, target_copy_path,
                             iterations, alloc_parser, size_parser, work_dir))
 
     shutil.rmtree(work_dir)
@@ -227,7 +229,7 @@ if __name__ == "__main__":
 
     args = BuildOptions()
     utils.verbose = not args.noverbose
-    stats = CollectStats(args.target, args.mode, args.remote_copy_path, args.iterations, args.pathnames)
+    stats = CollectStats(args.target, args.mode, args.target_copy_path, args.iterations, args.pathnames)
     apk_list = sorted(stats)
 
     for apk in apk_list:

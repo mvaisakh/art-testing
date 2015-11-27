@@ -32,8 +32,7 @@ def BuildOptions():
         description = "Compare two results of the associated `run.py` script.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('res_1', metavar = 'res_1.pkl')
-    parser.add_argument('res_2', metavar = 'res_2.pkl')
+    utils.AddCommonCompareOptions(parser)
     return parser.parse_args()
 
 def GetMemoryEntries(stats_1, stats_2):

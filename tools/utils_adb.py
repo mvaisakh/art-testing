@@ -17,8 +17,6 @@ import subprocess
 
 import utils
 
-default_remote_copy_path = '/data/local/tmp'
-
 def pull(f, local_path, target = utils.adb_default_target_string):
     command = ['adb'] + (['-s', target] if target != utils.adb_default_target_string else []) + \
               ['pull', f, local_path]
@@ -26,7 +24,7 @@ def pull(f, local_path, target = utils.adb_default_target_string):
     p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     return p.communicate()
 
-def push(f, target_path = default_remote_copy_path, target = None):
+def push(f, target_path = utils.adb_default_target_copy_path, target = None):
     command = ['adb', 'push', f, target_path]
     if target != utils.adb_default_target_string:
         command = ['adb', '-s', target, 'push', f, target_path]

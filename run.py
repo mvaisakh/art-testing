@@ -47,27 +47,16 @@ def BuildOptions():
         description = "Run java benchmarks.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--iterations', '-i', metavar = 'N', type = int,
-                        default = default_n_iterations,
-                        help = "Run <N> iterations of the benchmarks.")
+    utils.AddCommonRunOptions(parser)
     parser.add_argument('--dont-auto-calibrate',
                         action='store_true', default = False,
                         dest = 'no_auto_calibrate', help='''Do not auto-calibrate
                         the benchmarks. Instead, run each benchmark's `main()`
                         function directly.''')
-    parser.add_argument('--target', '-t', action='store', nargs='?', default=None, const='<default>',
-                        dest='target', help='Run on target adb device.')
-    parser.add_argument('--mode', action = 'store',
-                        choices = ['32', '64', ''], default = default_mode,
-                        help='''Run with dalvikvm32, dalvikvm64, or dalvikvm''')
     parser.add_argument('-n', '--norun', action='store_true',
                         help='Build and configure everything, but do not run the benchmarks.')
     parser.add_argument('--noverbose', action='store_true', default = False,
                         help='Do not print extra information and commands run.')
-    parser.add_argument('--remote_copy_path', action = 'store',
-                        default = utils_adb.default_remote_copy_path,
-                        help = '''Path where objects should be copied on the
-                        target.''')
     parser.add_argument('-f', '--filter', action = 'append',
                         help='Quoted (benchmark name) filter pattern.')
     parser.add_argument('-F', '--filter-out', action = 'append',
@@ -85,7 +74,13 @@ def BuildOptions():
     utils.ensure_dir(os.path.dirname(default_out_json))
     parser.add_argument('--output-json', default = default_out_json,
                         help='Results will be dumped to this `.json` file.')
-    return parser.parse_args()
+
+    args = parser.parse_args()
+
+    if args.mode and not args.target:
+        utils.Error('The `--mode` option is only valid when `--target` is specified.')
+
+    return args
 
 def host_java(command):
     utils.VerbosePrint(' '.join(command))
@@ -95,11 +90,11 @@ def host_java(command):
     out, err = p.communicate()
     return rc, out, err
 
-def DeleteAppInDalvikCache(remote_copy_path, target):
+def DeleteAppInDalvikCache(target_copy_path, target):
     # We delete the entire dalvik-cache in the test path.
     # Delete any cached version of the benchmark app.
     # With the current defaults, the pattern is "data@local@tmp@java-benchs.apk*"
-    utils_adb.shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'), target)
+    utils_adb.shell('rm -rf ' + os.path.join(target_copy_path, 'dalvik-cache'), target)
 
 def BuildBenchmarks(build_for_target):
     # Call the build script.
@@ -228,11 +223,11 @@ if __name__ == "__main__":
 
     remote_apk = None
     if args.target:
-        DeleteAppInDalvikCache(args.remote_copy_path, args.target)
+        DeleteAppInDalvikCache(args.target_copy_path, args.target)
         apk = os.path.join(utils.dir_build, 'bench.apk')
         apk_name = os.path.basename(apk)
-        utils_adb.push(apk, args.remote_copy_path, args.target)
-        remote_apk = os.path.join(args.remote_copy_path, apk_name)
+        utils_adb.push(apk, args.target_copy_path, args.target)
+        remote_apk = os.path.join(args.target_copy_path, apk_name)
 
     if args.norun:
         sys.exit(0)

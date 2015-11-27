@@ -20,6 +20,7 @@ import pickle
 
 from collections import OrderedDict
 
+from tools import utils
 from tools import utils_stats
 
 def BuildOptions():
@@ -27,8 +28,7 @@ def BuildOptions():
         description = "Compare two results of the `run.py` script.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('res_1', metavar = 'res_1.pkl')
-    parser.add_argument('res_2', metavar = 'res_2.pkl')
+    utils.AddCommonCompareOptions(parser)
     parser.add_argument('--order-by-diff', '-o',
                         action = 'store_true', default = False,
                         help = 'Show results with bigger differences first.')

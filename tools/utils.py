@@ -15,6 +15,7 @@
 
 import os
 import subprocess
+import sys
 
 dir_tools = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_tools, '..'))
@@ -27,6 +28,7 @@ dir_framework = os.path.join(dir_root, 'framework')
 # Constant shared values that should not be modified.
 si_factors = {'m' : 0.001, 'n' : 0.000000001, 'u' : 0.000001}
 adb_default_target_string = '<default>'
+adb_default_target_copy_path = '/data/local/tmp'
 
 verbose = True
 
@@ -50,3 +52,34 @@ def PrettySIFactor(value):
 
 def VerbosePrint(msg):
     if verbose: print(msg)
+
+def Error(message, rc=1):
+    print('ERROR: ' + message)
+    sys.exit(rc)
+
+
+
+# Common arguments for `run` scripts.
+def AddCommonRunOptions(parser):
+    opts = parser.add_argument_group('options common to all `run` scripts')
+    opts.add_argument('--iterations', '-i',
+                      type=int,
+                      default=1,
+                      help="The number of iterations to run.")
+    opts.add_argument('--target', '-t',
+                      nargs='?', default=None, const=adb_default_target_string,
+                      help='Run on target adb device.')
+    opts.add_argument('--mode',
+                      choices = ['32', '64'], default = '',
+                      help='''When specified, force using the 32bit or 64bit
+                      architecture instead of the target primary architecture.
+                      This is only valid when running on target.''')
+    opts.add_argument('--target-copy-path',
+                      default = adb_default_target_copy_path,
+                      help = '''Path where objects should be copied on the
+                      target.''')
+
+# Common arguments for `compare` scripts.
+def AddCommonCompareOptions(parser):
+    parser.add_argument('res_1', metavar = 'res_1.pkl')
+    parser.add_argument('res_2', metavar = 'res_2.pkl')
