@@ -57,13 +57,13 @@ def TestCommand(command, _cwd=None):
 def TestBenchmarksOnHost():
     rc = 0
     # Test standard usage of the top-level scripts.
-    rc |= TestCommand(["./build.sh", "-w"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./build.sh"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py", "--dont-auto-calibrate"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
     non_root_path = os.path.join(utils.dir_root, "test", "foo", "bar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
-    rc |= TestCommand([os.path.join(utils.dir_root, "build.sh"), "-w"], _cwd=non_root_path)
+    rc |= TestCommand([os.path.join(utils.dir_root, "build.sh")], _cwd=non_root_path)
     rc |= TestCommand([os.path.join(utils.dir_root, "run.py")], _cwd=non_root_path)
     rc |= TestCommand(["rm", "-rf", non_root_path])
     # TODO: Abstract the app name.

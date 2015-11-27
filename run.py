@@ -102,8 +102,8 @@ def DeleteAppInDalvikCache(remote_copy_path, target):
     utils_adb.shell('rm -rf ' + os.path.join(remote_copy_path, 'dalvik-cache'), target)
 
 def BuildBenchmarks(build_for_target):
-    # Call the build script, with warnings treated as errors.
-    command = [os.path.join(dir_root, 'build.sh'), '-w']
+    # Call the build script.
+    command = [os.path.join(dir_root, 'build.sh')]
     if build_for_target:
         command += ['-t']
     utils.VerbosePrint(' '.join(command))

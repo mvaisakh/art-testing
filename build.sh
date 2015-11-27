@@ -28,9 +28,8 @@ DIR_FRAMEWORK=$DIR_ROOT/framework
 TARGET_BUILD=false
 # Set to true to print the commands executed.
 VERBOSE=false
-# Set to true to treat warnings as errors, in which case hitting a warning will
-# cause the script to exit.
-WERROR=false
+# Set to false to not treat build warnings as errors.
+WERROR=true
 
 
 
@@ -80,15 +79,15 @@ Options:
 	-h	Show this help message.
 	-t	Build for the target. Requires building from an Android environment.
 	-v	Verbose. Print the commands executed.
-	-w	Treat warnings as errors, causing them to abort.
+	-W	Do not treat build warnings as errors.
 "
 
-while getopts ':htlvw' option; do
+while getopts ':htlvW' option; do
   case "$option" in
     h) echo "$usage"; exit ;;
     t) TARGET_BUILD=true ;;
     v) VERBOSE=true ;;
-    w) WERROR=true ;;
+    W) WERROR=false ;;
     \?)
       printf "Illegal option: -%s\n" "$OPTARG" >&2
       echo "$usage"
