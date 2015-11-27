@@ -1,9 +1,7 @@
-build
 framework/org/linaro/bench/BenchmarkList.java
 # Python compiled files.
 *.pyc
 # Automatically generated.
 BenchmarkList.java
 # Output files.
-*.pkl
-*.json
+out

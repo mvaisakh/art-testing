@@ -65,7 +65,7 @@ def BuildOptions():
                         target.''')
     out_file_name = time.strftime("%Y.%m.%d-%H:%M:%S") + '.{type}'
     out_file_format = os.path.relpath(
-        os.path.join(utils.dir_root, '{type}', 'compilation_statistics', out_file_name))
+        os.path.join(utils.dir_out, '{type}', 'compilation_statistics', out_file_name))
     default_out_pkl = out_file_format.format(type = 'pkl')
     utils.ensure_dir(os.path.dirname(default_out_pkl))
     parser.add_argument('--output-pkl', default = default_out_pkl,

@@ -76,7 +76,7 @@ def BuildOptions():
                              specified.''')
     out_file_name = time.strftime("%Y.%m.%d-%H:%M:%S") + '.{type}'
     out_file_format = os.path.relpath(
-        os.path.join(utils.dir_root, '{type}', out_file_name))
+        os.path.join(utils.dir_out, '{type}', out_file_name))
     default_out_pkl = out_file_format.format(type = 'pkl')
     utils.ensure_dir(os.path.dirname(default_out_pkl))
     parser.add_argument('--output-pkl', default = default_out_pkl,
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     remote_apk = None
     if args.target:
         DeleteAppInDalvikCache(args.remote_copy_path, args.target)
-        apk = os.path.join(utils.dir_root, 'build/bench.apk')
+        apk = os.path.join(utils.dir_build, 'bench.apk')
         apk_name = os.path.basename(apk)
         utils_adb.push(apk, args.remote_copy_path, args.target)
         remote_apk = os.path.join(args.remote_copy_path, apk_name)

@@ -21,7 +21,8 @@ si_factors = {'m' : 0.001, 'n' : 0.000000001, 'u' : 0.000001}
 dir_tools = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_tools, '..'))
 dir_benchmarks = os.path.join(dir_root, 'benchmarks')
-dir_build = os.path.join(dir_root, 'build')
+dir_out = os.path.join(dir_root, 'out')
+dir_build = os.path.join(dir_out, 'build')
 dir_build_java_classes = os.path.join(dir_build, 'classes')
 dir_framework = os.path.join(dir_root, 'framework')
 
