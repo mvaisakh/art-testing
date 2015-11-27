@@ -59,6 +59,10 @@ warning() {
   $WERROR && exit 2
 }
 
+info() {
+  echo -e "${CORANGE}INFO: $*${CNC}" >&2
+}
+
 verbose_safe() {
   if $VERBOSE; then
     echo "$@"
@@ -73,6 +77,8 @@ verbose_safe() {
 
 usage="Usage: $(basename "$0")
 Build Java benchmark class, APK, and jar files.
+The script will automatically attempt to build the APK if the \`dx\` command is
+available in the PATH.
 Output files are produced in $DIR_BUILD.
 
 Options:
@@ -138,7 +144,12 @@ verbose_safe rm -rf $DIR_BUILD
 verbose_safe mkdir -p $DIR_BUILD/classes/
 verbose_safe javac -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
 verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
-if $TARGET_BUILD; then
+DX=$(which dx)
+if [ $TARGET_BUILD = "true" ] || [ -n "$DX" ]; then
+  if [ $TARGET_BUILD = "false" ]; then
+    info "This is not a target build (\`-t\` was not specified), but" \
+      "the \`dx\` command was found, so the APK will be built. (\`dx\`: $DX)"
+  fi
   if hash dx 2> /dev/null; then
     verbose_safe dx --dex --output $DIR_BUILD/bench.apk $DIR_BUILD/classes/
   else
