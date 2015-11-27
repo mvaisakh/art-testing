@@ -19,8 +19,8 @@ import utils
 
 default_remote_copy_path = '/data/local/tmp'
 
-def pull(f, local_path, target = '<default>'):
-    command = ['adb'] + (['-s', target] if target != '<default>' else []) + \
+def pull(f, local_path, target = utils.adb_default_target_string):
+    command = ['adb'] + (['-s', target] if target != utils.adb_default_target_string else []) + \
               ['pull', f, local_path]
     utils.VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
@@ -28,7 +28,7 @@ def pull(f, local_path, target = '<default>'):
 
 def push(f, target_path = default_remote_copy_path, target = None):
     command = ['adb', 'push', f, target_path]
-    if target != '<default>':
+    if target != utils.adb_default_target_string:
         command = ['adb', '-s', target, 'push', f, target_path]
     utils.VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
@@ -40,7 +40,7 @@ def shell(command_arg, target):
     # We need to quote the actual command in the text printed so it can be
     # copy-pasted and executed.
     command = ['adb', 'shell', command_arg]
-    if target != '<default>':
+    if target != utils.adb_default_target_string:
         command = ['adb', '-s', target, 'shell', command_arg]
     utils.VerbosePrint(' '.join(command))
     p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
