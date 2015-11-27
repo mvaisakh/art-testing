@@ -52,6 +52,23 @@ Steps to use the automation script:
   adb remount
   adb sync
 
+1.4 Build and install art-disassembler (it's part of <AOSP>) (Optional)
+  Without art-disassembler, you will not be able to see HIRs intermixed. To enable the HIR feature,
+you need to build the art-disassembler and push it to the device.
+1.4.1 Build art-disassembler
+  There are 3 choices to build the art-disassembler. You can choose any of them.
+  a) Minimal build (faster)
+    cd <AOSP>/art/disassembler
+    ART_BUILD_HOST_DEBUG=false ART_BUILD_HOST_NDEBUG=false ART_BUILD_TARGET_DEBUG=false ART_BUILD_TARGET_NDEBUG=true mm libart-disassembler -j 64
+  b) Easy build (slower)
+    m -j 64 libart-disassembler
+  c) Easy build (with perf)
+    m -j 64 perf libart-disassembler
+1.4.2 Push to device
+  adb root
+  adb remount
+  adb sync
+
 1.4 Download FlameGraph.
   cd <this_folder>
   ./download-flamegraph.sh

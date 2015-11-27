@@ -22,7 +22,7 @@ usage() {
   echo "  $(basename "$0") disassebmly < perf-out/cfg/bench.dalvikvm64.cfg > perf-out/cfg/bench.dalvikvm64.disassembly"
 }
 
-if [ $# -ne 3 ] ; then
+if [ $# -lt 1 ] ; then
   usage
   exit
 fi

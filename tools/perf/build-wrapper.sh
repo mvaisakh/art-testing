@@ -26,13 +26,26 @@ safe cd -
 # Clear dalvik cache.
 safe $ADB shell rm -f $UBENCH_REMOTE_DIR/dalvik-cache/*/$UBENCH_REMOTE_CACHE_FILE
 
+# Note: `test -e` is not used, because adb seems not return the correct exit value.
+# adb shell ls output error message to stdout, so use grep to test if file exists.
+if [ "$($ADB shell ls /system/lib*/*art-disassembler* | grep libart-disassembler)" != "" ] ; then
+HAS_ART_DISASSEMBLER=true
+else
+HAS_ART_DISASSEMBLER=false
+fi
+
 for dalvikvm in $REMOTE_DALVIKVMS ; do
   vm=$(basename $dalvikvm)
+  $HAS_ART_DISASSEMBLER && VM_CFG_FLAG="-Xcompiler-option -j1 -Xcompiler-option --dump-cfg=$UBENCH_REMOTE_DIR/bench.${vm}.cfg"
 # Trigger the build with debug symbols generated.
-  safe $ADB shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $vm -Xcompiler-option -g -Xcompiler-option -j1 -Xcompiler-option --dump-cfg=$UBENCH_REMOTE_DIR/bench.${vm}.cfg -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
-# Pull CFG file.
+  safe $ADB shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $vm -Xcompiler-option -g $VM_CFG_FLAG -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
   safe mkdir -p $CFG_FOLDER
-  safe $ADB pull $UBENCH_REMOTE_DIR/bench.${vm}.cfg $CFG_FOLDER
+# Pull CFG file if can be generated or create an empty one.
+  if $HAS_ART_DISASSEMBLER ; then
+    safe $ADB pull $UBENCH_REMOTE_DIR/bench.${vm}.cfg $CFG_FOLDER
+  else
+    safe touch $CFG_FOLDER/bench.${vm}.cfg
+  fi
 # Extract disassembly information from the CFG file.
   safe $SCRIPT_PATH/shrink-cfg.sh disassembly < $CFG_FOLDER/bench.${vm}.cfg > $CFG_FOLDER/bench.${vm}.disassembly
 done
