@@ -15,16 +15,21 @@
 # limitations under the License.
 
 import argparse
+import os
 import pickle
+import sys
 
-from tools import utils
-from tools import utils_stats
+dir_compilation_statistics = os.path.dirname(os.path.realpath(__file__))
+dir_tools = os.path.join(dir_compilation_statistics, '..')
+sys.path.insert(0, dir_tools)
 
-from compile_stats import CompileStats, MemoryUsage, OATSize, memory_stats_fields, time_stats_fields
+import utils
+import utils_stats
+from run import CompileStats, MemoryUsage, OATSize, memory_stats_fields, time_stats_fields
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
-        description = "Compare two results of the `compile_stats.py` script.",
+        description = "Compare two results of the associated `run.py` script.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('res_1', metavar = 'res_1.pkl')

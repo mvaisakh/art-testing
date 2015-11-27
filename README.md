@@ -1,23 +1,93 @@
 # ART Performance Tests
 
 
-## How to Run
 
-You can run the benchmarks with the `run.py` script, and obtain compilation
-statistics from a target adb device using `compile_stats.py`. Running on a
-device requires that the Android environment be set up, and the device be
-connected via adb. See either `run.py --help` or `compile_stats.py --help`
-for details.
+## General repository information.
 
-For example you can run on a target adb device:
-      ./run.py --iterations 5 --mode 64 --target
+The top-level contains scripts used to build, run, and compare the results of
+the Java benchmarks.
+Other tools are available under tools/<tool> for example to gather memory
+statistics or gather profiling information. See the [Tools][] section.
 
-Or on the host, with no adb device:
-      ./run.py --iterations 5
+All scripts must include a `--help` or `-h` command-line option displaying
+a useful help message.
 
-Running 5 iterations of the compilation process with the benchmarks and all
-APK files in ~/apk:
-      ./compile_stats.py -i5 build/bench.apk ~/apk
+
+## Running the benchmarks
+
+### Running via the script helper
+
+The benchmarks can be ran with the `run.py` script on host with
+
+    ./run.py
+
+To run the benchmarks on target, `dx` and `adb` need to be available in your
+`PATH`. This will be the case if you run from your Android environment.
+
+    ./run.py --target
+    ./run.py --target=<adb target device>
+
+`run.py` provides multiple options.
+
+    ./run.py --target --iterations=5 --filter "benchmarks/algorithm/Crypto*"
+
+
+### Running manually
+
+    ./build.sh
+
+On host
+
+    cd build/classes
+    java org/linaro/bench/RunBench --help
+    # Run all the benchmarks.
+    java org/linaro/bench/RunBench
+    # Run a specific benchmark.
+    java org/linaro/bench/RunBench benchmarks/micro/Base64
+    # Run a specific sub-benchmark.
+    java org/linaro/bench/RunBench benchmarks/micro/Base64.Encode
+    # Run the specified class directly without auto-calibration.
+    java benchmarks/micro/Base64
+
+And similarly on target
+
+    cd build/
+    adb push bench.apk /data/local/tmp
+    adb shell "cd /data/local/tmp && dalvikvm -cp /data/local/tmp/bench.apk org/linaro/bench/RunBench"
+    adb shell "cd /data/local/tmp && dalvikvm -cp /data/local/tmp/bench.apk org/linaro/bench/RunBench benchmarks/micro/Base64"
+    adb shell "cd /data/local/tmp && dalvikvm -cp /data/local/tmp/bench.apk org/linaro/bench/RunBench benchmarks/micro/Base64.Encode"
+    adb shell "cd /data/local/tmp && dalvikvm -cp /data/local/tmp/bench.apk benchmarks/micro/Base64"
+
+
+### Comparing the rsults
+
+The results of `run.py` can be compared using `compare.py`.
+
+
+    ./run.py --target --iterations=10 --output-pkl=/tmp/res1.pkl
+    ./run.py --target --iterations=10 --output-pkl=/tmp/res2.pkl
+    ./compare.py /tmp/res1.pkl /tmp/res2.pkl
+
+
+
+## Tools
+
+This repository includes other development tools and utilities.
+
+### Compilation statistics
+
+The `run.py` and `compare.py` scripts in `tools/compilation_statistics` allow
+collecting and comparing statistics about the APK compilation process on target.
+The options for these scripts are similar to the API for the top-level scripts.
+See `tools/compilation_statistics/run.py --help` and
+`tools/compilation_statistics/compare.py --help`.
+
+### Profiling
+
+The `tools/perf` directory includes tools to profile the Java benchmarks on
+target and generate an html output. See `tools/perf/PERF.README` for details.
+
+
 
 ## How to Write a Benchmark
 
