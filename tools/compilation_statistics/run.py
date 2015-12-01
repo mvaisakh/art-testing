@@ -118,12 +118,12 @@ def GetStats(apk, target, isa, target_copy_path, iterations, alloc_parser, size_
     compile_times = []
 
     for i in range(iterations):
-        rc, out, err = utils_adb.shell(command, target)
+        rc, out = utils_adb.shell(command, target)
         # To simplify parsing, assume that PID values are rarely recycled by the system.
         stats_command = 'logcat -dsv process dex2oat | grep "^I([[:space:]]*' + \
-                        out.decode().rstrip() + ').*took" | tail -n1'
-        rc, out, err = utils_adb.shell(stats_command, target)
-        alloc_stats = alloc_parser.match(out.decode())
+                        out.rstrip() + ').*took" | tail -n1'
+        rc, out = utils_adb.shell(stats_command, target)
+        alloc_stats = alloc_parser.match(out)
 
         if not alloc_stats:
             print('ERROR: dex2oat failed; check adb logcat.')
@@ -141,11 +141,11 @@ def GetStats(apk, target, isa, target_copy_path, iterations, alloc_parser, size_
     local_oat = os.path.join(utils.dir_root, work_dir, apk + '.oat')
     utils_adb.pull(oat, local_oat)
     command = ['size', '-A', '-d', local_oat]
-    out, err = subprocess.Popen(command, stdout = subprocess.PIPE).communicate()
+    rc, outerr = utils.Command(command)
     section_sizes = dict()
     total_size = 0
 
-    for s in size_parser.findall(out.decode()):
+    for s in size_parser.findall(outerr):
         value = int(s[1])
 
         if s[0] in sections:
@@ -160,18 +160,18 @@ def GetISA(target, mode):
         # To be consistent with RunBenchADB(), the default mode depends on the executable
         # /system/bin/dalvikvm points to.
         command = 'readlink /system/bin/dalvikvm'
-        rc, out, err = utils_adb.shell(command, target)
+        rc, out = utils_adb.shell(command, target)
 
         # The default (e.g. if /system/bin/dalvikvm is not a soft link) is 64-bit.
-        if '32' in out.decode():
+        if '32' in out:
             mode = '32'
         else:
             mode = '64'
 
     # The 32-bit ISA name should be a substring of the 64-bit one.
     command = 'getprop | grep "dalvik\.vm\.isa\..*\.variant" | cut -d "." -f4 | sort'
-    rc, out, err = utils_adb.shell(command, target)
-    isa_list = out.decode().split()
+    rc, out = utils_adb.shell(command, target)
+    isa_list = out.split()
 
     if mode == '64':
         # 64-bit ISA names should contain '64'.

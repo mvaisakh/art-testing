@@ -17,31 +17,35 @@ import subprocess
 
 import utils
 
-def pull(f, local_path, target = utils.adb_default_target_string):
-    command = ['adb'] + (['-s', target] if target != utils.adb_default_target_string else []) + \
-              ['pull', f, local_path]
-    utils.VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    return p.communicate()
 
-def push(f, target_path = utils.adb_default_target_copy_path, target = None):
-    command = ['adb', 'push', f, target_path]
-    if target != utils.adb_default_target_string:
-        command = ['adb', '-s', target, 'push', f, target_path]
-    utils.VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    return p.communicate()
+def GetTargetArgs(target):
+    return ['-s', target] if target != utils.adb_default_target_string else []
 
 
-# `command` is expected to be a string, not a list.
-def shell(command_arg, target):
+def pull(f,
+         local_path,
+         target=utils.adb_default_target_string,
+         exit_on_error=True):
+    return utils.Command(
+        ['adb'] + GetTargetArgs(target) + ['pull', f, local_path],
+        exit_on_error)
+
+
+def push(f,
+         target_path=utils.adb_default_target_copy_path,
+         target=utils.adb_default_target_string,
+         exit_on_error=True):
+    return utils.Command(
+        ['adb'] + GetTargetArgs(target) + ['push', f, target_path],
+        exit_on_error)
+
+
+# `command_string` is expected to be a string, not a list.
+def shell(command_string,
+          target=utils.adb_default_target_string,
+          exit_on_error=True):
     # We need to quote the actual command in the text printed so it can be
     # copy-pasted and executed.
-    command = ['adb', 'shell', command_arg]
-    if target != utils.adb_default_target_string:
-        command = ['adb', '-s', target, 'shell', command_arg]
-    utils.VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    rc = p.wait()
-    out, err = p.communicate()
-    return rc, out, err
+    return utils.Command(
+        ['adb'] + GetTargetArgs(target) + ['shell', command_string],
+        exit_on_error)

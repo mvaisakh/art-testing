@@ -1,4 +1,4 @@
-#    Copyright 2015 ARM Limited
+#    Copyright 2015 Linaro Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import pickle
 import subprocess
 import sys
 import time
+import traceback
 
 
 dir_tools = os.path.dirname(os.path.realpath(__file__))
@@ -29,12 +30,41 @@ dir_build = os.path.join(dir_out, 'build')
 dir_build_java_classes = os.path.join(dir_build, 'classes')
 dir_framework = os.path.join(dir_root, 'framework')
 
+
 # Constant shared values that should not be modified.
 si_factors = {'m' : 0.001, 'n' : 0.000000001, 'u' : 0.000001}
 adb_default_target_string = '<default>'
 adb_default_target_copy_path = '/data/local/tmp'
 
+# Printing helpers.
+
+redirected_output = not sys.stdout.isatty()
 verbose = True
+
+def ColourCode(colour):
+  return '' if redirected_output else colour
+
+COLOUR_GREEN = ColourCode("\x1b[0;32m")
+COLOUR_ORANGE = ColourCode("\x1b[0;33m")
+COLOUR_RED = ColourCode("\x1b[0;31m")
+NO_COLOUR = ColourCode("\x1b[0m")
+
+def Warning(message):
+    print(COLOUR_ORANGE + 'WARNING: ' + message + NO_COLOUR,
+          file=sys.stderr)
+    traceback.print_stack()
+
+def Error(message, rc=1):
+    print(COLOUR_RED + 'ERROR: ' + message + NO_COLOUR,
+          file=sys.stderr)
+    traceback.print_stack()
+    sys.exit(rc)
+
+def VerbosePrint(message):
+    if verbose:
+        print(message)
+
+
 
 def ensure_dir(path):
     if not os.path.exists(path):
@@ -54,12 +84,22 @@ def PrettySIFactor(value):
 
     return si_factor, si_prefix
 
-def VerbosePrint(msg):
-    if verbose: print(msg)
-
-def Error(message, rc=1):
-    print('ERROR: ' + message)
-    sys.exit(rc)
+# Wrapper around `subprocess.Popen` returning the output of the given command.
+def Command(command, exit_on_error=True, cwd=None):
+    VerbosePrint(' '.join(command))
+    p = subprocess.Popen(command,
+                         cwd=cwd,
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    outerr, empty_err = p.communicate()
+    outerr = outerr.decode()
+    rc = p.returncode
+    if rc:
+        message = 'Command failed:\n' + ' '.join(command) + '\n' + outerr
+        if exit_on_error:
+            Error(message)
+        else:
+            Warning(message)
+    return rc, outerr
 
 
 
