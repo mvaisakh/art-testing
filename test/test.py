@@ -61,7 +61,7 @@ def TestBenchmarksOnHost():
     rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py", "--dont-auto-calibrate"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
-    non_root_path = os.path.join(utils.dir_root, "test", "foo", "bar")
+    non_root_path = os.path.join(utils.dir_root, "test", "foobar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
     rc |= TestCommand([os.path.join(utils.dir_root, "build.sh")], _cwd=non_root_path)
     rc |= TestCommand([os.path.join(utils.dir_root, "run.py")], _cwd=non_root_path)
