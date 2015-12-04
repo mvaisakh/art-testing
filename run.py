@@ -240,5 +240,5 @@ if __name__ == "__main__":
         print('Wrote results to %s.' % output_filename)
 
     if rc != 0:
-        print("ERROR: The benchmarks did *not* run successfully. (rc = %d)" % rc)
+        utils.Error("The benchmarks did *not* run successfully. (rc = %d)" % rc)
     sys.exit(rc)

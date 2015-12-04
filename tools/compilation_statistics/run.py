@@ -126,8 +126,7 @@ def GetStats(apk, target, isa, target_copy_path, iterations, alloc_parser, size_
         alloc_stats = alloc_parser.match(out)
 
         if not alloc_stats:
-            print('ERROR: dex2oat failed; check adb logcat.')
-            sys.exit(-1)
+            utils.Error('dex2oat failed; check adb logcat.')
 
         compile_times.append(utils.GetTimeValue(float(alloc_stats.group(1)), alloc_stats.group(2)))
 
@@ -178,8 +177,7 @@ def GetISA(target, mode):
         isa = next((i for i in isa_list if mode in i), None)
 
         if not isa:
-            print('ERROR: The target adb device does not support 64-bit mode.')
-            sys.exit(-1)
+            utils.Error('The target adb device does not support 64-bit mode.')
     else:
         # The 32-bit ISA name comes first.
         isa = isa_list[0]
@@ -214,8 +212,7 @@ def CollectStats(target, mode, target_copy_path, iterations, pathnames):
 if __name__ == "__main__":
     # TODO: Mac OS support
     if os.uname().sysname != 'Linux':
-        print('ERROR: Running this script is supported only on Linux.')
-        sys.exit(-1)
+        utils.Error('Running this script is supported only on Linux.')
 
     args = BuildOptions()
     utils.verbose = not args.noverbose
