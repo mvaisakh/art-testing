@@ -15,8 +15,6 @@
 # limitations under the License.
 #
 
-# TODO: error handling
-
 import argparse
 import csv
 import fnmatch
