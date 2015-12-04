@@ -72,12 +72,7 @@ def BuildOptions():
     return args
 
 def host_java(command):
-    utils.VerbosePrint(' '.join(command))
-    p = subprocess.Popen(command, cwd = utils.dir_build_java_classes,
-                         stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    rc = p.wait()
-    out, err = p.communicate()
-    return rc, out, err
+    return utils.Command(command, cwd=utils.dir_build_java_classes)
 
 def DeleteAppInDalvikCache(target_copy_path, target):
     # We delete the entire dalvik-cache in the test path.
@@ -90,8 +85,7 @@ def BuildBenchmarks(build_for_target):
     command = [os.path.join(dir_root, 'build.sh')]
     if build_for_target:
         command += ['-t']
-    utils.VerbosePrint(' '.join(command))
-    subprocess.check_call(command)
+    utils.Command(command)
 
 def RunBenchADB(mode, auto_calibrate, apk, classname, target):
     dalvikvm = 'dalvikvm%s' % mode
@@ -105,16 +99,14 @@ def RunBenchADB(mode, auto_calibrate, apk, classname, target):
         command += " %s" % (classname)
     if utils.verbose:
         command += " --debug"
-    rc, out, err = utils_adb.shell(command, target)
-    return rc, out.decode(), err.decode()
+    return utils_adb.shell(command, target, exit_on_error=False)
 
 def RunBenchHost(mode, auto_calibrate, apk, classname, target):
     if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
         command = ['java', classname]
-    rc, out, err = host_java(command)
-    return rc, out.decode(), err.decode()
+    return host_java(command)
 
 
 # TODO: Avoid using global variables.
@@ -129,27 +121,21 @@ def RunBench(apk, classname,
     rc = 0
     for iteration in range(iterations):
         try:
-            local_rc, out, err = run_helper(mode,
-                                            auto_calibrate,
-                                            apk,
-                                            classname,
-                                            target)
+            local_rc, outerr = run_helper(mode,
+                                          auto_calibrate,
+                                          apk,
+                                          classname,
+                                          target)
             rc += local_rc
-            out = out.rstrip('\n')
-            if local_rc != 0:
-                print("ERROR:")
-                print(err)
-                print(out)
-            elif utils.verbose:
-                print(out)
+            outerr = outerr.rstrip('\n')
+            utils.VerbosePrint(outerr)
         except Exception as e:
-            print(e)
-            sys.stderr.write("  \-> FAILED, continuing anyway\n")
+            utils.Warning(str(e) + "\n  \-> FAILED, continuing anyway\n")
             rc += 1
             continue
 
         try:
-            for line in out.rstrip().split("\n"):
+            for line in outerr.rstrip().split("\n"):
                 name = line.split(":")[0].rstrip()
                 # Ignore any java logging from --debug
                 if name not in ['INFO', 'DEBUG', 'ERROR']:
@@ -158,8 +144,7 @@ def RunBench(apk, classname,
                         result[name] = list()
                     result[name].append(score)
         except Exception as e:
-            print(e)
-            print("  \-> Error parsing output from %s" % classname)
+            utils.Warning(str(e) + "\n  \-> Error parsing output from %s")
             rc += 1
             break
 
@@ -186,9 +171,10 @@ def RunBenchs(apk, bench_names,
 
 
 def ListAllBenchmarks():
-    out = subprocess.check_output(['java', 'org.linaro.bench.RunBench', '--list_benchmarks'],
-                                  cwd=utils.dir_build_java_classes)
-    out = out.decode().rstrip()
+    rc, out = utils.Command(
+        ['java', 'org.linaro.bench.RunBench', '--list_benchmarks'],
+        cwd=utils.dir_build_java_classes)
+    out = out.rstrip()
     benchs = out.split('\n')
     return benchs
 
