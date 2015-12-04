@@ -27,12 +27,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RunBench {
-  // Minimum valid calibration time: 400ms.
+  // Minimum valid calibration time.
   public static final long DEFAULT_CALIBRATION_MIN_TIME_NS =
-      TimeUnit.NANOSECONDS.convert(400, TimeUnit.MILLISECONDS);
-  // The target benchmark running time: 2s.
+      TimeUnit.NANOSECONDS.convert(50, TimeUnit.MILLISECONDS);
+  // The target benchmark running time.
   public static final long DEFAULT_BENCH_TARGET_RUN_TIME_NS =
-      TimeUnit.NANOSECONDS.convert(2, TimeUnit.SECONDS);
+      TimeUnit.NANOSECONDS.convert(200, TimeUnit.MILLISECONDS);
   public static final int ITERATIONS_LIMIT = 0x400000;
 
   // A method with this name will be executed as a microbenchmark.
