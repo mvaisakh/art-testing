@@ -36,6 +36,9 @@ dir_framework = os.path.join(dir_root, 'framework')
 si_factors = {'m' : 0.001, 'n' : 0.000000001, 'u' : 0.000001}
 adb_default_target_string = '<default>'
 adb_default_target_copy_path = '/data/local/tmp'
+default_mode = ''
+default_compiler_mode = None
+default_n_iterations = 1
 
 # Printing helpers.
 
@@ -129,13 +132,13 @@ def AddCommonRunOptions(parser):
     opts = parser.add_argument_group('options common to all `run` scripts')
     opts.add_argument('--iterations', '-i',
                       type=int,
-                      default=1,
+                      default=default_n_iterations,
                       help="The number of iterations to run.")
     opts.add_argument('--target', '-t',
                       nargs='?', default=None, const=adb_default_target_string,
                       help='Run on target adb device.')
     opts.add_argument('--mode',
-                      choices = ['32', '64'], default = '',
+                      choices = ['32', '64'], default = default_mode,
                       help='''When specified, force using the 32bit or 64bit
                       architecture instead of the target primary architecture.
                       This is only valid when running on target.''')
@@ -145,6 +148,29 @@ def AddCommonRunOptions(parser):
                       target.''')
     opts.add_argument('--noverbose', action=SetVerbosity, nargs=0,
                       help='Do not print extra information and commands run.')
+    opts.add_argument('--compiler-mode', choices=['optimizing', 'quick'],
+                      default=default_compiler_mode,
+                      help='''The compiler to use on target. When this option is
+                      not specified no additional arguments are passed so the
+                      default compiler on the target is used.''')
+
+def ValidateCommonRunOptions(args):
+    options_requiring_target_mode = ['mode', 'compiler-mode']
+    if not args.target:
+        for opt in options_requiring_target_mode:
+            if getattr(args, opt.replace('-', '_')):
+                Error('The `--%s` option is only valid when `--target` is specified.' % opt)
+
+# Returns a list of `dex2oat` options for the compiler.
+def GetDex2oatOptions(compiler_mode):
+    if compiler_mode is None:
+        return []
+    elif compiler_mode == 'optimizing':
+        return ['--compiler-backend=Optimizing']
+    elif compiler_mode == 'quick':
+        return ['--compiler-backend=Quick']
+    else:
+        Error('Unsupported compiler mode: ' + compiler_mode)
 
 
 default_output_formats = ['pkl', 'json']

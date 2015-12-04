@@ -63,8 +63,7 @@ def BuildOptions():
 
     # This cannot fire for now since this script always runs on target, but
     # eventually we may want to run on host as well.
-    if args.mode and not args.target:
-        utils.Error('The `--mode` option is only valid when `--target` is specified.')
+    utils.ValidateCommonRunOptions(args)
 
     return args
 
@@ -106,12 +105,23 @@ def PrintStatsTable(apk, stats):
     utils_stats.PrintTable([apk, ''], ['s', 's'], GetTimeEntries(stats) + GetMemoryEntries(stats) + \
                                                   GetSizeEntries(stats))
 
-def GetStats(apk, target, isa, target_copy_path, iterations, alloc_parser, size_parser, work_dir):
+def GetStats(apk,
+             target,
+             isa,
+             compiler_mode,
+             target_copy_path,
+             iterations,
+             alloc_parser,
+             size_parser,
+             work_dir):
     apk_path = os.path.join(target_copy_path, apk)
     oat = apk_path + '.oat'
     # Only the output of the first command is necessary; execute in a subshell to guarantee PID value;
     # only one thread is used for compilation to reduce measurement noise.
-    command = '(echo $BASHPID && exec dex2oat -j1 --dex-file=' + apk_path + ' --oat-file=' + oat
+    dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
+    command = '(echo $BASHPID && exec dex2oat -j1 ' + \
+        ' '.join(dex2oat_options) + \
+        ' --dex-file=' + apk_path + ' --oat-file=' + oat
     command += ' --instruction-set=' + isa + ') | head -n1'
     compile_times = []
 
@@ -201,7 +211,8 @@ def GetCompilationStats(args):
 
     for apk in apk_list:
         utils_adb.push(apk, args.target_copy_path, args.target)
-        res.update(GetStats(os.path.basename(apk), args.target, isa, args.target_copy_path,
+        res.update(GetStats(os.path.basename(apk), args.target, isa,
+                            args.compiler_mode, args.target_copy_path,
                             args.iterations, alloc_parser, size_parser, work_dir))
 
     shutil.rmtree(work_dir)

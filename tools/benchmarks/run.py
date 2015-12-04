@@ -36,9 +36,6 @@ bench_runner_main = 'org.linaro.bench.RunBench'
 
 # Options
 
-default_mode = ''
-default_n_iterations = 1
-
 def BuildOptions():
     parser = argparse.ArgumentParser(
         description = "Run java benchmarks.",
@@ -62,8 +59,7 @@ def BuildOptions():
 
     args = parser.parse_args()
 
-    if args.mode and not args.target:
-        utils.Error('The `--mode` option is only valid when `--target` is specified.')
+    utils.ValidateCommonRunOptions(args)
 
     return args
 
@@ -83,7 +79,7 @@ def BuildBenchmarks(build_for_target):
         command += ['-t']
     utils.Command(command)
 
-def RunBenchADB(mode, auto_calibrate, apk, classname, target):
+def RunBenchADB(mode, compiler_mode, auto_calibrate, apk, classname, target):
     format_data={'workdir': os.path.dirname(apk)}
     # Escaping through `adb shell` is fiddly, so we expand the path fully in
     # the environment configuration.
@@ -102,12 +98,24 @@ def RunBenchADB(mode, auto_calibrate, apk, classname, target):
     if utils.verbose:
         apk_arguments += " --debug"
 
+    dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
+    for opt in dex2oat_options:
+        dalvikvm_options += ' -Xcompiler-option %s' % opt
+        # We want the compiler options to be used both for the APK and the
+        # boot-image.
+        dalvikvm_options += ' -Ximage-compiler-option %s' % opt
+
     command = 'cd {workdir} && ' + ' '.join([environment_config, dalvikvm, dalvikvm_options, '-cp', apk, apk_arguments])
     command = command.format(**format_data)
 
     return utils_adb.shell(command, target, exit_on_error=False)
 
-def RunBenchHost(mode, auto_calibrate, apk, classname, target):
+def RunBenchHost(ignored_mode,
+                 ignored_compiler_mode,
+                 auto_calibrate,
+                 ignored_apk,
+                 classname,
+                 ignored_target):
     if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
@@ -121,13 +129,15 @@ result = dict()
 def RunBench(apk, classname,
              run_helper,
              auto_calibrate,
-             iterations = default_n_iterations,
-             mode = default_mode,
+             iterations = utils.default_n_iterations,
+             mode = utils.default_mode,
+             compiler_mode = utils.default_compiler_mode,
              target = None):
     rc = 0
     for iteration in range(iterations):
         try:
             local_rc, outerr = run_helper(mode,
+                                          compiler_mode,
                                           auto_calibrate,
                                           apk,
                                           classname,
@@ -161,7 +171,9 @@ def RunBench(apk, classname,
 def RunBenchs(apk, bench_names,
               target,
               auto_calibrate,
-              iterations = default_n_iterations, mode = default_mode):
+              iterations=utils.default_n_iterations,
+              mode=utils.default_mode,
+              compiler_mode=utils.default_compiler_mode):
     rc = 0
     utils.VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
     run_helper = RunBenchADB if target else RunBenchHost
@@ -172,6 +184,7 @@ def RunBenchs(apk, bench_names,
                        auto_calibrate,
                        iterations = iterations,
                        mode = mode,
+                       compiler_mode = compiler_mode,
                        target = target)
     return rc
 
@@ -237,7 +250,8 @@ def GetBenchmarkStats(args):
                    args.target,
                    not args.no_auto_calibrate,
                    args.iterations,
-                   args.mode)
+                   args.mode,
+                   args.compiler_mode)
 
     if rc:
         utils.Error("The benchmarks did *not* run successfully. (rc = %d)" % rc, rc)
