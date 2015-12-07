@@ -53,8 +53,6 @@ def BuildOptions():
                         function directly.''')
     parser.add_argument('-n', '--norun', action='store_true',
                         help='Build and configure everything, but do not run the benchmarks.')
-    parser.add_argument('--noverbose', action='store_true', default = False,
-                        help='Do not print extra information and commands run.')
     parser.add_argument('-f', '--filter', action = 'append',
                         help='Quoted (benchmark name) filter pattern.')
     parser.add_argument('-F', '--filter-out', action = 'append',
@@ -191,7 +189,6 @@ def FilterBenchmarks(benchmarks, filter, filter_out):
 
 if __name__ == "__main__":
     args = BuildOptions()
-    utils.verbose = not args.noverbose
     BuildBenchmarks(args.target)
 
     remote_apk = None

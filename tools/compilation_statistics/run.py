@@ -54,8 +54,6 @@ def BuildOptions():
                         name for which compilation statistics should be collected.''')
     utils.AddCommonRunOptions(parser)
     utils.AddOutputFormatOptions(parser, utils.default_output_formats)
-    parser.add_argument('--noverbose', action='store_true', default = False,
-                        help='Do not print extra information and commands run.')
 
     # TODO: Support running on host?
     # For now override the default value for the `--target`.
@@ -215,7 +213,6 @@ if __name__ == "__main__":
         utils.Error('Running this script is supported only on Linux.')
 
     args = BuildOptions()
-    utils.verbose = not args.noverbose
     stats = CollectStats(args.target, args.mode, args.target_copy_path, args.iterations, args.pathnames)
     apk_list = sorted(stats)
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 
+import argparse
 import json
 import os
 import pickle
@@ -115,6 +116,13 @@ def Command(command, exit_on_error=True, cwd=None):
 
 
 
+class SetVerbosity(argparse.Action):
+    def __init__(self, option_strings, dest, nargs, **kwargs):
+        super(SetVerbosity, self).__init__(option_strings, dest, nargs, **kwargs)
+    def __call__(self, parser, namespace, values, option_string):
+        global verbose
+        verbose = False
+
 # Common arguments for `run` scripts.
 def AddCommonRunOptions(parser):
     opts = parser.add_argument_group('options common to all `run` scripts')
@@ -134,6 +142,8 @@ def AddCommonRunOptions(parser):
                       default = adb_default_target_copy_path,
                       help = '''Path where objects should be copied on the
                       target.''')
+    opts.add_argument('--noverbose', action=SetVerbosity, nargs=0,
+                      help='Do not print extra information and commands run.')
 
 
 default_output_formats = ['pkl', 'json']
