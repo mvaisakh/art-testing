@@ -67,8 +67,14 @@ def VerbosePrint(message):
 
 
 def ensure_dir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+    try:
+        if os.path.exists(path):
+            if not os.path.isdir(path):
+                Error('`%s` exists but is not a directory.' % path)
+        else:
+            os.makedirs(path)
+    except:
+        Error('Failed to ensure the directory `%s` exists.' % path)
 
 def GetTimeValue(value, si_prefix):
     return value * si_factors[si_prefix] if si_prefix else value
