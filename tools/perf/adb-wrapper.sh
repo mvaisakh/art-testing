@@ -23,10 +23,12 @@ adbshellstrip() {
 
 if [ "x-$1" != "x-shell" ] ; then
   adb "$@"
+elif [ $# -eq 1 ] ; then
+  # adb shell without specified command
+  adbshellstrip
 else
-  shift
-  cmd=$1
-  shift
+  cmd=$2
+  shift 2
   cmd_fullpath=$(adbshellstrip which $cmd)
   cmd_realpath=$(adbshellstrip realpath $cmd_fullpath)
   # Always prefer toybox.
@@ -36,4 +38,3 @@ else
     adbshellstrip $cmd "$@"
   fi
 fi
-
