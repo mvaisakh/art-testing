@@ -67,6 +67,9 @@ def VerbosePrint(message):
 
 
 def ensure_dir(path):
+    if path == '':
+        # This can happen when a user refers to the current working directory.
+        return
     try:
         if os.path.exists(path):
             if not os.path.isdir(path):
