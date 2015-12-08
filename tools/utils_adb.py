@@ -46,6 +46,6 @@ def shell(command_string,
           exit_on_error=True):
     # We need to quote the actual command in the text printed so it can be
     # copy-pasted and executed.
-    return utils.Command(
-        ['adb'] + GetTargetArgs(target) + ['shell', command_string],
-        exit_on_error)
+    command = ['adb'] + GetTargetArgs(target) + ['shell', '"' + command_string + '"']
+    command = ' '.join(command)
+    return utils.Command(command, exit_on_error, shell=True)

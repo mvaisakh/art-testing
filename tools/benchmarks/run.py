@@ -84,7 +84,10 @@ def BuildBenchmarks(build_for_target):
     utils.Command(command)
 
 def RunBenchADB(mode, auto_calibrate, apk, classname, target):
-    environment_config = 'ANDROID_DATA=`pwd` DEX_LOCATION=`pwd`'
+    format_data={'workdir': os.path.dirname(apk)}
+    # Escaping through `adb shell` is fiddly, so we expand the path fully in
+    # the environment configuration.
+    environment_config = 'ANDROID_DATA={workdir} DEX_LOCATION={workdir}'
     dalvikvm = 'dalvikvm%s' % mode
     dalvikvm_options = ''
     apk_arguments = ''
@@ -100,7 +103,7 @@ def RunBenchADB(mode, auto_calibrate, apk, classname, target):
         apk_arguments += " --debug"
 
     command = 'cd {workdir} && ' + ' '.join([environment_config, dalvikvm, dalvikvm_options, '-cp', apk, apk_arguments])
-    command = command.format(workdir=os.path.dirname(apk))
+    command = command.format(**format_data)
 
     return utils_adb.shell(command, target, exit_on_error=False)
 
