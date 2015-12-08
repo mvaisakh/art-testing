@@ -71,6 +71,12 @@ def TestBenchmarksOnHost():
                        # Reduce the duration of the tests.
                        "--filter", "benchmarks/algorithm/NSieve"],
                       _cwd=non_root_path)
+    # Test that the `--output-*` option work even when a path prefix is not specified.
+    rc |= TestCommand([os.path.join(utils.dir_root, "run.py"),
+                       # Reduce the duration of the tests.
+                       "--filter", "benchmarks/algorithm/CryptoMD5",
+                       "--output-pkl=no_path_prefix.pkl"],
+                      _cwd=non_root_path)
     rc |= TestCommand(["rm", "-rf", non_root_path])
     # TODO: Abstract the app name.
     rc |= TestCommand(["java", "org.linaro.bench.RunBench", "benchmarks/micro/Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=utils.dir_build_java_classes)
