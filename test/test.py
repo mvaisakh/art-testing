@@ -41,7 +41,8 @@ def BuildOptions():
 
 
 def TestCommand(command, _cwd=None):
-    printable_command = ' '.join(command)
+    escape_wildcards = lambda x: x if not '*' in x else '"' + x + '"'
+    printable_command = ' '.join(list(map(escape_wildcards, command)))
     if _cwd is not None:
         printable_command = "cd " + _cwd + " && " + printable_command
     print("Testing: " + printable_command)
@@ -58,13 +59,18 @@ def TestBenchmarksOnHost():
     rc = 0
     # Test standard usage of the top-level scripts.
     rc |= TestCommand(["./build.sh"], _cwd=utils.dir_root)
+    # Two full runs of `run.py`, with and without auto-calibration. Later runs
+    # can use specific benchmarks to reduce the duration of the tests.
     rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py", "--dont-auto-calibrate"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
     non_root_path = os.path.join(utils.dir_root, "test", "foobar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
     rc |= TestCommand([os.path.join(utils.dir_root, "build.sh")], _cwd=non_root_path)
-    rc |= TestCommand([os.path.join(utils.dir_root, "run.py")], _cwd=non_root_path)
+    rc |= TestCommand([os.path.join(utils.dir_root, "run.py"),
+                       # Reduce the duration of the tests.
+                       "--filter", "benchmarks/algorithm/NSieve"],
+                      _cwd=non_root_path)
     rc |= TestCommand(["rm", "-rf", non_root_path])
     # TODO: Abstract the app name.
     rc |= TestCommand(["java", "org.linaro.bench.RunBench", "benchmarks/micro/Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=utils.dir_build_java_classes)
@@ -84,8 +90,9 @@ def TestLint(jobs = 1):
 
 def TestCompareScript():
     rc = 0
-    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"], _cwd=utils.dir_root)
-    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"], _cwd=utils.dir_root)
+    benchmarks_filter = ["--filter", "benchmarks/algorithm/*"]
+    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
