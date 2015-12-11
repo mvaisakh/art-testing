@@ -25,8 +25,8 @@ import time
 
 from collections import OrderedDict
 
-dir_root = os.path.dirname(os.path.realpath(__file__))
-dir_tools = os.path.join(dir_root, 'tools')
+dir_benchs = os.path.dirname(os.path.realpath(__file__))
+dir_tools = os.path.join(dir_benchs, '..')
 sys.path.insert(0, dir_tools)
 import utils
 import utils_adb
@@ -78,7 +78,7 @@ def DeleteAppInDalvikCache(target_copy_path, target):
 
 def BuildBenchmarks(build_for_target):
     # Call the build script.
-    command = [os.path.join(dir_root, 'build.sh')]
+    command = [os.path.join(utils.dir_root, 'build.sh')]
     if build_for_target:
         command += ['-t']
     utils.Command(command)

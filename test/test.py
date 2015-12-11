@@ -55,24 +55,28 @@ def TestCommand(command, _cwd=None):
     return rc
 
 
+run_py = os.path.join(".", "tools", "benchmarks", "run.py")
+compare_py = os.path.join(".", "tools", "benchmarks", "compare.py")
+
+
 def TestBenchmarksOnHost():
     rc = 0
     # Test standard usage of the top-level scripts.
     rc |= TestCommand(["./build.sh"], _cwd=utils.dir_root)
     # Two full runs of `run.py`, with and without auto-calibration. Later runs
     # can use specific benchmarks to reduce the duration of the tests.
-    rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
-    rc |= TestCommand(["./run.py", "--dont-auto-calibrate"], _cwd=utils.dir_root)
+    rc |= TestCommand([run_py], _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--dont-auto-calibrate"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
     non_root_path = os.path.join(utils.dir_root, "test", "foobar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
     rc |= TestCommand([os.path.join(utils.dir_root, "build.sh")], _cwd=non_root_path)
-    rc |= TestCommand([os.path.join(utils.dir_root, "run.py"),
+    rc |= TestCommand([os.path.join(utils.dir_root, run_py),
                        # Reduce the duration of the tests.
                        "--filter", "benchmarks/algorithm/NSieve"],
                       _cwd=non_root_path)
     # Test that the `--output-*` option work even when a path prefix is not specified.
-    rc |= TestCommand([os.path.join(utils.dir_root, "run.py"),
+    rc |= TestCommand([os.path.join(utils.dir_root, run_py),
                        # Reduce the duration of the tests.
                        "--filter", "benchmarks/algorithm/CryptoMD5",
                        "--output-pkl=no_path_prefix.pkl"],
@@ -97,11 +101,11 @@ def TestLint(jobs = 1):
 def TestCompareScript():
     rc = 0
     benchmarks_filter = ["--filter", "benchmarks/algorithm/*"]
-    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
-    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
-    rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand(["./compare.py", "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand(["./compare.py", "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-pkl=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-pkl=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
 

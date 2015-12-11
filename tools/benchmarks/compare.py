@@ -16,12 +16,17 @@
 #
 
 import argparse
+import os
 import pickle
+import sys
 
 from collections import OrderedDict
 
-from tools import utils
-from tools import utils_stats
+dir_benchs = os.path.dirname(os.path.realpath(__file__))
+dir_tools = os.path.join(dir_benchs, '..')
+sys.path.insert(0, dir_tools)
+import utils
+import utils_stats
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
