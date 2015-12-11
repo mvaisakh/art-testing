@@ -67,6 +67,8 @@ def TestBenchmarksOnHost():
     # can use specific benchmarks to reduce the duration of the tests.
     rc |= TestCommand([run_py], _cwd=utils.dir_root)
     rc |= TestCommand([run_py, "--dont-auto-calibrate"], _cwd=utils.dir_root)
+    # Test the wrapper script.
+    rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
     non_root_path = os.path.join(utils.dir_root, "test", "foobar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
@@ -75,6 +77,7 @@ def TestBenchmarksOnHost():
                        # Reduce the duration of the tests.
                        "--filter", "benchmarks/algorithm/NSieve"],
                       _cwd=non_root_path)
+    rc |= TestCommand([os.path.join(utils.dir_root, "./run.py")], _cwd=non_root_path)
     # Test that the `--output-*` option work even when a path prefix is not specified.
     rc |= TestCommand([os.path.join(utils.dir_root, run_py),
                        # Reduce the duration of the tests.
@@ -106,6 +109,10 @@ def TestCompareScript():
     rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    # Test the wrapper scripts.
+    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
 

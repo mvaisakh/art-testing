@@ -89,6 +89,13 @@ def PrintStatsDiff(apk, stats_1, stats_2):
                            GetTimeEntries(stats_1, stats_2) + GetMemoryEntries(stats_1, stats_2) + \
                            GetSizeEntries(stats_1, stats_2))
 
+def PrintDiff(stats_1, stats_2):
+    apk_list = [apk for apk in sorted(stats_1.keys()) if apk in stats_2]
+
+    for apk in apk_list:
+        PrintStatsDiff(apk, stats_1[apk], stats_2[apk])
+        print('')
+
 if __name__ == "__main__":
     args = BuildOptions()
     pkl_file_1 = open(args.res_1, 'rb')
@@ -97,10 +104,4 @@ if __name__ == "__main__":
     res_2 = pickle.load(pkl_file_2)
     pkl_file_1.close()
     pkl_file_2.close()
-    apk_list = [apk for apk in sorted(res_1.keys()) if apk in res_2]
-
-    for apk in apk_list:
-        if apk != apk_list[0]:
-            print('')
-
-        PrintStatsDiff(apk, res_1[apk], res_2[apk])
+    PrintDiff(res_1, res_2)

@@ -182,17 +182,17 @@ def GetISA(target, mode):
 
     return isa
 
-def CollectStats(target, mode, target_copy_path, iterations, pathnames):
+def GetCompilationStats(args):
     alloc_parser = re.compile('.*?took (.*?)([mnu]{,1})s.*?=([0-9]+)([GKM]{,1})B' \
                               '.*?=([0-9]+)([GKM]{,1})B.*?=([0-9]+)([GKM]{,1})B' \
                               '.*?=([0-9]+)([GKM]{,1})B')
     size_parser = re.compile('(\S+)\s+([0-9]+).*')
-    isa = GetISA(target, mode)
+    isa = GetISA(args.target, args.mode)
     res = dict()
     work_dir = tempfile.mkdtemp()
     apk_list = []
 
-    for pathname in pathnames:
+    for pathname in args.pathnames:
         if os.path.isfile(pathname):
             apk_list.append(pathname)
         else:
@@ -200,11 +200,17 @@ def CollectStats(target, mode, target_copy_path, iterations, pathnames):
                                         if os.path.isfile(dentry)]
 
     for apk in apk_list:
-        utils_adb.push(apk, target_copy_path, target)
-        res.update(GetStats(os.path.basename(apk), target, isa, target_copy_path,
-                            iterations, alloc_parser, size_parser, work_dir))
+        utils_adb.push(apk, args.target_copy_path, args.target)
+        res.update(GetStats(os.path.basename(apk), args.target, isa, args.target_copy_path,
+                            args.iterations, alloc_parser, size_parser, work_dir))
 
     shutil.rmtree(work_dir)
+    apk_list = sorted(res)
+
+    for apk in apk_list:
+        PrintStatsTable(apk, res[apk])
+        print('')
+
     return res
 
 if __name__ == "__main__":
@@ -213,12 +219,6 @@ if __name__ == "__main__":
         utils.Error('Running this script is supported only on Linux.')
 
     args = BuildOptions()
-    stats = CollectStats(args.target, args.mode, args.target_copy_path, args.iterations, args.pathnames)
-    apk_list = sorted(stats)
-
-    for apk in apk_list:
-        PrintStatsTable(apk, stats[apk])
-        print('')
-
+    stats = GetCompilationStats(args)
     utils.OutputObject(stats, 'pkl', args.output_pkl)
     utils.OutputObject(stats, 'json', args.output_json)

@@ -186,9 +186,19 @@ def FilterBenchmarks(benchmarks, filter, filter_out):
             res = [x for x in res if not fnmatch.fnmatch(x, f)]
     return res
 
+def GetBenchmarkStats(args):
+    if getattr(args, 'filter', []) == []:
+        setattr(args, 'filter', None)
 
-if __name__ == "__main__":
-    args = BuildOptions()
+    if getattr(args, 'filter_out', []) == []:
+        setattr(args, 'filter_out', None)
+
+    if getattr(args, 'no_auto_calibrate', None) is None:
+        setattr(args, 'no_auto_calibrate', False)
+
+    if getattr(args, 'norun', None) is None:
+        setattr(args, 'norun', False)
+
     BuildBenchmarks(args.target)
 
     remote_apk = None
@@ -218,10 +228,18 @@ if __name__ == "__main__":
                    not args.no_auto_calibrate,
                    args.iterations,
                    args.mode)
-    result = OrderedDict(sorted(result.items()))
-    utils_stats.PrintStats(result, iterations = args.iterations)
-    print('')
 
+    if rc:
+        utils.Error("The benchmarks did *not* run successfully. (rc = %d)" % rc, rc)
+
+    res = OrderedDict(sorted(result.items()))
+    utils_stats.PrintStats(res, iterations = args.iterations)
+    print('')
+    return res
+
+if __name__ == "__main__":
+    args = BuildOptions()
+    result = GetBenchmarkStats(args)
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)
     # Output in CSV format.
@@ -235,7 +253,3 @@ if __name__ == "__main__":
         writer = csv.writer(output_file, delimiter=',')
         writer.writerows(data)
         print('Wrote results to %s.' % output_filename)
-
-    if rc != 0:
-        utils.Error("The benchmarks did *not* run successfully. (rc = %d)" % rc)
-    sys.exit(rc)

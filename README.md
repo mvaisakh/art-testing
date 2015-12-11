@@ -5,7 +5,7 @@
 ## General repository information.
 
 The top-level contains scripts used to build, run, and compare the results of
-the Java benchmarks.
+the Java benchmarks and the APK compilation process statistics.
 Other tools are available under tools/<tool> for example to gather memory
 statistics or gather profiling information. See the [Tools][] section.
 
@@ -13,15 +13,15 @@ All scripts must include a `--help` or `-h` command-line option displaying
 a useful help message.
 
 
-## Running the benchmarks
+## Running
 
 ### Running via the script helper
 
-The benchmarks can be ran with the `run.py` script on host with
+Statistics can be obtained with the `run.py` script on host with
 
     ./run.py
 
-To run the benchmarks on target, `dx` and `adb` need to be available in your
+To obtain the results on target, `dx` and `adb` need to be available in your
 `PATH`. This will be the case if you run from your Android environment.
 
     ./run.py --target
@@ -29,7 +29,7 @@ To run the benchmarks on target, `dx` and `adb` need to be available in your
 
 `run.py` provides multiple options.
 
-    ./run.py --target --iterations=5 --filter "benchmarks/algorithm/Crypto*"
+    ./run.py --target --iterations=5
 
 
 ### Running manually
@@ -73,6 +73,13 @@ The results of `run.py` can be compared using `compare.py`.
 ## Tools
 
 This repository includes other development tools and utilities.
+
+### Benchmarks
+
+The `run.py` and `compare.py` scripts in `tools/benchmarks` allow collecting
+and comparing the run times of the Java benchmarks. The options for these
+scripts are similar to the API for the top-level scripts. See
+`tools/benchmarks/run.py --help` and `tools/benchmarks/compare.py --help`.
 
 ### Compilation statistics
 
@@ -185,5 +192,4 @@ Large portions Copyright (c) 2000-2015 The Legion of the Bouncy Castle Inc. (htt
 See BitfieldRotate.java header for license text.
 
 License iS BSD-like.
-
 
