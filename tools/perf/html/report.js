@@ -62,11 +62,11 @@ function onLoadData(data) {
     case kStatusReadLine:
       if (isSymbol(line)) {
         status = kStatusReadDetail;
-        hotspot_index++;
-        if (hotspot_index <= num_of_hotspots) {
+        if (hotspot_index < num_of_hotspots) {
           pre.innerHTML = ' <a href="hotspot.html?bench_index=' + bench_index
             + '&hotspot_index=' + hotspot_index + '">Annotate</a>' + pre.innerHTML;
         }
+        hotspot_index++;
         pre.innerHTML = '<a id="toggleDetail_' + hotspot_index
           + '" href="javascript:toggleDetail(' + hotspot_index
           + ');">Show</a>' + pre.innerHTML;
