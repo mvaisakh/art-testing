@@ -88,7 +88,7 @@ public class ControlFlowRecursive {
   /**
    * *NOT* called by the framework by default, provided for direct use only.
    **/
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     ControlFlowRecursive obj = new ControlFlowRecursive();
     long before = System.currentTimeMillis();
     obj.timeControlFlowRecursive(500);

@@ -25,7 +25,7 @@ public class LockTest {
 
   public static final int ITERATIONS = 200000;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     long before = System.currentTimeMillis();
     timeStaticLockWithDepth1(ITERATIONS);
     long after = System.currentTimeMillis();

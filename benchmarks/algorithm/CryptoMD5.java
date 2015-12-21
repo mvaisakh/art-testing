@@ -102,7 +102,7 @@ public class CryptoMD5 {
       paddedLen += padding - rem;
     }
 
-    int bin[] = new int[paddedLen];
+    int[] bin = new int[paddedLen];
 
     for (int i = 0; i < str.length() * CHRSZ; i += CHRSZ) {
       bin[i >> 5] |= (str.charAt(i / CHRSZ) & MASK) << (i % 32);
@@ -117,7 +117,7 @@ public class CryptoMD5 {
   }
 
   /* Convert an array of little-endian words to a hex string. */
-  private String binl2hex(int bin[]) {
+  private String binl2hex(int[] bin) {
     String str = "";
 
     for (int i = 0; i < bin.length * 4; i++) {
@@ -148,7 +148,7 @@ public class CryptoMD5 {
     return md5Common(c ^ (b | (~d)), a, b, x, s, t);
   }
 
-  private int[] coreMD5(int x[], int len) {
+  private int[] coreMD5(int[] x, int len) {
     /* append padding */
     x[len >> 5] |= 0x80 << ((len) % 32);
     x[(((len + 64) >>> 9) << 4) + 14] = len;
@@ -241,8 +241,8 @@ public class CryptoMD5 {
   }
 
   public String hexMD5(String stringData) {
-    int bin[] = str2binl(stringData);
-    int md5[] = coreMD5(bin, stringData.length() * CHRSZ);
+    int[] bin = str2binl(stringData);
+    int[] md5 = coreMD5(bin, stringData.length() * CHRSZ);
     String hex = binl2hex(md5);
     return hex;
   }
@@ -258,7 +258,7 @@ public class CryptoMD5 {
     return md5Output.equals(MD5_EXPECTED);
   }
 
-  public static void main(String argv[]) {
+  public static void main(String[] argv) {
     CryptoMD5 obj = new CryptoMD5();
     final long before = System.currentTimeMillis();
     obj.timeHexMD5(2305);

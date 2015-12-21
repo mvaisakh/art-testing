@@ -46,7 +46,7 @@ public class BitopsNSieve {
     return s;
   }
 
-  private void primes(int isPrime[], int n) {
+  private void primes(int[] isPrime, int n) {
     // As per the original, this variable can be optimised out.
     int count = 0;
     final int m = 10000 << n;
@@ -67,7 +67,7 @@ public class BitopsNSieve {
   }
 
   private int[] sieve() {
-    int isPrime[] = null;
+    int[] isPrime = null;
     // As per the original, this loop will have just one iteration.
     for (int i = 4; i <= 4; i++) {
       isPrime = new int[(10000 << i) + 31 >> 5];
@@ -84,7 +84,7 @@ public class BitopsNSieve {
 
   public boolean verify() {
     int output = 0;
-    int result[] = sieve();
+    int[] result = sieve();
 
     for (int i = 0; i < result.length; i++) {
       output += result[i];
@@ -92,7 +92,7 @@ public class BitopsNSieve {
     return output == BITOPS_NSIEVE_EXPECTED;
   }
 
-  public static void main(String argv[]) {
+  public static void main(String[] argv) {
     BitopsNSieve obj = new BitopsNSieve();
     final long before = System.currentTimeMillis();
     obj.timeBitopsNSieve(189);

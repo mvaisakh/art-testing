@@ -40,7 +40,7 @@ public class BitfieldRotate {
   private int h3;
   private int h4;
   private int h5;
-  private int x[] = new int[80];
+  private int[] x = new int[80];
   private int xOff;
 
   //
@@ -203,7 +203,7 @@ public class BitfieldRotate {
   }
 
   public boolean verifySHa1DigestProcessBlock() {
-    byte buf[] = SOURCE_Text.getBytes();
+    byte[] buf = SOURCE_Text.getBytes();
     for (int i = 0; i < 80; i++) {
       x[i] = buf[i];
     }
@@ -331,7 +331,7 @@ public class BitfieldRotate {
            (rotateLongLeftRegNegVV(0xCAFEBABEBAADF00DL, -16) == 0xF00DCAFEBABEBAADL);
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     BitfieldRotate br = new BitfieldRotate();
     long before = System.currentTimeMillis();
     br.timeSHA1DigestProcessBlock(1000);

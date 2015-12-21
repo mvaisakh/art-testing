@@ -26,7 +26,7 @@ public class SyncFib {
   public static final int ITERATIONS_SFIB = 300;
   public static final int ITERATIONS_AFIB = 500;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     long sum = 0;
     long before = System.currentTimeMillis();
     timeSfib(ITERATIONS_SFIB);

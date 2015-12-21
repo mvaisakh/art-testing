@@ -731,7 +731,7 @@ public class ShifterOperand {
     return true;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     int rc = 0;
     int iterations = 100000;
     long start;

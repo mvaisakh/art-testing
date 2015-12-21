@@ -123,7 +123,7 @@ public class HashMapBench {
   /**
    * *NOT* called by the framework by default, provided for direct use only.
    **/
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     HashMapBench obj = new HashMapBench();
     long before = System.currentTimeMillis();
     obj.timeTestHashMap(100);

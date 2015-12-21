@@ -23,7 +23,7 @@ public class Synchro {
 
   public static final int ITERATIONS = 100000;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     Synchro dummy = new Synchro();
     long before = System.currentTimeMillis();
     dummy.timeInc(ITERATIONS);

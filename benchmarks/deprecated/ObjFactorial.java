@@ -71,7 +71,7 @@ public class ObjFactorial {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
 
     final int ITERATIONS_BIG = 1000;
     final int ITERATIONS_MY = 100000;

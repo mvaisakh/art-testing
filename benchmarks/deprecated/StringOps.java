@@ -65,7 +65,7 @@ public class StringOps {
     return index;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     StringOps obj = new StringOps();
     long before = System.currentTimeMillis();
     obj.timeAppend(1);

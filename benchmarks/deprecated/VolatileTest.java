@@ -23,7 +23,7 @@ public class VolatileTest {
 
   public static final int ITERATIONS = 1000000;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     VolatileTest test = new VolatileTest();
 
     long before = System.currentTimeMillis();

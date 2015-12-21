@@ -26,8 +26,8 @@ public class NSieve {
   /* Number of repeats (internal, not benchmark iterations) */
   private static final int NUM_SIEVES = 4;
   /* Array of flags - big enough for all standard test scenarios */
-  private static boolean flags[] = new boolean[80001];
-  private static int results[] = new int[NUM_SIEVES];
+  private static boolean[] flags = new boolean[80001];
+  private static int[] results = new int[NUM_SIEVES];
 
   private int nsieve(int m) {
     for (int i = 2; i <= m; i++) {
@@ -78,7 +78,7 @@ public class NSieve {
   /**
    * *NOT* called by the framework by default, provided for direct use only.
    **/
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     NSieve obj = new NSieve();
     long before = System.currentTimeMillis();
 

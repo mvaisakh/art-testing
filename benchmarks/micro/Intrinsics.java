@@ -31,7 +31,7 @@ public class Intrinsics {
   private static final int NUM_RANDS = 1000;
 
   /* Pre-allocated pool of random integers from [0, Integer.MAX_VALUE) */
-  private static final int rand[] = new int[NUM_RANDS];
+  private static final int[] rand = new int[NUM_RANDS];
 
   static {
     // Allocate a pool of random integers to use in benchmarks that
@@ -47,10 +47,10 @@ public class Intrinsics {
    * NumberOfLeadingZeros.
    **/
 
-  private static int resultsNumberOfLeadingZerosInteger[] = new int[NUM_INVOKES];
-  private static int resultsNumberOfLeadingZerosLong[] = new int[NUM_INVOKES];
-  private static int resultsNumberOfLeadingZerosIntegerRandom[] = new int[NUM_INVOKES];
-  private static int resultsNumberOfLeadingZerosLongRandom[] = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfLeadingZerosInteger = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfLeadingZerosLong = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfLeadingZerosIntegerRandom = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfLeadingZerosLongRandom = new int[NUM_INVOKES];
 
   public void timeNumberOfLeadingZerosInteger(int iterations) {
     for (int iter = 0; iter < iterations; ++iter) {
@@ -92,10 +92,10 @@ public class Intrinsics {
    * NumberOfTrailingZeros.
    **/
 
-  private static int resultsNumberOfTrailingZerosInteger[] = new int[NUM_INVOKES];
-  private static int resultsNumberOfTrailingZerosLong[] = new int[NUM_INVOKES];
-  private static int resultsNumberOfTrailingZerosIntegerRandom[] = new int[NUM_INVOKES];
-  private static int resultsNumberOfTrailingZerosLongRandom[] = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfTrailingZerosInteger = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfTrailingZerosLong = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfTrailingZerosIntegerRandom = new int[NUM_INVOKES];
+  private static int[] resultsNumberOfTrailingZerosLongRandom = new int[NUM_INVOKES];
 
   public void timeNumberOfTrailingZerosInteger(int iterations) {
     for (int iter = 0; iter < iterations; ++iter) {
@@ -137,10 +137,10 @@ public class Intrinsics {
    * RotateRight.
    **/
 
-  private static int resultsRotateRightInteger[] = new int[NUM_INVOKES];
-  private static int resultsRotateRightIntegerConstant[] = new int[NUM_INVOKES];
-  private static long resultsRotateRightLong[] = new long[NUM_INVOKES];
-  private static long resultsRotateRightLongConstant[] = new long[NUM_INVOKES];
+  private static int[] resultsRotateRightInteger = new int[NUM_INVOKES];
+  private static int[] resultsRotateRightIntegerConstant = new int[NUM_INVOKES];
+  private static long[] resultsRotateRightLong = new long[NUM_INVOKES];
+  private static long[] resultsRotateRightLongConstant = new long[NUM_INVOKES];
 
   public void timeRotateRightInteger(int iterations) {
     for (int iter = 0; iter < iterations; ++iter) {
@@ -178,10 +178,10 @@ public class Intrinsics {
    * RotateLeft.
    **/
 
-  private static int resultsRotateLeftInteger[] = new int[NUM_INVOKES];
-  private static int resultsRotateLeftIntegerConstant[] = new int[NUM_INVOKES];
-  private static long resultsRotateLeftLong[] = new long[NUM_INVOKES];
-  private static long resultsRotateLeftLongConstant[] = new long[NUM_INVOKES];
+  private static int[] resultsRotateLeftInteger = new int[NUM_INVOKES];
+  private static int[] resultsRotateLeftIntegerConstant = new int[NUM_INVOKES];
+  private static long[] resultsRotateLeftLong = new long[NUM_INVOKES];
+  private static long[] resultsRotateLeftLongConstant = new long[NUM_INVOKES];
 
   public void timeRotateLeftInteger(int iterations) {
     for (int iter = 0; iter < iterations; ++iter) {
@@ -219,8 +219,8 @@ public class Intrinsics {
    * RotateRandom.
    **/
 
-  private static int resultsRotateRandomInteger[] = new int[NUM_INVOKES];
-  private static long resultsRotateRandomLong[] = new long[NUM_INVOKES];
+  private static int[] resultsRotateRandomInteger = new int[NUM_INVOKES];
+  private static long[] resultsRotateRandomLong = new long[NUM_INVOKES];
 
   public void timeRotateRandomInteger(int iterations) {
     for (int iter = 0; iter < iterations; ++iter) {
@@ -256,7 +256,7 @@ public class Intrinsics {
   /**
    * *NOT* called by the framework by default, provided for direct use only.
    **/
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     Intrinsics obj = new Intrinsics();
     long before = System.currentTimeMillis();
     obj.timeNumberOfLeadingZerosInteger(100000);

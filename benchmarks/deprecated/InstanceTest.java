@@ -28,7 +28,7 @@ public class InstanceTest {
   public static final int ITERATIONS = 1000;
   public static final int INSTANCES = 1000;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     long before = System.currentTimeMillis();
     timeCheckInstances(ITERATIONS);
     long after = System.currentTimeMillis();

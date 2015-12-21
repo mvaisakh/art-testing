@@ -67,12 +67,12 @@ public class AccessNBody {
   }
 
   private class NBodySystem {
-    private Body bodies[];
+    private Body[] bodies;
     private double px;
     private double py;
     private double pz;
 
-    NBodySystem(Body bodies[]) {
+    NBodySystem(Body[] bodies) {
       this.bodies = bodies;
 
       for (int i = 0; i < bodies.length; i++) {
@@ -197,7 +197,7 @@ public class AccessNBody {
 
   private double simulateGalaxy() {
     double output = 0.0;
-    Body bodies[] = { sun(), jupiter(), saturn(), uranus(), neptune() };
+    Body[] bodies = { sun(), jupiter(), saturn(), uranus(), neptune() };
     NBodySystem galaxy = new NBodySystem(bodies);
 
     for (int i = 3; i <= 24; i *= 2) {
@@ -221,7 +221,7 @@ public class AccessNBody {
     return output == ACCESS_NBODY_EXPECTED;
   }
 
-  public static void main(String argv[]) {
+  public static void main(String[] argv) {
     AccessNBody obj = new AccessNBody();
     final long before = System.currentTimeMillis();
     obj.timeAccessNBody(172);

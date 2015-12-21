@@ -23,12 +23,12 @@ public class MultiplyAdd {
   public static final int ITERATIONS = 100000000;
   public static final int VALUE = 500;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     long start = 0;
     long end = 0;
     MultiplyAdd test = new MultiplyAdd();
 
-    Method methods[] = test.getClass().getDeclaredMethods();
+    Method[] methods = test.getClass().getDeclaredMethods();
     // sort methods by name
     for (int i = 0; i < methods.length; i++) {
       for (int j = 0; j < methods.length - i - 1; j++) {

@@ -39,10 +39,10 @@ public class AccessFannkuch {
 
   private int fannkuch(int n) {
     int check = 0;
-    int perm[] = new int[n];
-    int perm1[] = new int[n];
-    int count[] = new int[n];
-    int maxPerm[] = new int[n];
+    int[] perm = new int[n];
+    int[] perm1 = new int[n];
+    int[] count = new int[n];
+    int[] maxPerm = new int[n];
     int maxFlipsCount = 0;
     final int m = n - 1;
 
@@ -124,7 +124,7 @@ public class AccessFannkuch {
     return fannkuch(8) == ACCESS_FANNKUCH_EXPECTED;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     AccessFannkuch obj = new AccessFannkuch();
     final long before = System.currentTimeMillis();
     obj.timeAccessFannkuch(109);

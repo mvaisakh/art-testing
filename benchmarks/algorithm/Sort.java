@@ -35,7 +35,7 @@ public class Sort {
   public ArrayList<int[]> insertionSortArraysToVerify = new ArrayList<int[]>();
   public ArrayList<int[]> mergeSortArraysToVerify = new ArrayList<int[]>();
 
-  void initArray(int array[]) {
+  void initArray(int[] array) {
     int copyBase;
     int copySize;
     for (copyBase = 0; copyBase < array.length; copyBase += copySize) {
@@ -44,7 +44,7 @@ public class Sort {
     }
   }
 
-  boolean arraysEqual(int array_1[], int array_2[]) {
+  boolean arraysEqual(int[] array_1, int[] array_2) {
     int length = Math.min(array_1.length, array_2.length);
     for (int i = 0; i < length; i++) {
       if (array_1[i] != array_2[i]) {
@@ -61,7 +61,7 @@ public class Sort {
     return true;
   }
 
-  boolean isArraySorted(int array[]) {
+  boolean isArraySorted(int[] array) {
     for (int i = 0; i < array.length - 1; ++i) {
       if (array[i] > array[i + 1]) {
         System.out.println("ERROR: The array is not sorted at index " + i + ": " +
@@ -74,7 +74,7 @@ public class Sort {
 
   /* Bubble sort */
 
-  void bubbleSort(int array[]) {
+  void bubbleSort(int[] array) {
     for (int i = 0; i < array.length; ++i) {
       for (int j = 0; j < array.length - i - 1; ++j) {
         if (array[j] > array[j + 1]) {
@@ -87,7 +87,7 @@ public class Sort {
   }
 
   public void benchBubbleSort(int arraySize, int iterations) {
-    int array[] = new int[arraySize];
+    int[] array = new int[arraySize];
     bubbleSortArraysToVerify.add(array);
     for (int iter = 0; iter < iterations; ++iter) {
       initArray(array);
@@ -96,8 +96,8 @@ public class Sort {
   }
 
   public boolean verifyBubbleSort() {
-    for (int array[] : bubbleSortArraysToVerify) {
-      int ref[] = new int[array.length];
+    for (int[] array : bubbleSortArraysToVerify) {
+      int[] ref = new int[array.length];
       initArray(ref);
       Arrays.sort(ref);
       if (!isArraySorted(array) || !arraysEqual(ref, array)) {
@@ -111,7 +111,7 @@ public class Sort {
 
   /* Insertion sort */
 
-  void insertionSort(int array[]) {
+  void insertionSort(int[] array) {
     for (int k = 1; k < array.length; ++k) {
       int i;
       int key = array[k];
@@ -123,7 +123,7 @@ public class Sort {
   }
 
   public void benchInsertionSort(int arraySize, int iterations) {
-    int array[] = new int[arraySize];
+    int[] array = new int[arraySize];
     insertionSortArraysToVerify.add(array);
     for (int iter = 0; iter < iterations; ++iter) {
       initArray(array);
@@ -132,8 +132,8 @@ public class Sort {
   }
 
   public boolean verifyInsertionSort() {
-    for (int array[] : insertionSortArraysToVerify) {
-      int ref[] = new int[array.length];
+    for (int[] array : insertionSortArraysToVerify) {
+      int[] ref = new int[array.length];
       initArray(ref);
       Arrays.sort(ref);
       if (!isArraySorted(array) || !arraysEqual(ref, array)) {
@@ -147,11 +147,11 @@ public class Sort {
 
   /* Merge sort */
 
-  void mergeSort(int array[], int scratch[]) {
+  void mergeSort(int[] array, int[] scratch) {
     mergeSort(array, 0, array.length, scratch);
   }
 
-  void mergeSort(int array[], int index, int size, int scratch[]) {
+  void mergeSort(int[] array, int index, int size, int[] scratch) {
     if (size <= 1) {
       return;
     }
@@ -165,10 +165,10 @@ public class Sort {
     mergeArrays(array, index_1, size_1, index_2, size_2, scratch);
   }
 
-  void mergeArrays(int array[],
+  void mergeArrays(int[] array,
                    int index_1, int size_1,
                    int index_2, int size_2,
-                   int scratch[]) {
+                   int[] scratch) {
     int end_1 = index_1 + size_1;
     int end_2 = index_2 + size_2;
     int i1 = index_1;
@@ -198,8 +198,8 @@ public class Sort {
   }
 
   public void benchMergeSort(int arraySize, int iterations) {
-    int array[] = new int[arraySize];
-    int scratch[] = new int[arraySize];
+    int[] array = new int[arraySize];
+    int[] scratch = new int[arraySize];
     mergeSortArraysToVerify.add(array);
     for (int iter = 0; iter < iterations; ++iter) {
       initArray(array);
@@ -208,8 +208,8 @@ public class Sort {
   }
 
   public boolean verifyMergeSort() {
-    for (int array[] : mergeSortArraysToVerify) {
-      int ref[] = new int[array.length];
+    for (int[] array : mergeSortArraysToVerify) {
+      int[] ref = new int[array.length];
       initArray(ref);
       Arrays.sort(ref);
       if (!isArraySorted(array) || !arraysEqual(ref, array)) {
@@ -223,14 +223,14 @@ public class Sort {
 
   /* System sort */
 
-  void systemSort(int array[]) {
+  void systemSort(int[] array) {
     // This is wrapped in a helper to match the implementation for other sort
     // algorithms.
     Arrays.sort(array);
   }
 
   void benchSystemSort(int arraySize, int iterations) {
-    int array[] = new int[arraySize];
+    int[] array = new int[arraySize];
     systemSortArraysToVerify.add(array);
     for (int iter = 0; iter < iterations; ++iter) {
       initArray(array);
@@ -239,8 +239,8 @@ public class Sort {
   }
 
   public boolean verifySystemSort() {
-    for (int array[] : systemSortArraysToVerify) {
-      int ref[] = new int[array.length];
+    for (int[] array : systemSortArraysToVerify) {
+      int[] ref = new int[array.length];
       System.arraycopy(array, 0, ref, 0, array.length);
       Arrays.sort(ref);
       if (!isArraySorted(array) || !arraysEqual(ref, array)) {
@@ -272,7 +272,7 @@ public class Sort {
   // CHECKSTYLE.ON: LeftCurly
 
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     int rc = 0;
     long b;               // before
     long a;               // after
@@ -328,7 +328,7 @@ public class Sort {
   }
 
   // Array of 2048 integers between 0 and 4096.
-  public int referenceInputArray[] = {
+  public int[] referenceInputArray = {
     2334, 3368, 316, 762, 3183, 3200, 1037, 814, 238, 1882, 3382, 3682, 4034,
     2655, 119, 1820, 1287, 896, 1871, 939, 1478, 3882, 327, 3368, 1764, 3712,
     2363, 2823, 878, 3094, 1961, 3351, 1518, 2658, 2627, 3537, 4096, 1917, 1403,

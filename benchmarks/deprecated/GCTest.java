@@ -29,7 +29,7 @@ public class GCTest {
   public static final int BORN = LIVE * FACTOR * 100;
   public static final int SIZE = FACTOR;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     long before = System.currentTimeMillis();
     timeSmash(BORN);
     long after = System.currentTimeMillis();
@@ -40,14 +40,14 @@ public class GCTest {
   }
 
   public static void timeSmash(int iters) {
-    GCTest list[] = new GCTest[LIVE];
+    GCTest[] list = new GCTest[LIVE];
     Random rnd = new Random(123456789);
     for (int i = 0; i < iters; i++) {
       smash(list, rnd);
     }
   }
 
-  public static void smash(GCTest list[], Random rnd) {
+  public static void smash(GCTest[] list, Random rnd) {
     for (int i = 0; i < ITERATIONS; i++) {
       int index = rnd.nextInt(list.length);
       int size = rnd.nextInt(SIZE);
@@ -63,6 +63,6 @@ public class GCTest {
   }
 
   private Object pointer = null;
-  private int variable[] = null;
+  private int[] variable = null;
 }
 

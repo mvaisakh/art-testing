@@ -23,7 +23,7 @@ public class SyncNorec {
 
   public static final int ITERATIONS = 1000000;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     SyncNorec dummy = new SyncNorec();
     long before = System.currentTimeMillis();
     dummy.timeInc(ITERATIONS);

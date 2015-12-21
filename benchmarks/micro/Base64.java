@@ -44,10 +44,10 @@ public class Base64 {
   private static Random rnd = new Random();
   private static final int ENC_Length = 64;
   private static final int NUM_Encodings = 16;
-  private static String randomStrings[] = new String[NUM_Encodings];
-  private static String randomBase64[] = new String[NUM_Encodings];
-  private static String encodeResults[] = new String[NUM_Encodings];
-  private static String decodeResults[] = new String[NUM_Encodings];
+  private static String[] randomStrings = new String[NUM_Encodings];
+  private static String[] randomBase64 = new String[NUM_Encodings];
+  private static String[] encodeResults = new String[NUM_Encodings];
+  private static String[] decodeResults = new String[NUM_Encodings];
   private static final String codes =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
   private static char base64Pad = '=';
@@ -78,7 +78,7 @@ public class Base64 {
   }
 
   private static String encode(String str) {
-    byte in[] = str.getBytes();
+    byte[] in = str.getBytes();
     StringBuffer out = new StringBuffer((in.length * 4) / 3);
     int b;
     for (int i = 0; i < in.length; i += 3)  {
@@ -114,11 +114,11 @@ public class Base64 {
     }
     int eqPos = input.indexOf('=');
     int len = input.length();
-    byte decoded[] =
+    byte[] decoded =
       new byte[((len * 3) / 4) - (eqPos > 0 ? (len - eqPos) : 0)];
-    char inChars[] = input.toCharArray();
+    char[] inChars = input.toCharArray();
     int j = 0;
-    int b[] = new int[4];
+    int[] b = new int[4];
     for (int i = 0; i < inChars.length; i += 4)     {
       b[0] = codes.indexOf(inChars[i]);
       b[1] = codes.indexOf(inChars[i + 1]);
@@ -177,7 +177,7 @@ public class Base64 {
     return result;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     Base64 b = new Base64();
     long before = System.currentTimeMillis();
     b.timeEncode(1000);

@@ -41,7 +41,7 @@ public class MathSpectralNorm {
     return 1.0 / ((i + j) * (i + j + 1) / 2 + i + 1);
   }
 
-  private void au(double u[], double v[]) {
+  private void au(double[] u, double[] v) {
     for (int i = 0; i < u.length; ++i) {
       double t = 0.0;
       for (int j = 0; j < u.length; ++j) {
@@ -51,7 +51,7 @@ public class MathSpectralNorm {
     }
   }
 
-  private void atu(double u[], double v[]) {
+  private void atu(double[] u, double[] v) {
     for (int i = 0; i < u.length; ++i) {
       double t = 0.0;
       for (int j = 0; j < u.length; ++j) {
@@ -61,15 +61,15 @@ public class MathSpectralNorm {
     }
   }
 
-  private void atAu(double u[], double v[], double w[]) {
+  private void atAu(double[] u, double[] v, double[] w) {
     au(u, w);
     atu(w, v);
   }
 
   double spectralNorm(int n) {
-    double u[] = new double[n];
-    double v[] = new double[n];
-    double w[] = new double[n];
+    double[] u = new double[n];
+    double[] v = new double[n];
+    double[] w = new double[n];
     double vv;
     double vBv;
 
@@ -106,7 +106,7 @@ public class MathSpectralNorm {
     return spectralNormOutput == SPECTRAL_NORM_EXPECTED;
   }
 
-  public static void main(String argv[]) {
+  public static void main(String[] argv) {
     MathSpectralNorm obj = new MathSpectralNorm();
     final long before = System.currentTimeMillis();
     obj.timeMathSpectralNorm(180);

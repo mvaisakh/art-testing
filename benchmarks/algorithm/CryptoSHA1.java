@@ -88,7 +88,7 @@ public class CryptoSHA1 {
       paddedLen += padding - rem;
     }
 
-    int bin[] = new int[paddedLen];
+    int[] bin = new int[paddedLen];
 
     for (int i = 0; i < str.length() * CHRSZ; i += CHRSZ) {
       bin[i >> 5] |= (str.charAt(i / CHRSZ) & MASK) << (32 - CHRSZ - i % 32);
@@ -103,7 +103,7 @@ public class CryptoSHA1 {
   }
 
   /* Convert an array of little-endian words to a hex string. */
-  private String binb2hex(int bin[]) {
+  private String binb2hex(int[] bin) {
     String str = "";
 
     for (int i = 0; i < bin.length * 4; i++) {
@@ -146,12 +146,12 @@ public class CryptoSHA1 {
         ((t < 60) ? -1894007588 : -899497514));
   }
 
-  private int[] coreSHA1(int x[], int len) {
+  private int[] coreSHA1(int[] x, int len) {
     /* append padding */
     x[len >> 5] |= 0x80 << (24 - len % 32);
     x[(((len + 64) >> 9) << 4) + 15] = len;
 
-    int w[] = new int[80];
+    int[] w = new int[80];
     int a =  1732584193;
     int b = -271733879;
     int c = -1732584194;
@@ -189,8 +189,8 @@ public class CryptoSHA1 {
   }
 
   public String hexSHA1(String stringData) {
-    int bin[] = str2binb(stringData);
-    int sha1[] = coreSHA1(bin, stringData.length() * CHRSZ);
+    int[] bin = str2binb(stringData);
+    int[] sha1 = coreSHA1(bin, stringData.length() * CHRSZ);
     String hex = binb2hex(sha1);
     return hex;
   }
@@ -206,7 +206,7 @@ public class CryptoSHA1 {
     return sha1Output.equals(SHA1_EXPECTED);
   }
 
-  public static void main(String argv[]) {
+  public static void main(String[] argv) {
     CryptoSHA1 obj = new CryptoSHA1();
     final long before = System.currentTimeMillis();
     obj.timeHexSHA1(1808);

@@ -54,7 +54,7 @@ package benchmarks.math;
 import java.lang.System;
 
 public class MathCordic {
-  private static double ANGLES[];
+  private static double[] ANGLES;
   private static final double AG_CONST = 0.6072529350;
   private static final double CORDIC_EXPECTED = 10362.570468755888;
   private static final double RAD_CONST = 0.017453;
@@ -125,7 +125,7 @@ public class MathCordic {
     return cordicOutput == CORDIC_EXPECTED;
   }
 
-  public static void main(String argv[]) {
+  public static void main(String[] argv) {
     MathCordic obj = new MathCordic();
     final long before = System.currentTimeMillis();
     obj.timeMathCordic(175);

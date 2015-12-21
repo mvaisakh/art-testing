@@ -94,7 +94,7 @@ public class MathPartialSums {
     return partialSumsOutput == PARTIAL_SUMS_EXPECTED;
   }
 
-  public static void main(String argv[]) {
+  public static void main(String[] argv) {
     MathPartialSums obj = new MathPartialSums();
     final long before = System.currentTimeMillis();
     obj.timeMathPartialSums(96);

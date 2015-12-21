@@ -53,7 +53,7 @@ public class JoinTest extends Thread {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
 
     long before = System.currentTimeMillis();
     timeJoinOfFiftyThreads(1);

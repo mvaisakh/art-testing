@@ -25,7 +25,7 @@ public class Switch {
   public static final int ITERATIONS_SPARSE = 5000000;
   public static final int ITERATIONS_IFELSE = 5000000;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     long before = System.currentTimeMillis();
     timeDense(ITERATIONS_DENSE);
     long after = System.currentTimeMillis();
