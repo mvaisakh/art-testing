@@ -14,6 +14,27 @@
 #
 import math
 import statistics
+import math
+
+from functools import reduce
+
+def CalcGeomean(nums):
+    assert len(nums) != 0
+    return math.exp((sum(map(lambda x: math.log(x), nums))) / len(nums))
+
+def CalcGeomeanErrorImpl(nums, stdevs, geomean, length):
+    assert len(nums) == len(stdevs)
+    assert length != 0
+    return math.sqrt(sum(map(lambda x, y: (x / y) ** 2, stdevs, nums))) * geomean / length
+
+def CalcGeomeanError(nums, stdevs, geomean):
+    return CalcGeomeanErrorImpl(nums, stdevs, geomean, len(nums))
+
+def CalcGeomeanRelationError(nums1, nums2, stdevs1, stdevs2, geomean):
+    assert len(nums1) == len(nums2) == len(stdevs1) == len(stdevs2)
+    nums = nums1 + nums2
+    stdevs = stdevs1 + stdevs2
+    return CalcGeomeanErrorImpl(nums, stdevs, geomean, len(nums1))
 
 def GetRelativeDiff(x1, x2):
     return (x2 - x1) / x1 * 100 if x1 else float("inf")
@@ -26,11 +47,57 @@ def ComputeStats(nums):
         dp = d / ave * 100 if ave != 0 else float("inf")
         return m, M, ave, d, dp
 
+def GetSuiteName(benchmark):
+    return benchmark.split("/", 2)[1]
+
 def PrintStats(dict_results, iterations = None):
     headers = ['', 'min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
     results = []
+
+    stats_dict = {}
+
     for benchmark in dict_results:
-        results.append([benchmark] + list(ComputeStats(dict_results[benchmark])))
+        suite_name = GetSuiteName(benchmark)
+
+        if (suite_name not in stats_dict):
+             stats_dict[suite_name] = {}
+
+        data = ComputeStats(dict_results[benchmark])
+        stats_dict[suite_name][benchmark] = data
+
+        results.append([benchmark] + list(data))
+
+    PrintTable(headers, ['.3f'] * len(headers), results)
+
+    # overall and per suite geomeans calculations
+    print("\nGEOMEANS:")
+    mean_list  = []
+    stdev_list = []
+    headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
+    results = []
+
+    for suite_name in stats_dict:
+        suite_mean_list = []
+        suite_stdev_list = []
+        for benchmark in stats_dict[suite_name]:
+            bench_mean  = stats_dict[suite_name][benchmark][2]
+            bench_stdev = stats_dict[suite_name][benchmark][3]
+
+            suite_mean_list.append(bench_mean)
+            suite_stdev_list.append(bench_stdev)
+
+            mean_list.append(bench_mean)
+            stdev_list.append(bench_stdev)
+
+        suite_geomean     = CalcGeomean(suite_mean_list)
+        suite_geomean_err = CalcGeomeanError(suite_mean_list, suite_stdev_list, suite_geomean)
+        results.append([suite_name, suite_geomean, suite_geomean_err,
+                suite_geomean_err / suite_geomean * 100])
+
+    geomean     = CalcGeomean(mean_list)
+    geomean_err = CalcGeomeanError(mean_list, stdev_list, geomean)
+
+    results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
     PrintTable(headers, ['.3f'] * len(headers), results)
 
 # Print a table showing the difference between two runs of benchmarks.
@@ -41,11 +108,68 @@ def PrintDiff(res_1, res_2, title = ''):
     headers = [title, 'mean1', 'stdev1 (% of mean1)', 'mean2', 'stdev2 (% of mean2)',
                '(mean2 - mean1) / mean1 * 100']
     results = []
+    stats_dict = {}
+    # collecting data
     for bench in benchmarks:
-        m1, M1, ave1, d1, dp1 = ComputeStats(res_1[bench])
-        m2, M2, ave2, d2, dp2 = ComputeStats(res_2[bench])
+        suite_name = GetSuiteName(bench)
+
+        if (suite_name not in stats_dict):
+             stats_dict[suite_name] = {}
+
+        stats_dict[suite_name][bench] = []
+        data1 = m1, M1, ave1, d1, dp1 = ComputeStats(res_1[bench])
+        data2 = m2, M2, ave2, d2, dp2 = ComputeStats(res_2[bench])
+
+        stats_dict[suite_name][bench].append(data1)
+        stats_dict[suite_name][bench].append(data2)
         diff = GetRelativeDiff(ave1, ave2)
         results.append([bench, ave1, dp1, ave2, dp2, diff])
+
+    PrintTable(headers, ['.3f'] * len(headers), results)
+
+    # overall and per suite geomeans calculations
+    print("\nGEOMEANS:")
+    mean_list1  = []
+    mean_list2  = []
+    stdev_list1 = []
+    stdev_list2 = []
+    headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
+    results = []
+
+    for suite_name in stats_dict:
+        suite_mean_list1  = []
+        suite_mean_list2  = []
+        suite_stdev_list1 = []
+        suite_stdev_list2 = []
+
+        for benchmark in stats_dict[suite_name]:
+            bench_mean1  = stats_dict[suite_name][benchmark][0][2]
+            bench_mean2  = stats_dict[suite_name][benchmark][1][2]
+            bench_stdev1 = stats_dict[suite_name][benchmark][0][3]
+            bench_stdev2 = stats_dict[suite_name][benchmark][1][3]
+
+            suite_mean_list1.append(bench_mean1)
+            suite_mean_list2.append(bench_mean2)
+            suite_stdev_list1.append(bench_stdev1)
+            suite_stdev_list2.append(bench_stdev2)
+
+            mean_list1.append(bench_mean1)
+            mean_list2.append(bench_mean2)
+
+            stdev_list1.append(bench_stdev1)
+            stdev_list2.append(bench_stdev2)
+
+        suite_geomean = CalcGeomean(suite_mean_list2) / CalcGeomean(suite_mean_list1)
+        suite_geomean_err = CalcGeomeanRelationError(suite_mean_list1, suite_mean_list2,
+                suite_stdev_list1, suite_stdev_list2, suite_geomean)
+        results.append([suite_name, suite_geomean, suite_geomean_err,
+                suite_geomean_err / suite_geomean * 100])
+
+    geomean     = CalcGeomean(mean_list2) / CalcGeomean(mean_list1)
+    geomean_err = CalcGeomeanRelationError(mean_list1, mean_list2,
+            stdev_list1, stdev_list2, geomean)
+
+    results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
     PrintTable(headers, ['.3f'] * len(headers), results)
 
 # Pretty-prints a table. The arguments must look like:
