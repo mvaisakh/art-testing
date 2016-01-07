@@ -31,7 +31,7 @@ import utils
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
-        description = "Run tests for je java benchmarks framework.",
+        description = "Run tests for the java benchmarks framework.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--jobs', '-j', metavar='N', type=int, nargs='?',
