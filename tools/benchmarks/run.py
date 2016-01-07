@@ -84,17 +84,24 @@ def BuildBenchmarks(build_for_target):
     utils.Command(command)
 
 def RunBenchADB(mode, auto_calibrate, apk, classname, target):
+    environment_config = 'ANDROID_DATA=`pwd` DEX_LOCATION=`pwd`'
     dalvikvm = 'dalvikvm%s' % mode
-    command = ("cd %s && ANDROID_DATA=`pwd` DEX_LOCATION=`pwd` %s -cp %s"
-            % (os.path.dirname(apk), dalvikvm, apk))
+    dalvikvm_options = ''
+    apk_arguments = ''
+
     if auto_calibrate:
         # Run the benchmark's time* method(s) via bench_runner_main
-        command += " %s %s" % (bench_runner_main, classname)
+        apk_arguments += " %s %s" % (bench_runner_main, classname)
     else:
         # Run the benchmark as a main class directly
-        command += " %s" % (classname)
+        apk_arguments += " %s" % (classname)
+
     if utils.verbose:
-        command += " --debug"
+        apk_arguments += " --debug"
+
+    command = 'cd {workdir} && ' + ' '.join([environment_config, dalvikvm, dalvikvm_options, '-cp', apk, apk_arguments])
+    command = command.format(workdir=os.path.dirname(apk))
+
     return utils_adb.shell(command, target, exit_on_error=False)
 
 def RunBenchHost(mode, auto_calibrate, apk, classname, target):
