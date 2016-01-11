@@ -36,7 +36,12 @@ if [ -f "$VMLINUX" ] ; then
   PERF_SYMBOL_FLAG="-k $VMLINUX $PERF_SYMBOL_FLAG"
 fi
 PERF_BINUTILS_FLAG=--objdump=aarch64-linux-android-objdump
-PERF_RECORD="perf record -q"
+# Due to removal of external/linux-tools-perf from AOSP project
+# (commit c9f4115ea9a7b27eae143190e3ab99ba46a8d48) 'simpleperf' must be used instead of 'perf'.
+# After transition some parts of the scripts doesn't work (Flamegraph, etc).
+#
+# TODO: check and fix the rest of the scripts.
+PERF_RECORD="simpleperf record"
 # The `--input` option is broken for `perf annotate` in some versions of
 # `perf`. Abstracting the perf binary makes it easy to use a custom `perf`
 # binary on host within these scripts.
