@@ -15,13 +15,17 @@
 
   <!-- Allow check suppression.
          Example:
-             // CHECKSTYLE.OFF: LineLength
-             // Some very long lines of code...
+             // CHECKSTYLE.OFF: .*
              // CHECKSTYLE.ON: LineLength
+             // We don't check anything except the line length in this code.
+             // CHECKSTYLE.OFF: LineLength
+             // We don't check anything here.
+             // CHECKSTYLE.ON: .*
+             // We check everything from now on.
   -->
   <module name="SuppressionCommentFilter">
-    <property name="offCommentFormat" value="\s*CHECKSTYLE.OFF\: ([\w\|]+)"/>
-    <property name="onCommentFormat" value="\s*CHECKSTYLE.ON\: ([\w\|]+)"/>
+    <property name="onCommentFormat" value="\s*CHECKSTYLE.ON\: ([\w\|]+|\.\*)"/>
+    <property name="offCommentFormat" value="\s*CHECKSTYLE.OFF\: ([\w\|]+|\.\*)"/>
     <property name="checkFormat" value="$1"/>
   </module>
 
