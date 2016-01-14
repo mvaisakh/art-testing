@@ -112,6 +112,6 @@ public class MathSpectralNorm {
     obj.timeMathSpectralNorm(180);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("MathSpectralNorm: " + (after - before));
+    System.out.println("benchmarks/math/MathSpectralNorm: " + (after - before));
   }
 }

@@ -183,6 +183,6 @@ public class Base64 {
     b.timeEncode(1000);
     b.timeDecode(1000);
     long after = System.currentTimeMillis();
-    System.out.println("Base64: " + (after - before));
+    System.out.println("benchmarks/micro/Base64: " + (after - before));
   }
 }

@@ -84,7 +84,7 @@ public class VectorCalc {
     long before = System.currentTimeMillis();
     obj.timeRun(MAIN_ITERATIONS);
     long after = System.currentTimeMillis();
-    System.out.println("VectorCalculation: " + (after - before));
+    System.out.println("benchmarks/micro/VectorCalculation: " + (after - before));
   }
 
 }

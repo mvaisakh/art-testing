@@ -278,6 +278,6 @@ public class Intrinsics {
     obj.timeRotateRandomLong(100000);
 
     long after = System.currentTimeMillis();
-    System.out.println("Intrinsics: " + (after - before));
+    System.out.println("benchmarks/micro/Intrinsics: " + (after - before));
   }
 }

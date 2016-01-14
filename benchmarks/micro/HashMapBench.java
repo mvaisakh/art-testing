@@ -129,6 +129,6 @@ public class HashMapBench {
     obj.timeTestHashMap(100);
 
     long after = System.currentTimeMillis();
-    System.out.println("HashMapBench: " + (after - before));
+    System.out.println("benchmarks/micro/HashMapBench: " + (after - before));
   }
 }

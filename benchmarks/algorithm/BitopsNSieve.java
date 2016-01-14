@@ -98,6 +98,6 @@ public class BitopsNSieve {
     obj.timeBitopsNSieve(189);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("BitopsNSieve: " + (after - before));
+    System.out.println("benchmarks/algorithm/BitopsNSieve: " + (after - before));
   }
 }

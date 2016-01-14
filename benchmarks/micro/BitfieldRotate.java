@@ -340,7 +340,7 @@ public class BitfieldRotate {
     br.timeLongRotateRight(1000);
     br.timeLongRotateLeft(1000);
     long after = System.currentTimeMillis();
-    System.out.println("BitfieldRotate: " + (after - before));
+    System.out.println("benchmarks/micro/BitfieldRotate: " + (after - before));
   }
 }
 

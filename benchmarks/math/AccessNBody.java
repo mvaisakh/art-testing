@@ -227,6 +227,6 @@ public class AccessNBody {
     obj.timeAccessNBody(172);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("AccessNBody: " + (after - before));
+    System.out.println("benchmarks/math/AccessNBody: " + (after - before));
   }
 }

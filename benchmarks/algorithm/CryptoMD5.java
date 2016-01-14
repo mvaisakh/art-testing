@@ -264,6 +264,6 @@ public class CryptoMD5 {
     obj.timeHexMD5(2305);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("CryptoMD5: " + (after - before));
+    System.out.println("benchmarks/algorithm/CryptoMD5: " + (after - before));
   }
 }

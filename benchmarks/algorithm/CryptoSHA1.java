@@ -212,6 +212,6 @@ public class CryptoSHA1 {
     obj.timeHexSHA1(1808);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("CryptoSHA1: " + (after - before));
+    System.out.println("benchmarks/algorithm/CryptoSHA1: " + (after - before));
   }
 }

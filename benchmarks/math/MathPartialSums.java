@@ -100,7 +100,7 @@ public class MathPartialSums {
     obj.timeMathPartialSums(96);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("MathPartial: " + (after - before));
+    System.out.println("benchmarks/math/MathPartial: " + (after - before));
   }
 }
 

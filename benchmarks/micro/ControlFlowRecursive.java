@@ -94,6 +94,6 @@ public class ControlFlowRecursive {
     obj.timeControlFlowRecursive(500);
 
     long after = System.currentTimeMillis();
-    System.out.println("Control Flow Recursive: " + (after - before));
+    System.out.println("benchmarks/micro/ControlFlowRecursive: " + (after - before));
   }
 }

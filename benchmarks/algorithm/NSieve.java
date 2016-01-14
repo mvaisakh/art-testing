@@ -84,6 +84,6 @@ public class NSieve {
 
     obj.timeNSieveAccess(100);
     long after = System.currentTimeMillis();
-    System.out.println("NSieve.NSieveAccess: " + (after - before));
+    System.out.println("benchmarks/algorithm/NSieve.NSieveAccess: " + (after - before));
   }
 }

@@ -130,7 +130,7 @@ public class AccessFannkuch {
     obj.timeAccessFannkuch(109);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("AccessFankuch: " + (after - before));
+    System.out.println("benchmarks/algorithm/AccessFankuch: " + (after - before));
   }
 }
 

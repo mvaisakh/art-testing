@@ -131,6 +131,6 @@ public class MathCordic {
     obj.timeMathCordic(175);
     final long after = System.currentTimeMillis();
     obj.verify();
-    System.out.println("MathCordic: " + (after - before));
+    System.out.println("benchmarks/math/MathCordic: " + (after - before));
   }
 }
