@@ -95,15 +95,14 @@ def PrettySIFactor(value):
     return si_factor, si_prefix
 
 # Wrapper around `subprocess.Popen` returning the output of the given command.
-def Command(command, exit_on_error=True, cwd=None, shell=False):
-    # `command` is expected to be a string when passed through the shell.
-    command_string = ' '.join(command) if not shell else command
+def Command(command, command_string=None, exit_on_error=True, cwd=None):
+    if not command_string:
+        command_string = ' '.join(command)
     if cwd:
         command_string = 'cd ' + cwd + ' && ' + command_string
     VerbosePrint(command_string)
     p = subprocess.Popen(command,
                          cwd=cwd,
-                         shell=shell,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     outerr, empty_err = p.communicate()
     outerr = outerr.decode()

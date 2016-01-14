@@ -28,7 +28,7 @@ def pull(f,
          exit_on_error=True):
     return utils.Command(
         ['adb'] + GetTargetArgs(target) + ['pull', f, local_path],
-        exit_on_error)
+        exit_on_error=exit_on_error)
 
 
 def push(f,
@@ -37,15 +37,17 @@ def push(f,
          exit_on_error=True):
     return utils.Command(
         ['adb'] + GetTargetArgs(target) + ['push', f, target_path],
-        exit_on_error)
+        exit_on_error=exit_on_error)
 
 
-# `command_string` is expected to be a string, not a list.
-def shell(command_string,
+def shell(command,
           target=utils.adb_default_target_string,
           exit_on_error=True):
+    if not isinstance(command, list):
+        command = [command]
     # We need to quote the actual command in the text printed so it can be
     # copy-pasted and executed.
-    command = ['adb'] + GetTargetArgs(target) + ['shell', '"' + command_string + '"']
-    command = ' '.join(command)
-    return utils.Command(command, exit_on_error, shell=True)
+    command_string = ' '.join(['adb'] + GetTargetArgs(target) + \
+                              ['shell', '"%s"' % ' '.join(command)])
+    command = ['adb'] + GetTargetArgs(target) + ['shell'] + command
+    return utils.Command(command, exit_on_error=exit_on_error)
