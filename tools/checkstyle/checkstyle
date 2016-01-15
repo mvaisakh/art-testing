@@ -3,7 +3,7 @@
 SCRIPT_PATH=$(dirname $0)
 
 CONFIG=$SCRIPT_PATH/config.xml
-CHECKSTYLE_JAR=$SCRIPT_PATH/checkstyle-6.10-all.jar
+CHECKSTYLE_JAR=$SCRIPT_PATH/checkstyle-6.14.1-all.jar
 
 if [ ! -f $CHECKSTYLE_JAR ]; then
   echo "ERROR: Could not find ${CHECKSTYLE_JAR}. Did you run $SCRIPT_PATH/download.sh?"
