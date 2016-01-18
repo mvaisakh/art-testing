@@ -72,7 +72,6 @@ def TestBenchmarksOnHost():
                        # Reduce the duration of the tests.
                        "--filter", "benchmarks/algorithm/NSieve"],
                       _cwd=non_root_path)
-    rc |= TestCommand([os.path.join(utils.dir_root, "./run.py")], _cwd=non_root_path)
     # Test that the `--output-*` option work even when a path prefix is not specified.
     rc |= TestCommand([os.path.join(utils.dir_root, run_py),
                        # Reduce the duration of the tests.
@@ -112,7 +111,9 @@ def TestLint(jobs = 1):
 def TestTopLevelWrapperScripts():
     rc = 0
     rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
-    # Test the wrapper scripts.
+    non_root_path = os.path.join(utils.dir_root, "test", "foobar")
+    rc |= TestCommand(["mkdir", "-p", non_root_path])
+    rc |= TestCommand([os.path.join(utils.dir_root, "./run.py")], _cwd=non_root_path)
     rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
