@@ -55,20 +55,15 @@ def TestCommand(command, _cwd=None):
     return rc
 
 
-run_py = os.path.join(".", "tools", "benchmarks", "run.py")
-compare_py = os.path.join(".", "tools", "benchmarks", "compare.py")
-
-
 def TestBenchmarksOnHost():
     rc = 0
+    run_py = os.path.join(".", "tools", "benchmarks", "run.py")
     # Test standard usage of the top-level scripts.
     rc |= TestCommand(["./build.sh"], _cwd=utils.dir_root)
     # Two full runs of `run.py`, with and without auto-calibration. Later runs
-    # can use specific benchmarks to reduce the duration of the tests.
+    # can filter benchmarks to reduce the duration of the tests.
     rc |= TestCommand([run_py], _cwd=utils.dir_root)
     rc |= TestCommand([run_py, "--dont-auto-calibrate"], _cwd=utils.dir_root)
-    # Test the wrapper script.
-    rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
     non_root_path = os.path.join(utils.dir_root, "test", "foobar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
@@ -91,6 +86,19 @@ def TestBenchmarksOnHost():
     return rc
 
 
+def TestBenchmarksCompareScript():
+    rc = 0
+    run_py = os.path.join(".", "tools", "benchmarks", "run.py")
+    compare_py = os.path.join(".", "tools", "benchmarks", "compare.py")
+    benchmarks_filter = ["--filter", "benchmarks/algorithm/*"]
+    rc |= TestCommand([run_py, "--output-pkl=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-pkl=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    return rc
+
+
 def TestBenchmarkPackages():
     benchmark_files = []
     # TODO: Automatically test that each benchmark has the correct package.
@@ -101,29 +109,24 @@ def TestLint(jobs = 1):
     return lint.LintFiles(lint.GetJavaFiles(), jobs)
 
 
-def TestCompareScript():
+def TestTopLevelWrapperScripts():
     rc = 0
-    benchmarks_filter = ["--filter", "benchmarks/algorithm/*"]
-    rc |= TestCommand([run_py, "--output-pkl=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
-    rc |= TestCommand([run_py, "--output-pkl=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py"], _cwd=utils.dir_root)
     # Test the wrapper scripts.
     rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
-
 if __name__ == "__main__":
     args = BuildOptions()
 
     rc = 0
     rc |= TestBenchmarksOnHost()
+    rc |= TestBenchmarksCompareScript()
     rc |= TestBenchmarkPackages()
     rc |= TestLint(args.jobs)
-    rc |= TestCompareScript()
+    rc |= TestTopLevelWrapperScripts()
 
     if rc != 0:
         print("Tests FAILED.")
