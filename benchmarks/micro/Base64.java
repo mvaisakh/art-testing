@@ -1,27 +1,9 @@
 /*
- * Copyright (C) 2015 Linaro Limited. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
-/* encode and decode methods from:
+ * encode and decode methods from:
  *  https://en.wikipedia.org/wiki/Base64#Sample_Implementation_in_Java
- *
- * Available under the Creative Commons Attribution-ShareAlike License.
- *  https://en.wikipedia.org/wiki/Wikipedia: \
- *    Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License.
- *
+ *  Available under the Creative Commons Attribution-ShareAlike License.
+ *  http://creativecommons.org/licenses/by-sa/3.0/
+ *  Modifiication: added test code
  */
 
 /*

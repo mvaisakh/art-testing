@@ -1,19 +1,15 @@
 /*
- *    Copyright 2015 Linaro Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (C) 2015 Linaro Limited. Ported to Java from:
+ *  https://github.com/WebKit/webkit/blob/master/PerformanceTests/SunSpider/tests/sunspider-1.0.2/access-nsieve.js
  *
  */
+
+// The Great Computer Language Shootout
+//  http://shootout.alioth.debian.org/
+//
+//  modified by Isaac Gouy
+
+// http://benchmarksgame.alioth.debian.org/license.html  (BSD 3-clause license)
 
 package benchmarks.algorithm;
 
