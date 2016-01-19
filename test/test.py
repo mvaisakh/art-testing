@@ -34,6 +34,12 @@ def BuildOptions():
         description = "Run tests for the java benchmarks framework.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--target', '-t',
+                        nargs='?', default=None, const=utils.adb_default_target_string,
+                        help='Also run on target adb device.')
+    parser.add_argument('--no-host-tests',
+                        default=False, action='store_true',
+                        help='Do not run tests on host.')
     parser.add_argument('--jobs', '-j', metavar='N', type=int, nargs='?',
                         default=multiprocessing.cpu_count(),
                         help='Test using N jobs.')
@@ -55,34 +61,49 @@ def TestCommand(command, _cwd=None):
     return rc
 
 
-def TestBenchmarksOnHost():
+# A `target` set to `None` indicates that the tests should be run on host.
+def TestBenchmarksCommon(target):
     rc = 0
     run_py = os.path.join(".", "tools", "benchmarks", "run.py")
+    build_target_args = []
+    run_target_args = []
+    if target:
+        build_target_args = ['-t']
+        run_target_args = ['--target']
+        if target != utils.adb_default_target_string:
+            run_target_args.append(target)
+
     # Test standard usage of the top-level scripts.
-    rc |= TestCommand(["./build.sh"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./build.sh"] + build_target_args,
+                      _cwd=utils.dir_root)
     # Two full runs of `run.py`, with and without auto-calibration. Later runs
     # can filter benchmarks to reduce the duration of the tests.
-    rc |= TestCommand([run_py], _cwd=utils.dir_root)
-    rc |= TestCommand([run_py, "--dont-auto-calibrate"], _cwd=utils.dir_root)
+    rc |= TestCommand([run_py] + run_target_args, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py] + run_target_args + ["--dont-auto-calibrate"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
     non_root_path = os.path.join(utils.dir_root, "test", "foobar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
-    rc |= TestCommand([os.path.join(utils.dir_root, "build.sh")], _cwd=non_root_path)
-    rc |= TestCommand([os.path.join(utils.dir_root, run_py),
+    rc |= TestCommand([os.path.join(utils.dir_root, "build.sh")] + build_target_args, _cwd=non_root_path)
+    rc |= TestCommand([os.path.join(utils.dir_root, run_py)] + run_target_args +
                        # Reduce the duration of the tests.
-                       "--filter", "benchmarks/algorithm/NSieve"],
+                       ["--filter", "benchmarks/algorithm/NSieve"],
                       _cwd=non_root_path)
     # Test that the `--output-*` option work even when a path prefix is not specified.
-    rc |= TestCommand([os.path.join(utils.dir_root, run_py),
+    rc |= TestCommand([os.path.join(utils.dir_root, run_py)] + run_target_args +
                        # Reduce the duration of the tests.
-                       "--filter", "benchmarks/algorithm/CryptoMD5",
+                       ["--filter", "benchmarks/algorithm/CryptoMD5",
                        "--output-pkl=no_path_prefix.pkl"],
                       _cwd=non_root_path)
     rc |= TestCommand(["rm", "-rf", non_root_path])
-    # TODO: Abstract the app name.
-    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "benchmarks/micro/Intrinsics.NumberOfLeadingZerosIntegerRandom"], _cwd=utils.dir_build_java_classes)
-    rc |= TestCommand(["java", "org.linaro.bench.RunBench", "benchmarks/algorithm/CryptoMD5"], _cwd=utils.dir_build_java_classes)
     return rc
+
+
+def TestBenchmarksOnHost():
+    return TestBenchmarksCommon(None)
+
+
+def TestBenchmarksOnTarget(target):
+    return TestBenchmarksCommon(target)
 
 
 def TestBenchmarksCompareScript():
@@ -123,11 +144,14 @@ if __name__ == "__main__":
     args = BuildOptions()
 
     rc = 0
-    rc |= TestBenchmarksOnHost()
-    rc |= TestBenchmarksCompareScript()
-    rc |= TestBenchmarkPackages()
-    rc |= TestLint(args.jobs)
-    rc |= TestTopLevelWrapperScripts()
+    if not args.no_host_tests:
+        rc |= TestBenchmarksOnHost()
+        rc |= TestBenchmarksCompareScript()
+        rc |= TestBenchmarkPackages()
+        rc |= TestLint(args.jobs)
+        rc |= TestTopLevelWrapperScripts()
+    if args.target:
+        rc |= TestBenchmarksOnTarget(args.target)
 
     if rc != 0:
         print("Tests FAILED.")
