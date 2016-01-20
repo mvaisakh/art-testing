@@ -117,6 +117,8 @@ def TestBenchmarksCompareScript():
     rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "--filter", "benchmarks/algorithm/Crypto*", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "--filter-out", "benchmarks/algorithm/Crypto*", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
 
