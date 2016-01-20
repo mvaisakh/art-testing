@@ -50,4 +50,4 @@ def shell(command,
     command_string = ' '.join(['adb'] + GetTargetArgs(target) + \
                               ['shell', '"%s"' % ' '.join(command)])
     command = ['adb'] + GetTargetArgs(target) + ['shell'] + command
-    return utils.Command(command, exit_on_error=exit_on_error)
+    return utils.Command(command, command_string=command_string , exit_on_error=exit_on_error)
