@@ -146,7 +146,7 @@ def GetStats(apk,
         memory_usage.append(MemoryUsage(int(alloc_stats.group(2 * i + 3)), alloc_stats.group(2 * i + 4)))
 
     local_oat = os.path.join(utils.dir_root, work_dir, apk + '.oat')
-    utils_adb.pull(oat, local_oat)
+    utils_adb.pull(oat, local_oat, target)
     command = ['size', '-A', '-d', local_oat]
     rc, outerr = utils.Command(command)
     section_sizes = dict()
