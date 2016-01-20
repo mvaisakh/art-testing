@@ -52,12 +52,13 @@ def TestCommand(command, _cwd=None):
     if _cwd is not None:
         printable_command = "cd " + _cwd + " && " + printable_command
     print("Testing: " + printable_command)
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=_cwd)
-    out, err = p.communicate()
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=_cwd)
+    outerr, empty_err = p.communicate()
+    outerr = outerr.decode()
     rc = p.poll()
     if rc != 0:
         print("FAILED: " + printable_command)
-        print(out)
+        print(outerr)
     return rc
 
 
