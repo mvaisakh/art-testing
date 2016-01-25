@@ -1,36 +1,20 @@
 /*
- * Copyright (C) 2015 Linaro Limited. All rights received.
+ * Copyright (C) 2015 Linaro Limited. Ported to Java from:
+ *  https://github.com/WebKit/webkit/blob/master/PerformanceTests/SunSpider/tests/sunspider-1.0.2/crypto-sha1.js
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Description:       Encrypts a text fragment using the SHA1 Secure Hash
+ *                    Algorithm, producing a 160-bit hash value.
+ * Main Focus:        Bit operations.
  *
  */
 
 /*
- * Ported from:
- *   webkit/PerformanceTests/SunSpider/tests/sunspider-1.0.2/crypto-sha1.js
- *
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
  * Version 2.1a Copyright Paul Johnston 2000 - 2002.
  * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
  * Distributed under the BSD License
  * See http://pajhome.org.uk/crypt/md5 for details.
- */
-
-/* Description:       Encrypts a text fragment using the SHA1 Secure Hash
- *                    Algorithm, producing a 160-bit hash value.
- * Main Focus:        Bit operations.
- *
  */
 
 package benchmarks.algorithm;
