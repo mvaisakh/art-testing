@@ -4,3 +4,5 @@
 BenchmarkList.java
 # Output files.
 out
+# Downloaded checkstyle jar file.
+checkstyle-*-all.jar

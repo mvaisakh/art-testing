@@ -58,7 +58,18 @@ def Lint(filename):
     return rc
 
 
+def EnsureCheckstyleAvailable():
+  # Run the checkstyle script once to ensure the checkstyle jar file as
+  # available.
+  p = subprocess.Popen([os.path.join(utils.dir_tools, 'checkstyle', 'checkstyle')],
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  # We do not care about any errors. The script will download the jar file if
+  # necessary.
+  out, err = p.communicate()
+
+
 def LintFiles(files, jobs = 1):
+  EnsureCheckstyleAvailable()
   pool = multiprocessing.Pool(jobs)
   # The '.get(9999999)' is workaround to allow killing the test script with
   # ctrl+C from the shell. This bug is documented at
