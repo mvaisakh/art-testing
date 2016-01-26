@@ -17,7 +17,6 @@
 
 import argparse
 import csv
-import fnmatch
 import os
 import subprocess
 import sys
@@ -198,15 +197,12 @@ def ListAllBenchmarks():
     return benchs
 
 
-def FilterBenchmarks(benchmarks, filter, filter_out):
+def FilterBenchmarks(benchmarks, filters, filters_out):
     res = benchmarks
-    if filter:
-        res = []
-        for f in filter:
-            res += [x for x in benchmarks if fnmatch.fnmatch(x, f)]
-    if filter_out:
-        for f in filter_out:
-            res = [x for x in res if not fnmatch.fnmatch(x, f)]
+    if filters:
+        res = [b for b in res if utils.NameMatchesAnyFilter(b, filters)]
+    if filters_out:
+        res = [b for b in res if not utils.NameMatchesAnyFilter(b, filters_out)]
     return res
 
 def GetBenchmarkStats(args):

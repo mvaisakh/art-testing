@@ -14,6 +14,7 @@
 #
 
 import argparse
+import fnmatch
 import json
 import os
 import pickle
@@ -96,6 +97,15 @@ def PrettySIFactor(value):
             si_prefix = i[0]
 
     return si_factor, si_prefix
+
+def NameMatchesAnyFilter(name, filters):
+    # Ensure we have a list of filters. This lets the function work if only one
+    # filter is passed as a string.
+    filters = list(filters)
+    for f in filters:
+        if fnmatch.fnmatch(name, f):
+            return True
+    return False
 
 # Wrapper around `subprocess.Popen` returning the output of the given command.
 def Command(command, command_string=None, exit_on_error=True, cwd=None):
