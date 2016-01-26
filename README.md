@@ -59,7 +59,7 @@ And similarly on target
     adb shell "cd /data/local/tmp && dalvikvm -cp /data/local/tmp/bench.apk benchmarks/micro/Base64"
 
 
-### Comparing the rsults
+### Comparing the results
 
 The results of `run.py` can be compared using `compare.py`.
 
@@ -102,6 +102,40 @@ Each set of related benchmarks is implemented as a Java class and kept in the
 benchmarks/ folder.
 
 Before contributing, make sure that `test/test.py` passes.
+
+
+## How to Port an Existing Benchmark
+
+Similar to writing a benchmark, above guidelines also applies to porting an
+existing benchmark. Besides, developers should also notice:
+1. Licenses:
+   Make sure the benchmark has appropriate license for us to integrate it
+   freely into our test framework. Apache-v2.0, BSD, MIT licenses are well-
+   known and preferred. Check with the gatekeepers for other licenses.
+   The original license header in the ported benchmark MUST be *preserved* and
+   *unmodified*.
+
+2. Porting a benchmark should be done in two commits:
+   (1) Add *untouched* original file *with* its license and copyright header.
+   (2) Modify the benchmark as necessary.
+   This allows easily showing (`git diff <first commit> <second commit>`)
+   what modifications have been made to the original benchmarks.
+
+3. Keep the original code as it is:
+   This includes indents, spaces, tabs, etc. Only make changes to original code
+   when you have to (e.g. fit into our framework), but keep the changes as
+   minimal as possible. When we have to investigate why we're getting different
+   results than other projects or developers using the same benchmark, a 'diff'
+   should show as few changes as possible. If the original code has some coding
+   style which cannot pass our 'checkstyle' script, use 'CHECKSTYLE.OFF' to
+   bypass.
+
+4. Header comment:
+   When you have modified the code, make sure you comply with the license terms.
+   Provide a full copy of the license (Apache2, BSD, MIT, etc.) and notices
+   stating that you changed the files (required by GPLv2 etc) in the header
+   comment. Also, please put description in the header: where did you find the
+   benchmark source code and a link to original source.
 
 ### Rules
 
