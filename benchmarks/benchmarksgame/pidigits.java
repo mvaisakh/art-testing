@@ -1,36 +1,92 @@
-/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
- 
-   contributed by Isaac Gouy
-*/
+/*
+ * This benchmark has been ported from "The Computer Language Benchmarks Game" suite and slightly
+ * modified to fit the benchmarking framework.
+ *
+ * The original file is `pidigits/pidigits.java` from the archive
+ * available at
+ * http://benchmarksgame.alioth.debian.org/download/benchmarksgame-sourcecode.zip.
+ * See LICENSE file in the same folder (BSD 3-clause)
+ *
+ * The Computer Language Benchmarks Game
+ * http://benchmarksgame.alioth.debian.org/
+ *
+ * contributed by Isaac Gouy
+ */
+
+/*
+ * Description:     Streaming arbitrary-precision arithmetic.
+ * Main Focus:      TODO
+ *
+ */
+
+package benchmarks.benchmarksgame;
 
 import java.math.BigInteger;
 
+// CHECKSTYLE.OFF: .*
 public class pidigits {
    static final int L = 10;
+   private static final int PREDEFINED_N_DIGITS = 27;
 
-   public static void main(String args[]) { 
-      int n = Integer.parseInt(args[0]);
+   public static void old_main() { 
+      int n = PREDEFINED_N_DIGITS;
       int j = 0;
    
       PiDigitSpigot digits = new PiDigitSpigot();
       
       while (n > 0){
          if (n >= L){
-            for (int i=0; i<L; i++) System.out.print( digits.next() );
+            for (int i=0; i<L; i++) digits.next();
             j += L;
          } else {
-            for (int i=0; i<n; i++) System.out.print( digits.next() );
-            for (int i=n; i<L; i++) System.out.print(" ");  
+            for (int i=0; i<n; i++) digits.next();
             j += n;   
          }
-         System.out.print("\t:"); System.out.println(j);
          n -= L;           
       }               
    }
+   // CHECKSTYLE.ON: .*
+
+  public void timePidigits(int iters) {
+    for (int j = 0; j < iters; j++) {
+      old_main();
+    }
+  }
+
+  public boolean verifyPidigits() {
+    PiDigitSpigot digits = new PiDigitSpigot();
+
+    for (int i = 0; i < PREDEFINED_N_DIGITS; ++i) {
+      digits.next();
+    }
+    int expected = 3;
+    int found = digits.next();
+
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    pidigits obj = new pidigits();
+
+    final long before = System.currentTimeMillis();
+    obj.timePidigits(8);
+    final long after = System.currentTimeMillis();
+
+    if (!obj.verifyPidigits()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/pidigits: " + (after - before));
+    System.exit(rc);
+  }
 }
 
 
+// CHECKSTYLE.OFF: .*
 class PiDigitSpigot {
    Transformation z, x, inverse;            
        
@@ -121,6 +177,7 @@ class Transformation {
          );                    
    }          
 }
+// CHECKSTYLE.ON: .*
 
 
   

@@ -1,25 +1,36 @@
-/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
- 
- contributed by Java novice Jarkko Miettinen
- modified ~3 lines of the original C#-version 
- by Isaac Gouy
+/*
+ * This benchmark has been ported from "The Computer Language Benchmarks Game" suite and slightly
+ * modified to fit the benchmarking framework.
+ *
+ * The original file is `spectralnorm/spectralnorm.java` from the archive
+ * available at
+ * http://benchmarksgame.alioth.debian.org/download/benchmarksgame-sourcecode.zip.
+ * See LICENSE file in the same folder (BSD 3-clause)
+ *
+ * The Computer Language Benchmarks Game
+ * http://benchmarksgame.alioth.debian.org/
+ *
+ * contributed by Java novice Jarkko Miettinen
+ * modified ~3 lines of the original C#-version
+ * by Isaac Gouy
  */
- 
+
+ /*
+ * Description:     Eigenvalue using the power method.
+ * Main Focus:      TODO
+ *
+ */
+
+package benchmarks.benchmarksgame;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat; 
 
+// CHECKSTYLE.OFF: .*
 public class spectralnorm
 {
    
    private static final NumberFormat formatter = new DecimalFormat("#.000000000");
-   
-   public static void main(String[] args) {
-      int n = 100;
-      if (args.length > 0) n = Integer.parseInt(args[0]);
-      
-      System.out.println(formatter.format(new spectralnorm().Approximate(n)));
-   }
    
    private final double Approximate(int n) {
       // create unit vector
@@ -74,4 +85,39 @@ public class spectralnorm
       MultiplyAv(n,v,u);
       MultiplyAtv(n,u,AtAv);
    }
+   // CHECKSTYLE.ON: .*
+
+  private static final int APPROXIMATE_N = 100;
+
+  public boolean verifySpectralNorm() {
+    double expected = 1.2742199912349306;
+    double found = Approximate(APPROXIMATE_N);
+
+    if (Math.abs(expected - found) > 0.000000001) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
+  }
+
+  public void timeSpectralNorm(int iters) {
+    for (int j = 0; j < iters; j++) {
+      Approximate(APPROXIMATE_N);
+    }
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    spectralnorm obj = new spectralnorm();
+
+    final long before = System.currentTimeMillis();
+    obj.timeSpectralNorm(5);
+    final long after = System.currentTimeMillis();
+
+    if (!obj.verifySpectralNorm()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/spectralnorm: " + (after - before));
+    System.exit(rc);
+  }
 }

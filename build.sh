@@ -109,16 +109,7 @@ shift $((OPTIND - 1))
 # Disable wildcard expansion.
 set -f
 # Find what Java files we need to compile.
-# We temporarily filter out newly imported benchmarks to let the tests pass.
-JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java \
-! -name binarytrees.java                                            \
-! -name chameneosredux.java                                         \
-! -name pidigits.java                                               \
-! -name regexdna.java                                               \
-! -name revcomp.java                                                \
-! -name spectralnorm.java                                           \
-! -name threadring.java                                             \
-)"
+JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
 # Reenable wildcard expansion.
 set +f
 

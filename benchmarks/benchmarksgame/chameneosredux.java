@@ -1,9 +1,25 @@
-/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
+/*
+ * This benchmark has been ported from "The Computer Language Benchmarks Game" suite and slightly
+ * modified to fit the benchmarking framework.
+ *
+ * The original file is `chameneosredux/chameneosredux.java` from the archive
+ * available at
+ * http://benchmarksgame.alioth.debian.org/download/benchmarksgame-sourcecode.zip.
+ * See LICENSE file in the same folder (BSD 3-clause)
+ *
+ * The Computer Language Benchmarks Game
+ * http://benchmarksgame.alioth.debian.org/
+ *
+ * contributed by Michael Barker
+ */
 
-   contributed by Michael Barker
-*/
+/*
+ * Description:     Symmetrical thread rendezvous requests.
+ * Main Focus:      TODO
+ *
+ */
 
+package benchmarks.benchmarksgame;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -18,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * are set up as a thread pool and meeting requests are pushed onto a
  * queue that feeds the thread pool.
  */
+// CHECKSTYLE.OFF: .*
 public final class chameneosredux {
 
     enum Colour {
@@ -161,7 +178,7 @@ public final class chameneosredux {
         }
     }
 
-    private static void run(final int n, final Colour...colours) {
+    private int run(final int n, final Colour...colours) {
         final int len = colours.length;
         final MeetingPlace place = new MeetingPlace(n);
         final Creature[] creatures = new Creature[len];
@@ -169,11 +186,9 @@ public final class chameneosredux {
         final CountDownLatch latch = new CountDownLatch(len - 1);
 
         for (int i = 0; i < len; i++) {
-            System.out.print(" " + colours[i]);
             creatures[i] = new Creature(place, colours[i], q, latch);
         }
 
-        System.out.println();
         final Thread[] ts = new Thread[len];
         for (int i = 0, h = ts.length; i < h; i++) {
             ts[i] = new Thread(new Dispatcher(q));
@@ -199,30 +214,9 @@ public final class chameneosredux {
 
         int total = 0;
         for (final Creature creature : creatures) {
-            System.out.println(creature);
             total += creature.getCount();
         }
-        System.out.println(getNumber(total));
-        System.out.println();
-    }
-
-    public static void main(final String[] args){
-        chameneosredux.program_main(args,true);
-    }
-
-    public static void program_main(final String[] args, final boolean isWarm) {
-
-        int n = 600;
-        try {
-            n = Integer.parseInt(args[0]);
-        } catch (final Exception e) {
-        }
-
-        printColours();
-        System.out.println();
-        run(n, Colour.blue, Colour.red, Colour.yellow);
-        run(n, Colour.blue, Colour.red, Colour.yellow, Colour.red, Colour.yellow,
-               Colour.blue, Colour.red, Colour.yellow, Colour.red, Colour.blue);
+        return total;
     }
 
     private static final String[] NUMBERS = {
@@ -240,22 +234,42 @@ public final class chameneosredux {
 
         return sb.toString();
     }
+    // CHECKSTYLE.ON: .*
 
-    private static void printColours() {
-        printColours(Colour.blue, Colour.blue);
-        printColours(Colour.blue, Colour.red);
-        printColours(Colour.blue, Colour.yellow);
-        printColours(Colour.red, Colour.blue);
-        printColours(Colour.red, Colour.red);
-        printColours(Colour.red, Colour.yellow);
-        printColours(Colour.yellow, Colour.blue);
-        printColours(Colour.yellow, Colour.red);
-        printColours(Colour.yellow, Colour.yellow);
+  private static final int PREDEFINED_N = 600;
+
+  public void timeChameneosRedux(int iters) {
+    for (int i = 0; i < iters; i++) {
+      run(PREDEFINED_N, Colour.blue, Colour.red, Colour.yellow);
+      run(PREDEFINED_N, Colour.blue, Colour.red, Colour.yellow, Colour.red, Colour.yellow,
+                        Colour.blue, Colour.red, Colour.yellow, Colour.red, Colour.blue);
     }
+  }
 
-    private static void printColours(final Colour c1, final Colour c2) {
-        System.out.println(c1 + " + " + c2 + " -> " + doCompliment(c1, c2));
+  public boolean verifyChameneosRedux() {
+    int expected = 1200;
+    int found = run(PREDEFINED_N, Colour.blue, Colour.red, Colour.yellow, Colour.red, Colour.yellow,
+                                  Colour.blue, Colour.red, Colour.yellow, Colour.red, Colour.blue);
+
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
     }
+    return true;
+  }
 
+  public static void main(final String[] args) {
+    int rc = 0;
+    chameneosredux obj = new chameneosredux();
 
+    final long before = System.currentTimeMillis();
+    obj.timeChameneosRedux(5);
+    final long after = System.currentTimeMillis();
+
+    if (!obj.verifyChameneosRedux()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/chameneosredux: " + (after - before));
+    System.exit(rc);
+  }
 }
