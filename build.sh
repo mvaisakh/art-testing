@@ -109,7 +109,14 @@ shift $((OPTIND - 1))
 # Disable wildcard expansion.
 set -f
 # Find what Java files we need to compile.
-JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
+JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java \
+! -name FloatAtom.java                                              \
+! -name LogicAtom.java                                              \
+! -name LoopAtom.java                                               \
+! -name MethodAtom.java                                             \
+! -name SieveAtom.java                                              \
+! -name StringAtom.java                                             \
+)"
 # Reenable wildcard expansion.
 set +f
 
