@@ -143,6 +143,30 @@ def TestTopLevelWrapperScripts():
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
+
+def TestCompilationStatistics(target=utils.adb_default_target_string):
+    rc = 0
+    args = []
+
+    if target != utils.adb_default_target_string:
+        args = ['--target', target]
+
+    args.append(os.path.join(utils.dir_build, "bench.apk"))
+    run_py = os.path.join(utils.dir_root, "tools", "compilation_statistics", "run.py")
+    compare_py = os.path.join(utils.dir_root, "tools", "compilation_statistics", "compare.py")
+    rc |= TestCommand(["./build.sh", "-t"], _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-pkl=/tmp/res1"] + args, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-pkl=/tmp/res2"] + args, _cwd=utils.dir_root)
+    rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    # Test executing from a different path than the root.
+    non_root_path = os.path.join(utils.dir_root, "test", "foobar")
+    rc |= TestCommand(["mkdir", "-p", non_root_path])
+    rc |= TestCommand([run_py] + args, _cwd=non_root_path)
+    # Test that the `--output-*` option work even when a path prefix is not specified.
+    rc |= TestCommand([run_py, "--output-pkl=no_path_prefix.pkl"] + args, _cwd=non_root_path)
+    rc |= TestCommand(["rm", "-rf", non_root_path])
+    return rc
+
 if __name__ == "__main__":
     args = BuildOptions()
 
@@ -155,6 +179,7 @@ if __name__ == "__main__":
         rc |= TestTopLevelWrapperScripts()
     if args.target:
         rc |= TestBenchmarksOnTarget(args.target)
+        rc |= TestCompilationStatistics(args.target)
 
     if rc != 0:
         print("Tests FAILED.")
