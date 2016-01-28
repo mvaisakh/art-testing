@@ -22,8 +22,9 @@
 
 package benchmarks.benchmarksgame;
 
-public class FannkuchRedux {
-   // CHECKSTYLE.OFF: .*
+ // CHECKSTYLE.OFF: .*
+public class fannkuchredux
+{
    public int fannkuch(int n) {
       int[] perm = new int[n];
       int[] perm1 = new int[n];
@@ -78,7 +79,7 @@ public class FannkuchRedux {
    }
    // CHECKSTYLE.ON: .*
 
-  private static final int PREDEFINED_N_PANCAKES = 9;
+  private static final int PREDEFINED_N_PANCAKES = 7;
 
   public void timeFannkuchRedux(int iters) {
     for (int i = 0; i < iters; i++) {
@@ -86,18 +87,28 @@ public class FannkuchRedux {
     }
   }
 
-  public boolean verify() {
-    return fannkuch(PREDEFINED_N_PANCAKES) == 30;
+  public boolean verifyFannkuchRedux() {
+    int expected = 16;
+    int found = fannkuch(PREDEFINED_N_PANCAKES);
+
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
   }
 
   public static void main(String[] args) {
-
-    FannkuchRedux obj = new FannkuchRedux();
+    int rc = 0;
+    fannkuchredux obj = new fannkuchredux();
     final long before = System.currentTimeMillis();
     obj.timeFannkuchRedux(4);
     final long after = System.currentTimeMillis();
 
-    obj.verify();
-    System.out.println("benchmarks/benchmarksgame/FannkuchRedux: " + (after - before));
+    if (!obj.verifyFannkuchRedux()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/fannkuchredux: " + (after - before));
+    System.exit(rc);
   }
 }

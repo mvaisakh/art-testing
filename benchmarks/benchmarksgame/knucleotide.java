@@ -34,14 +34,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Knucleotide {
+// CHECKSTYLE.OFF: .*
+public class knucleotide {
 
   private byte[] temp = null;
   private byte[] buffer = null;
   private byte[] species = null;
   private ByteArrayInputStream stream = null;
 
-    // CHECKSTYLE.OFF: .*
     static Map<Key, Value> MAP;
     static final int[] SEQUENCES1 = {2, 1};
     static final int[] SEQUENCES2 = {18, 12, 6, 4, 3};
@@ -113,7 +113,7 @@ outer:
             Key key = new Key();
         }
     }
-
+        
     static byte translate(byte b) {
         return (byte) ((b >> 1) & 3);
     }
@@ -297,21 +297,33 @@ outer:
     }
   }
 
-  public boolean verify() {
+  public boolean verifyKnucleotide() {
     Key key = new Key();
     key.setHash(SPICIFIC_SEQUENCES[2]);
-    return MAP.get(key).count == 12;
+
+    int expected = 12;
+    int found = MAP.get(key).count;
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
   }
 
   public static void main(String[] args) {
-    Knucleotide obj = new Knucleotide();
+    int rc = 0;
+    knucleotide obj = new knucleotide();
 
     final long before = System.currentTimeMillis();
     obj.timeKnucleotide(15);
     final long after = System.currentTimeMillis();
 
-    obj.verify();
-    System.out.println("benchmarks/benchmarksgame/Knucleotide: " + (after - before));
+    if (!obj.verifyKnucleotide()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/knucleotide: " + (after - before));
+    System.exit(rc);
   }
 
   private static final String fastaStr = ">ONE Homo sapiens alu\n"

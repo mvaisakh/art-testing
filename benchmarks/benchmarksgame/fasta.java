@@ -24,9 +24,8 @@
 
 package benchmarks.benchmarksgame;
 
-public class Fasta {
-
-    // CHECKSTYLE.OFF: .*
+// CHECKSTYLE.OFF: .*
+public class fasta {
     public static final int IM = 139968;
     public static final int IA = 3877;
     public static final int IC = 29573;
@@ -147,7 +146,7 @@ public class Fasta {
     }
 
     public void old_main() {
-        int n = 250000;
+        int n = 1000;
      
         makeRepeatFasta("ONE", "Homo sapiens alu", ALU, n * 2);
         makeRandomFasta("TWO", "IUB ambiguity codes", IUB, n * 3);
@@ -164,22 +163,52 @@ public class Fasta {
     }
   }
 
-  public boolean verify() {
-    // TODO: Test other cases in `old_main()`.
+  public boolean verifyFasta() {
     index = 0;
-    makeRandomFasta("THREE", "Homo sapiens frequency", HomoSapiens, 125);
-    return index == 128;
+    int n = 25;
+    
+    makeRepeatFasta("ONE", "Homo sapiens alu", ALU, n * 2);
+    int expected = 51;
+    int found = index;
+
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+  
+    makeRandomFasta("THREE", "Homo sapiens frequency", HomoSapiens, n * 5);
+    expected = 128;
+    found = index;
+
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    makeRandomFasta("TWO", "IUB ambiguity codes", IUB, n * 3);
+    expected = 77;
+    found = index;
+
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
   }
 
   public static void main(String[] args) {
-    Fasta obj = new Fasta();
+    int rc = 0;
+    fasta obj = new fasta();
 
     final long before = System.currentTimeMillis();
     obj.timeFasta(5);
     final long after = System.currentTimeMillis();
 
-    obj.verify();
-    System.out.println("benchmarks/benchmarksgame/Fasta: " + (after - before));
+    if (!obj.verifyFasta()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/fasta: " + (after - before));
+    System.exit(rc);
   }
-
 }

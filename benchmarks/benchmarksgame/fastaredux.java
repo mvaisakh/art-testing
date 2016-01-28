@@ -27,9 +27,9 @@ package benchmarks.benchmarksgame;
 
 import java.io.*;
 
-public class FastaRedux {
+// CHECKSTYLE.OFF: .*
+public class fastaredux {
 
-    // CHECKSTYLE.OFF: .*
     static final int LINE_LENGTH = 60;
     static final int OUT_BUFFER_SIZE = 256*1024;
     static final int LOOKUP_SIZE = 4*1024;
@@ -93,7 +93,7 @@ public class FastaRedux {
 
     static final class Out {
     
-        static final byte buf[] = new byte[OUT_BUFFER_SIZE];
+        static byte buf[] = new byte[OUT_BUFFER_SIZE];
         static final int lim = OUT_BUFFER_SIZE - 2*LINE_LENGTH - 1;
         static int ct = 0;
         static OutputStream stream;
@@ -168,7 +168,7 @@ public class FastaRedux {
     }
 
     private void old_main() throws IOException {
-        int n = 250000;
+        int n = 1000;
 
         RepeatFasta.make(">ONE Homo sapiens alu\n", ALU.getBytes(), n * 2);
         RandomFasta.make(">TWO IUB ambiguity codes\n", IUB, n * 3);
@@ -194,22 +194,40 @@ public class FastaRedux {
     }
   }
 
-  static final int VERIFY_MAGIC_NUMBER = 125;
+  static final int VERIFY_MAGIC_NUMBER = 25;
 
-  public boolean verify() throws IOException {
-    // TODO: Test other cases run in `old_main()`.
-    RandomFasta.make(">THREE Homo sapiens frequency\n", HomoSapiens, VERIFY_MAGIC_NUMBER);
-    return Out.buf[VERIFY_MAGIC_NUMBER - 1] == 97;
+  public boolean verifyFastaRedux() throws IOException {
+    int n = VERIFY_MAGIC_NUMBER;
+    Out.buf = new byte[OUT_BUFFER_SIZE];
+    sumAndScale(IUB);
+    sumAndScale(HomoSapiens);
+
+    RepeatFasta.make(">ONE Homo sapiens alu\n", ALU.getBytes(), n * 2);
+    RandomFasta.make(">TWO IUB ambiguity codes\n", IUB, n * 3);
+    RandomFasta.make(">THREE Homo sapiens frequency\n", HomoSapiens, n * 5);
+
+    int expected = 0;
+    int found = Out.buf[VERIFY_MAGIC_NUMBER - 1];
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
   }
 
   public static void main(String[] args) throws IOException {
-    FastaRedux obj = new FastaRedux();
+    int rc = 0;
+    fastaredux obj = new fastaredux();
 
     final long before = System.currentTimeMillis();
     obj.timeFastaRedux(10);
     final long after = System.currentTimeMillis();
 
-    obj.verify();
-    System.out.println("benchmarks/benchmarksgame/FastaRedux: " + (after - before));
+    if (!obj.verifyFastaRedux()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/fastaredux: " + (after - before));
+    System.exit(rc);
   }
 }
