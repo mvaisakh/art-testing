@@ -219,3 +219,10 @@ def AddOutputFormatOptions(parser, formats=default_output_formats):
 def AddCommonCompareOptions(parser):
     parser.add_argument('res_1', metavar = 'res_1.pkl')
     parser.add_argument('res_2', metavar = 'res_2.pkl')
+
+def CheckDependencies(dependencies):
+    for d in dependencies:
+        rc, err = Command(['which', d], exit_on_error=False)
+
+        if rc:
+            Error("Couldn't find `" + d + "`.")

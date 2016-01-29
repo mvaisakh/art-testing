@@ -193,6 +193,7 @@ def GetISA(target, mode):
     return isa
 
 def GetCompilationStats(args):
+    utils.CheckDependencies(['adb', 'size'])
     alloc_parser = re.compile('.*?took (.*?)([mnu]{,1})s.*?=([0-9]+)([GKM]{,1})B' \
                               '.*?=([0-9]+)([GKM]{,1})B.*?=([0-9]+)([GKM]{,1})B' \
                               '.*?=([0-9]+)([GKM]{,1})B')

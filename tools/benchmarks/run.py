@@ -218,6 +218,9 @@ def GetBenchmarkStats(args):
     if getattr(args, 'norun', None) is None:
         setattr(args, 'norun', False)
 
+    if args.target:
+        utils.CheckDependencies(['adb'])
+
     BuildBenchmarks(args.target)
 
     remote_apk = None
