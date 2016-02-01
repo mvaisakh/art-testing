@@ -6,8 +6,25 @@ CONFIG=$SCRIPT_PATH/config.xml
 CHECKSTYLE_JAR=$SCRIPT_PATH/checkstyle-6.14.1-all.jar
 
 if [ ! -f $CHECKSTYLE_JAR ]; then
-  echo "ERROR: Could not find ${CHECKSTYLE_JAR}. Did you run $SCRIPT_PATH/download.sh?"
-  exit 1
+  DOWNLOAD_URL=http://sourceforge.net/projects/checkstyle/files/checkstyle/6.14.1/checkstyle-6.14.1-all.jar/download 
+  SOURCES_URL=https://github.com/checkstyle/checkstyle/tree/checkstyle-6.14.1
+  DOWNLOAD_COMMAND="wget $DOWNLOAD_URL -O $CHECKSTYLE_JAR"
+
+  echo "Downloading the checkstyle jar file at $DOWNLOAD_URL.
+  The sources can be found at $SOURCES_URL."
+  # Do not prompt for user input when run non-interactively.
+  if [ -z $PS1 ]; then
+    $DOWNLOAD_COMMAND
+  else
+    read -p "Download (y/n)?" -n 1 -r
+    if [[ ! $REPLY =~ ^y$ ]]
+    then
+      echo -e "\nCannot run checkstyle. Exiting."
+      exit 1
+    else
+      $DOWNLOAD_COMMAND
+    fi
+  fi
 fi
 
 output=$(java  -jar $CHECKSTYLE_JAR -c $CONFIG "$@")
