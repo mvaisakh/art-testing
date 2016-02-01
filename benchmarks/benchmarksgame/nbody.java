@@ -103,6 +103,7 @@ final class NBodySystem {
    }
 }
 
+
 final class Body {
    static final double PI = 3.141592653589793;
    static final double SOLAR_MASS = 4 * PI * PI;
@@ -173,17 +174,16 @@ final class Body {
       return this;
    }
 }
-// CHECKSTYLE.ON: .*
 
-public final class NBody {
-
+public final class nbody {
+  // CHECKSTYLE.ON: .*
   private NBodySystem bodies;
 
-  public NBody() {
+  public nbody() {
     bodies = new NBodySystem();
   }
 
-  private static final int PREDEFINED_N_STEPS = 500000;
+  private static final int PREDEFINED_N_STEPS = 1000;
 
   public void solve() {
     for (int i = 0; i < PREDEFINED_N_STEPS; ++i) {
@@ -197,23 +197,33 @@ public final class NBody {
     }
   }
 
-  private static final double EPSILON = 0.00001;
-  private static final double PREDEFINED_ENERGY = - 0.169096567;
-
-  public boolean verify() {
+  public boolean verifyNBody() {
     bodies = new NBodySystem();
     solve();
-    double sub = bodies.energy() - PREDEFINED_ENERGY;
-    return Math.abs(sub) < EPSILON;
+
+    double expected = -0.169087605234606;
+    double found = bodies.energy();
+
+    if (Math.abs(expected - found) > 0.000000001) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
   }
 
   public static void main(String[] args) {
-    NBody obj = new NBody();
+    int rc = 0;
+    nbody obj = new nbody();
+
     final long before = System.currentTimeMillis();
     obj.timeNBody(5);
     final long after = System.currentTimeMillis();
 
-    obj.verify();
-    System.out.println("benchmarks/benchmarksgame/NBody: " + (after - before));
+    if (!obj.verifyNBody()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/nbody: " + (after - before));
+    System.exit(rc);
   }
 }

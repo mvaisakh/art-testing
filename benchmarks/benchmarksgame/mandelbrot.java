@@ -26,13 +26,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.System;
 
-public class Mandelbrot {
-  private static final int PREDEFINED_SIZE = 400;
+// CHECKSTYLE.OFF: .*
+public class mandelbrot {
+  private static final int PREDEFINED_SIZE = 200;
 
-       // CHECKSTYLE.OFF: .*
        private static final int BUFFER_SIZE = 8192;
 
-       public Mandelbrot() {
+       public mandelbrot() {
          this.size = PREDEFINED_SIZE;
          fac = 2.0 / size;
          shift = size % 8 == 0 ? 0 : (8- size % 8);
@@ -97,20 +97,32 @@ public class Mandelbrot {
     }
   }
 
-  public boolean verify() {
+  public boolean verifyMandelbrot() {
     bufLen = 0;
     compute();
-    return 3616 == bufLen;
+
+    int expected = 5000;
+    int found = bufLen;
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
   }
 
   public static void main(String[] args) {
-    Mandelbrot obj = new Mandelbrot();
+    int rc = 0;
+    mandelbrot obj = new mandelbrot();
 
     final long before = System.currentTimeMillis();
     obj.timeMandelbrot(75);
     final long after = System.currentTimeMillis();
 
-    obj.verify();
-    System.out.println("benchmarks/benchmarksgame/Mandelbrot: " + (after - before));
+    if (!obj.verifyMandelbrot()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/mandelbrot: " + (after - before));
+    System.exit(rc);
   }
 }

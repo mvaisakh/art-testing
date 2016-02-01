@@ -19,6 +19,14 @@
  *
  */
 
+package benchmarks.benchmarksgame;
+
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 /** First hack at a Java solver for the meteor puzzle - just the IBM 
   * developerWorks article algorithm optimized with precalculated shapes 
   * and bitmasks. Should be possible to optimize it some more to take 
@@ -34,25 +42,11 @@
   * @author Tony Seebregts
   *
   */
-
-package benchmarks.benchmarksgame;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-public class Meteor {
-
-  public void resetMeteor() {
-    for (int i = 0; i < 10; ++i) {
-      solution[i] = new Entry();
-    }
-  }
-
-     // CHECKSTYLE.OFF: .*
-     // CONSTANTS
-
+  
+// CHECKSTYLE.OFF: .*
+public class meteor
+   { // CONSTANTS
+       
      private static final int[]    SHIFT = { 0,6,11,17,22,28,33,39,44,50 };
      private static final long[][] MASK  = { { 0x01L,      0x02L,      0x04L,      0x08L,      0x10L   },
                      { 0x01L << 6, 0x02L << 6, 0x04L << 6, 0x08L <<  6,0x10L << 6  },
@@ -106,7 +100,7 @@ public class Meteor {
        * 
        */
 
-     public Meteor ()
+     public meteor ()
         { for (int i=0; i<10; i++)
           solution[i] = new Entry();
         }
@@ -459,31 +453,47 @@ public class Meteor {
                      new Shape ('9',new int[][] {{3,-1},{2, 0},{1, 1},{0, 2},{0, 0}},0x0000000000021086L,1,false,6,1,7),
                      new Shape ('9',new int[][] {{1,-5},{1,-3},{1,-1},{1, 1},{0, 0}},0x00000000000003C8L,3,false,8,5,8)
                        };
+                       
      // CHECKSTYLE.ON: .*
 
-  public void timeSolve(int iters) {
+  public void resetMeteor() {
+    for (int i = 0; i < 10; ++i) {
+      solution[i] = new Entry();
+    }
+  }
+
+  public void timeMeteor(int iters) {
     for (int i = 0; i < iters; i++) {
       solve();
       resetMeteor();
     }
   }
 
-  public boolean verify() {
+  public boolean verifyMeteor() {
     solve();
-    return solutions.first().toString().equals(
-        "00001222012661126155865558633348893448934747977799");
+    String found = solutions.first().toString();
+    String expected = "00001222012661126155865558633348893448934747977799";
+
+    if (!expected.equals(found)) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
   }
 
   public static void main(String[] args) {
-
-    Meteor puzzle = new Meteor();
+    int rc = 0;
+    meteor puzzle = new meteor();
 
     final long before = System.currentTimeMillis();
-    puzzle.timeSolve(2);
+    puzzle.timeMeteor(2);
     final long after = System.currentTimeMillis();
 
-    puzzle.verify();
-    System.out.println("benchmarks/benchmarksgame/Meteor: " + (after - before));
+    if (!puzzle.verifyMeteor()) {
+      rc++;
+    }
+    System.out.println("benchmarks/benchmarksgame/meteor: " + (after - before));
+    System.exit(rc);
   }
-
 }
