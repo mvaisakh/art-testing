@@ -42,6 +42,29 @@ public class ControlFlowRecursive {
     return tak(tak(x - 1, y, z), tak(y - 1, z, x), tak(z - 1, x, y));
   }
 
+  private int tarai(int x, int y, int z) {
+    if (y >= x) {
+      return y;
+    }
+    return tarai(tarai(x - 1, y, z), tarai(y - 1, z, x), tarai(z - 1, x, y));
+  }
+
+  public void timeTak(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 3; i <= 5; i++) {
+        tak(3 * i + 3, 2 * i + 2, i + 1);
+      }
+    }
+  }
+
+  public void timeTarai(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 3; i <= 5; i++) {
+        tarai(3 * i + 3, 2 * i + 2, i + 1);
+      }
+    }
+  }
+
   public void timeControlFlowRecursive(int iterations) {
     for (int iter = 0; iter < iterations; ++iter) {
       result = 0;
@@ -56,10 +79,22 @@ public class ControlFlowRecursive {
    * Verify
    **/
 
+  public boolean verifyTakTarai() {
+    int i = 5;
+    int expected = 25;
+    int found = tak(3 * i + 3, 2 * i + 2, i + 1) + tarai(3 * i + 3, 2 * i + 2, i + 1);
+
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Called by the framework to assert the benchmarks have done the right thing.
    **/
-  public boolean verify() {
+  public boolean verifyControlFlowRecursive() {
     return result == expected;
   }
 
@@ -67,11 +102,18 @@ public class ControlFlowRecursive {
    * *NOT* called by the framework by default, provided for direct use only.
    **/
   public static void main(String[] args) {
+    int rc = 0;
     ControlFlowRecursive obj = new ControlFlowRecursive();
     long before = System.currentTimeMillis();
     obj.timeControlFlowRecursive(500);
+    obj.timeTak(500);
+    obj.timeTarai(500);
 
     long after = System.currentTimeMillis();
+    if (!obj.verifyTakTarai() || !obj.verifyControlFlowRecursive()) {
+      rc++;
+    }
     System.out.println("benchmarks/micro/ControlFlowRecursive: " + (after - before));
+    System.exit(rc);
   }
 }
