@@ -50,6 +50,7 @@ memory_stats_label = 'memory statistics'
 oat_size_label = 'oat size'
 adb_default_target_string = '<default>'
 adb_default_target_copy_path = '/data/local/tmp'
+default_android_root = None
 default_mode = ''
 default_compiler_mode = None
 default_n_iterations = 1
@@ -162,6 +163,9 @@ def AddCommonRunOptions(parser):
                       help='''The compiler to use on target. When this option is
                       not specified no additional arguments are passed so the
                       default compiler on the target is used.''')
+    opts.add_argument('--android-root',
+                      default = default_android_root,
+                      help='Set root for android.')
 
 def ValidateCommonRunOptions(args):
     options_requiring_target_mode = ['mode', 'compiler-mode']
@@ -169,6 +173,9 @@ def ValidateCommonRunOptions(args):
         for opt in options_requiring_target_mode:
             if getattr(args, opt.replace('-', '_')):
                 Error('The `--%s` option is only valid when `--target` is specified.' % opt)
+
+    if not args.target and args.android_root:
+        Error('The `--android_root` option is only valid when `--target` is specified.')
 
 # Returns a list of `dex2oat` options for the compiler.
 def GetDex2oatOptions(compiler_mode):
