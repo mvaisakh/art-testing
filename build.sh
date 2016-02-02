@@ -109,7 +109,18 @@ shift $((OPTIND - 1))
 # Disable wildcard expansion.
 set -f
 # Find what Java files we need to compile.
-JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
+JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java              \
+                                                   ! -name DeviceTask.java       \
+                                                   ! -name HandlerTask.java      \
+                                                   ! -name IdleTask.java         \
+                                                   ! -name Packet.java           \
+                                                   ! -name Richards.java         \
+                                                   ! -name Scheduler.java        \
+                                                   ! -name Task.java             \
+                                                   ! -name TaskControlBlock.java \
+                                                   ! -name WorkerTask.java       \
+)"
+
 # Reenable wildcard expansion.
 set +f
 
