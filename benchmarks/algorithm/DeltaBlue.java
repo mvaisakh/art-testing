@@ -7,6 +7,7 @@
  * CL_SUN_COPYRIGHT_JVM_END
 */
 
+// CHECKSTYLE.OFF: .*
 /*
  * @(#)DeltaBlue.java	1.6 06/10/10
  *
@@ -46,7 +47,19 @@
 
 */
 
+/*
+ * The original file is available at:
+ * https://github.com/xxgreg/deltablue/blob/master/DeltaBlue.java
+ *
+ * Modifications:
+ * (1) Added timeDeltaBlue() method for running with different iterations.
+ * (2) Added verifyDeltaBlue() method for verifying the benchmark.
+ * (3) Changed main() method.
+ * (4) On test failure, change from 'exit(1)' to print to stdout.
+ */
+
 //package COM.sun.labs.kanban.DeltaBlue;
+package benchmarks.algorithm;
 
 import java.util.ArrayList;
 
@@ -884,7 +897,7 @@ public class DeltaBlue /* implements Benchmark */ {
 
   public static Planner planner;
 
-  public static void main(String[] args) {
+  public static void main_(String[] args) {
     (new DeltaBlue()).inst_main(args);
   }
 
@@ -924,7 +937,7 @@ public class DeltaBlue /* implements Benchmark */ {
   //  low. Typical situations lie somewhere between these two
   //  extremes.
   //
-  private void chainTest(int n)
+  private boolean chainTest(int n)
   {
     planner= new Planner();
 
@@ -950,9 +963,10 @@ public class DeltaBlue /* implements Benchmark */ {
       first.value= i;
       plan.execute();
       if (last.value != i)
-        error("Chain test failed!");
+        return false;
     }
     editC.destroyConstraint();
+    return true;
   }
 
 
@@ -961,7 +975,7 @@ public class DeltaBlue /* implements Benchmark */ {
   // time is measured to change a variable on either side of the
   // mapping and to change the scale and offset factors.
   //
-  private void projectionTest(int n)
+  private boolean projectionTest(int n)
   {
     planner= new Planner();
 
@@ -980,22 +994,23 @@ public class DeltaBlue /* implements Benchmark */ {
     }
 
     change(src, 17);
-    if (dst.value != 1170) error("Projection test 1 failed!");
+    if (dst.value != 1170) return false;
 
     change(dst, 1050);
-    if (src.value != 5) error("Projection test 2 failed!");
+    if (src.value != 5) return false;
 
     change(scale, 5);
     for (int i= 0; i < n - 1; ++i) {
       if ((dests.get(i)).value != i * 5 + 1000)
-        error("Projection test 3 failed!");
+        return false;
     }
 
     change(offset, 2000);
     for (int i= 0; i < n - 1; ++i) {
       if ((dests.get(i)).value != i * 5 + 2000)
-        error("Projection test 4 failed!");
+        return false;
     }
+    return true;
   }
 
   private void change(Variable var, int newValue)
@@ -1017,5 +1032,39 @@ public class DeltaBlue /* implements Benchmark */ {
     System.exit(1);
   }
 
+  // CHECKSTYLE.ON: .*
+  public void timeDeltaBlue(int iterations) {
+    for (int iter = 0; iter < iterations; iter++) {
+      chainTest(100);
+      projectionTest(100);
+    }
+  }
+
+  public boolean verifyDeltaBlue() {
+    if (!chainTest(100)) {
+      System.out.println("ERROR: Chain test failed");
+      return false;
+    }
+    if (!projectionTest(100)) {
+      System.out.println("ERROR: Projection test failed");
+      return false;
+    }
+    return true;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    DeltaBlue obj = new DeltaBlue();
+
+    long before = System.currentTimeMillis();
+    obj.timeDeltaBlue(300);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/algorithm/DeltaBlue: " + (after - before));
+    if (!obj.verifyDeltaBlue()) {
+      rc++;
+    }
+    System.exit(rc);
+  }
 }
 
