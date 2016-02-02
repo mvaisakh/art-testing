@@ -33,23 +33,13 @@ def BuildOptions():
                         help='Lint using N jobs')
     return parser.parse_args()
 
-def ExcludeJavaFiles(filename):
-    return filename.endswith('DeviceTask.java')       or \
-           filename.endswith('HandlerTask.java')      or \
-           filename.endswith('IdleTask.java')         or \
-           filename.endswith('Packet.java')           or \
-           filename.endswith('Richards.java')         or \
-           filename.endswith('Scheduler.java')        or \
-           filename.endswith('Task.java')             or \
-           filename.endswith('TaskControlBlock.java') or \
-           filename.endswith('WorkerTask.java')
 
 def GetJavaFiles():
     java_files = []
     for dir_java_files in [utils.dir_framework, utils.dir_benchmarks]:
         for root, dirs, files in os.walk(dir_java_files):
             files = map(lambda x : os.path.join(root, x), files)
-            java_files += [f for f in files if (f.endswith('.java') and (not ExcludeJavaFiles(f)))]
+            java_files += [f for f in files if f.endswith('.java')]
     java_files.sort()
     return java_files
 
