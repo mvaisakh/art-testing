@@ -133,7 +133,7 @@ existing benchmark. Besides, developers should also notice:
 4. Header comment:
    When you have modified the code, make sure you comply with the license terms.
    Provide a full copy of the license (Apache2, BSD, MIT, etc.) and notices
-   stating that you changed the files (required by GPLv2 etc) in the header
+   stating that you changed the files (required by Apache2, etc) in the header
    comment. Also, please put description in the header: where did you find the
    benchmark source code and a link to original source.
 

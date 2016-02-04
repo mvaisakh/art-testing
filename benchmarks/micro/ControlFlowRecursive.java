@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2015, Linaro Limited. Ported to Java from:
  *  https://github.com/WebKit/webkit/blob/master/PerformanceTests/SunSpider/tests/sunspider-1.0.2/controlflow-recursive.js
+ * and added Tarai.
  *
  * Description:     A control flow recursive micro benchmark case.
  */
@@ -11,6 +12,7 @@
 // contributed by Isaac Gouy
 
 // http://benchmarksgame.alioth.debian.org/license.html  (BSD 3-clause license)
+// See NOTICE file for license.
 
 package benchmarks.micro;
 

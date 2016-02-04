@@ -1,3 +1,9 @@
+/*
+ * This software is available under multiple licenses at
+ * https://community.cablelabs.com/svn/OCAPRI/trunk/ri/RI_Stack/apps/vm_perf_test/src/com/tvworks/plateval/caffeinemark/LoopAtom.java
+ * and we redistribute it under the BSD 2-clause License
+ */
+
  // COPYRIGHT_BEGIN
  //  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
  //
@@ -50,16 +56,6 @@
  //       Louisville, CO 80027-9750
  //       303 661-9100
  // COPYRIGHT_END
-
-/*
- * This benchmark has been ported from "Caffeinemark" benchmark suite and slightly modified to fit
- * the benchmarking framework.
- *
- * The original file is available at
- * https://community.cablelabs.com/svn/OCAPRI/trunk/ri/RI_Stack/apps/vm_perf_test/src/com/tvworks/
- * plateval/caffeinemark/LoopAtom.java
- *
- */
 
 /*
  * Description:     The loop test uses sorting and sequence generation as to measure compiler

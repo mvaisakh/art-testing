@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2000-2015 The Legion of the Bouncy Castle Inc. (http://www.bouncycastle.org)
- * 
- * Modifications copyright (c) 2015 Linaro Ltd.
+ *
+ * Modifications copyright (c) 2015 Linaro Limited.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,

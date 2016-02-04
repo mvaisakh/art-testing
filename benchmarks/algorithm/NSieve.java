@@ -10,6 +10,7 @@
 //  modified by Isaac Gouy
 
 // http://benchmarksgame.alioth.debian.org/license.html  (BSD 3-clause license)
+// See NOTICE file for license.
 
 package benchmarks.algorithm;
 

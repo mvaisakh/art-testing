@@ -74,6 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---
 
 * For benchmarks/micro/Base64.java
+  From Wikipedia, article "Base64" https://en.wikipedia.org/wiki/Base64
   Creative Commons Attribution-ShareAlike License
 
 ---
@@ -84,4 +85,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---
 
 * For files in benchmarks/caffeinemark/*
-  BSD 2-Clause License
+  This software is available under multiple licenses on
+  https://community.cablelabs.com/svn/OCAPRI/trunk/ri/RI_Stack/apps/vm_perf_test/src/com/tvworks/plateval/caffeinemark/
+  we redistribute it under the BSD 2-clause License
+
+---
+
+* we use the tool checkstyle 
+it is downloaded automatically from http://sourceforge.net/projects/checkstyle
+but not redistributed here
+(LGLv2.1 License)
+

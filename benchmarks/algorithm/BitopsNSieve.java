@@ -13,6 +13,7 @@
 //  Contributed by Ian Osgood
 
 // http://benchmarksgame.alioth.debian.org/license.html  (BSD 3-clause license)
+// See NOTICE file for the license
 
 package benchmarks.algorithm;
 

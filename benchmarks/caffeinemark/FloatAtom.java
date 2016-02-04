@@ -1,3 +1,13 @@
+/*
+ * This benchmark has been ported from "Caffeinemark" benchmark suite and
+ * slightly modified: Custom version of Math library (FMath) were replaced by
+ * default one.
+ *
+ * This software is available under multiple licenses at
+ * https://community.cablelabs.com/svn/OCAPRI/trunk/ri/RI_Stack/apps/vm_perf_test/src/com/tvworks/plateval/caffeinemark/FloatAtom.java
+ * and we redistribute it under the BSD 2-clause License
+ */
+
  // COPYRIGHT_BEGIN
  //  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
  //
@@ -50,16 +60,6 @@
  //       Louisville, CO 80027-9750
  //       303 661-9100
  // COPYRIGHT_END
-
-/*
- * This benchmark has been ported from "Caffeinemark" benchmark suite and slightly modified to fit
- * the benchmarking framework. Custom version of Math library (FMath) were replaced by default one.
- *
- * The original file is available at
- * https://community.cablelabs.com/svn/OCAPRI/trunk/ri/RI_Stack/apps/vm_perf_test/src/com/tvworks/
- * plateval/caffeinemark/FloatAtom.java
- *
- */
 
 /*
  * Description:     Simulates a 3D rotation of objects around a point.
