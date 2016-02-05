@@ -145,7 +145,9 @@ existing benchmark. Besides, developers should also notice:
    be run to check the benchmark is working correctly.
 3. Leave iterations as parameter -- Test launcher will fill it with a value
    to make sure it runs in a reasonable duration.
-4. Benchmarks should take between 5 and 10 seconds to run.
+4. Without auto-calibration benchmarks should run for a reasonable amount of
+   time on target. Between 1 and 10 seconds is acceptable.
+   (`tools/benchmarks/run.py --target --dont-auto-calibrate`)
 
 ### Example
 
