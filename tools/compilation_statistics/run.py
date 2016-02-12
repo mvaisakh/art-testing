@@ -73,19 +73,72 @@ def GetStats(apk,
              compiler_mode,
              target_copy_path,
              iterations,
-             work_dir):
+             work_dir,
+             boot_oat_comp,
+             boot_oat_file):
     apk_path = os.path.join(target_copy_path, apk)
-    oat = apk_path + '.oat'
-    # Only the output of the first command is necessary; execute in a subshell
-    # to guarantee PID value; only one thread is used for compilation to reduce
-    # measurement noise.
-    dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
-    command = '(echo $BASHPID && exec dex2oat -j1 ' + \
-        ' '.join(dex2oat_options) + \
-        ' --dex-file=' + apk_path + ' --oat-file=' + oat
-    command += ' --instruction-set=' + isa + ') | head -n1'
-    compilation_times = []
+    if boot_oat_comp:
+        oat = "%s/boot.%s.oat" % (target_copy_path, isa)
+        art = "%s/boot.%s.art" % (target_copy_path, isa)
 
+        # Check if dump file exists.
+        dump_oat_file_location = "/data/local/boot.oat.%s.txt" % (isa)
+        dump_exists_command = "if [ -f %s ] ; then echo found; fi; exit 0" \
+                              % (dump_oat_file_location)
+        # Since we are interested in whether the dump file exists or not, we can't simply execute
+        # [ -f file_name ] since newer versions of adb return the error code of the command that's
+        # being executed. Therefore, if the file is found we output a string and at the end we
+        # always return error code 0, so that we can get an error only if the failure was due
+        # to adb not executing properly.
+        rc, out = utils_adb.shell(dump_exists_command, target)
+        # The command prints an extra new line as well.
+        if out[:-1] == "found":
+            print("Dump file exists, move on.")
+        else:
+            # Dump oat file the first time (for each arch).
+            # Remove leading dot from filename.
+            dump_command = "oatdump --oat-file=%s --output=%s" % (boot_oat_file, \
+                                                                  dump_oat_file_location)
+            print("Dumping oat file...")
+            utils_adb.shell(dump_command, target)
+        # Read dex2oat-host from dump file.
+        dex2oat_host_command = 'grep "dex2oat-host" %s' % (dump_oat_file_location)
+        rc, out = utils_adb.shell(dex2oat_host_command, target)
+        if rc:
+            utils.Error("Dump file doesn't contain dex2oat-host.")
+        if out == 'dex2oat-host = x86-64\n':
+            utils.Error("boot.oat was built on a x84-64 machine, which is most likely the" \
+                        " host: %s \nWe want it to be built on the target instead. Have you" \
+                        " configured the device with WITH_DEXPREOPT=false ?" % out)
+
+        # Read command.
+        dex2oat_cmdline_command = 'grep "dex2oat-cmdline" %s' % (dump_oat_file_location)
+        rc, out = utils_adb.shell(dex2oat_cmdline_command, target)
+        if rc:
+            utils.Error("Dump file doesn't contain dex2oat-cmldine.")
+        command = out
+        # Replace destination: --oat-file, fix beginning of command.
+        command = re.sub("--oat-file=(.+?) --", "--oat-file=%s --" % oat, command)
+        command = re.sub("--image=(.+?) --", "--image=%s --" % art, command)
+        command = re.sub("dex2oat-cmdline +=", "dex2oat", command)
+        # Force 1 thread only - we want compilation times to be as stable as possible and we are
+        # interested in single thread performance, not multi-thread (throughput).
+        command = re.sub(" -j\d+ ", " -j1 ", command)
+        # Remove newline at end.
+        command = re.sub("\n$", "", command)
+        command = '(echo $BASHPID && exec ' + command + ' ) | head -n1'
+    else:
+        oat = apk_path + '.oat'
+        dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
+        # Only the output of the first command is necessary; execute in a subshell
+        # to guarantee PID value; only one thread is used for compilation to reduce
+        # measurement noise.
+        command = '(echo $BASHPID && exec dex2oat -j1 ' + \
+                  ' '.join(dex2oat_options) + \
+                  ' --dex-file=' + apk_path + ' --oat-file=' + oat
+        command += ' --instruction-set=' + isa + ') | head -n1'
+
+    compilation_times = []
     for i in range(iterations):
         rc, out = utils_adb.shell(command, target)
         # To simplify parsing, assume that PID values are rarely recycled by the system.
@@ -125,7 +178,10 @@ def GetStats(apk,
         utils.Warning('Memory usage values have been rounded down, so they might be '
                       'inaccurate.')
 
-    local_oat = os.path.join(utils.dir_root, work_dir, apk + '.oat')
+    if boot_oat_comp:
+        local_oat = os.path.join(utils.dir_root, work_dir, "boot.%s.oat" % isa)
+    else:
+        local_oat = os.path.join(utils.dir_root, work_dir, apk + '.oat')
     utils_adb.pull(oat, local_oat, target)
     command = ['size', '-A', '-d', local_oat]
     rc, outerr = utils.Command(command)
@@ -136,57 +192,62 @@ def GetStats(apk,
                         (utils.memory_stats_label, memory_stats),
                         (utils.oat_size_label, section_sizes)])
 
-def GetISA(target, mode):
-    if not mode:
-        # To be consistent with RunBenchADB(), the default mode depends on the executable
-        # /system/bin/dalvikvm points to.
-        command = 'readlink /system/bin/dalvikvm'
-        rc, out = utils_adb.shell(command, target)
-
-        # The default (e.g. if /system/bin/dalvikvm is not a soft link) is 64-bit.
-        if '32' in out:
-            mode = '32'
-        else:
-            mode = '64'
-
-    # The 32-bit ISA name should be a substring of the 64-bit one.
-    command = 'getprop | grep "dalvik\.vm\.isa\..*\.variant" | cut -d "." -f4 | sort'
-    rc, out = utils_adb.shell(command, target)
-    isa_list = out.split()
-
-    if mode == '64':
-        # 64-bit ISA names should contain '64'.
-        isa = next((i for i in isa_list if mode in i), None)
-
-        if not isa:
-            utils.Error('The target adb device does not support 64-bit mode.')
-    else:
-        # The 32-bit ISA name comes first.
-        isa = isa_list[0]
-
-    return isa
 
 def GetCompilationStatisticsResults(args):
     utils.CheckDependencies(['adb', 'size'])
-    isa = GetISA(args.target, args.mode)
     res = OrderedDict()
     work_dir = tempfile.mkdtemp()
     apk_list = []
 
+    boot_oat_files = []
     for pathname in args.pathnames:
         if os.path.isfile(pathname):
             apk_list.append(pathname)
+        elif pathname == "boot.oat":
+            isa_list = utils_adb.GetISAList(args.target)
+            # Find .oat file on device (for each arch).
+            find_command = 'find / -type d \( -name proc -o -name sys \) -prune -o ' \
+                           '-name "*boot.oat" -print 2>/dev/null'
+            rc, out = utils_adb.shell(find_command, args.target)
+            boot_oat_files = out.split('\n')[:-1]
+
+            if len(boot_oat_files) != len(isa_list):
+                utils.Error("Number of architectures different from number of boot.oat files." \
+                            " The list of boot.oat files is here:\n\n %s\n\nMake sure there are" \
+                            " no stale boot.oat files in /data/local or some other directory." \
+                            " Another possibility is that you didn't build your device with" \
+                            " WITH_DEXPREOPT=false. Do a lunch and then WITH_DEX_PREOPT=false" \
+                            " make -j$(nproc) ." % boot_oat_files)
+            # Order both lists. Now, as long as both oat files have the same parent dir, order
+            # should match.
+            isa_list.sort()
+            boot_oat_files.sort()
+
+            for isa_l in isa_list:
+                apk_list.append("boot.oat " + isa_l)
         else:
             dentries = [dentry for dentry in glob.glob(os.path.join(pathname, '*.apk'))
                         if os.path.isfile(dentry)]
             apk_list[len(apk_list):] = dentries
+    # Oat file index.
+    oat_file_ind = 0
 
     for apk in sorted(apk_list):
-        utils_adb.push(apk, args.target_copy_path, args.target)
-        apk_name = os.path.basename(apk)
-        res[apk_name] = GetStats(apk_name, args.target, isa,
-                                 args.compiler_mode, args.target_copy_path,
-                                 args.iterations, work_dir)
+        if apk[:8] == "boot.oat":
+            isa = apk[9:]
+            # Remove leading dot and pass to function.
+            boot_oat_files[oat_file_ind] = boot_oat_files[oat_file_ind][1:]
+            res[apk] = GetStats(apk, args.target, isa,
+                                args.compiler_mode, args.target_copy_path,
+                                args.iterations, work_dir, True, boot_oat_files[oat_file_ind])
+            oat_file_ind += 1
+        else:
+            isa = utils_adb.GetISA(args.target, args.mode)
+            utils_adb.push(apk, args.target_copy_path, args.target)
+            apk_name = os.path.basename(apk)
+            res[apk_name] = GetStats(apk_name, args.target, isa,
+                                     args.compiler_mode, args.target_copy_path,
+                                     args.iterations, work_dir, False, None)
 
     shutil.rmtree(work_dir)
     return res

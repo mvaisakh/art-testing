@@ -51,3 +51,35 @@ def shell(command,
                               ['shell', '"%s"' % ' '.join(command)])
     command = ['adb'] + GetTargetArgs(target) + ['shell'] + command
     return utils.Command(command, command_string=command_string , exit_on_error=exit_on_error)
+
+def GetISAList(target):
+    # The 32-bit ISA name should be a substring of the 64-bit one.
+    command = 'getprop | grep "dalvik\.vm\.isa\..*\.variant" | cut -d "." -f4 | sort'
+    rc, out = shell(command, target)
+    return out.split()
+
+def GetISA(target, mode):
+    isa_list = GetISAList(target)
+
+    if not mode:
+        # To be consistent with RunBenchADB(), the default mode depends on the executable
+        # /system/bin/dalvikvm points to.
+        command = 'readlink /system/bin/dalvikvm'
+        rc, out = shell(command, target)
+
+        # The default (e.g. if /system/bin/dalvikvm is not a soft link) is 64-bit.
+        if '32' in out:
+            mode = '32'
+        else:
+            mode = '64'
+
+    if mode == '64':
+        # 64-bit ISA names should contain '64'.
+        isa = next((i for i in isa_list if mode in i), None)
+
+        if not isa:
+            utils.Error('The target adb device does not support 64-bit mode.')
+    else:
+        # The 32-bit ISA name comes first.
+        isa = isa_list[0]
+    return isa
