@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 import math
 import statistics
 import math
 
 from functools import reduce
+
+import utils_print
 
 stats_diff_headers = ['mean1', 'stdev1 (% of mean1)', 'mean2',
                       'stdev2 (% of mean2)', '(mean2 - mean1) / mean1 * 100']
@@ -73,7 +75,7 @@ def PrintStats(dict_results, iterations = None):
 
         results.append([benchmark] + list(data))
 
-    PrintTable(headers, ['.3f'] + stats_formats, results)
+    utils_print.PrintTable(headers, ['.3f'] + stats_formats, results)
 
     # overall and per suite geomeans calculations
     print("\nGEOMEANS:")
@@ -104,7 +106,7 @@ def PrintStats(dict_results, iterations = None):
     geomean_err = CalcGeomeanError(mean_list, stdev_list, geomean)
 
     results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
-    PrintTable(headers, ['.3f'] * len(headers), results)
+    utils_print.PrintTable(headers, ['.3f'] * len(headers), results)
 
 # Print a table showing the difference between two runs of benchmarks.
 def PrintDiff(res_1, res_2, title = ''):
@@ -130,7 +132,7 @@ def PrintDiff(res_1, res_2, title = ''):
         diff = GetRelativeDiff(ave1, ave2)
         results.append([bench, ave1, dp1, ave2, dp2, diff])
 
-    PrintTable(headers, ['.3f'] + stats_diff_formats, results)
+    utils_print.PrintTable(headers, ['.3f'] + stats_diff_formats, results)
 
     # overall and per suite geomeans calculations
     print("\nGEOMEANS:")
@@ -175,43 +177,4 @@ def PrintDiff(res_1, res_2, title = ''):
             stdev_list1, stdev_list2, geomean)
 
     results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
-    PrintTable(headers, ['.3f'] * len(headers), results)
-
-# Pretty-prints a table. The arguments must look like:
-# - headers: a list of strings
-#     ['header1', 'header2', 'header3']
-# - lines: a list of lists of data.
-#     [['name1', 0.123, 0.456],
-#      ['name2', 1.1, 2.2]]
-def PrintTable(headers, line_format, lines):
-    expected_number_of_fields = len(headers)
-    col_lengths = [len(field) for field in headers]
-
-    # Scan through the inputs to compute the maximum column lengths.
-    # Pay attention to correctly format the data.
-    for line in lines:
-        n_fields = len(line)
-        if n_fields != expected_number_of_fields:
-            print('Expected %d fields, found %d.' % \
-                  (expected_number_of_fields, n_fields))
-            raise Exception
-        col_lengths = [max(col_lengths[0], len(line[0]))] + \
-            [max(col_lengths[i], len(('{0:%s}' % line_format[i]).format(line[i]))) \
-             for i in range(1, len(line))]
-
-    # Compute the format strings.
-    # The first column is expected to be a description of the line.
-    headers_formats_list = ['{0:<%d} ' % col_lengths[0]]
-    formats_list = ['{0:<%d} ' % col_lengths[0]]
-    for i in range(1, len(col_lengths)):
-        headers_formats_list += ['{%d:>%d} ' % (i, col_lengths[i])]
-        formats_list += ['{%d:>%d%s} ' % (i, col_lengths[i], line_format[i])]
-
-    # Print the table.
-    headers_format = '  '.join(headers_formats_list)
-    format = '  '.join(formats_list)
-    print(headers_format.format(*headers))
-    delimiters = ['-' * l for l in col_lengths]
-    print(headers_format.format(*delimiters))
-    for line in lines:
-        print(format.format(*line))
+    utils_print.PrintTable(headers, ['.3f'] * len(headers), results)

@@ -28,6 +28,8 @@ from collections import OrderedDict
 dir_tools = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_tools)
 
+import utils_print
+from utils_print import VerbosePrint
 import utils_stats
 
 
@@ -52,34 +54,18 @@ default_mode = ''
 default_compiler_mode = None
 default_n_iterations = 1
 
-# Printing helpers.
-
-redirected_output = not sys.stdout.isatty()
-verbose = True
-
-def ColourCode(colour):
-  return '' if redirected_output else colour
-
-COLOUR_GREEN = ColourCode("\x1b[0;32m")
-COLOUR_ORANGE = ColourCode("\x1b[0;33m")
-COLOUR_RED = ColourCode("\x1b[0;31m")
-NO_COLOUR = ColourCode("\x1b[0m")
 
 def Warning(message):
-    print(COLOUR_ORANGE + 'WARNING: ' + message + NO_COLOUR,
+    print(utils_print.COLOUR_ORANGE + 'WARNING: ' + message + \
+          utils_print.NO_COLOUR,
           file=sys.stderr)
     traceback.print_stack()
 
 def Error(message, rc=1):
-    print(COLOUR_RED + 'ERROR: ' + message + NO_COLOUR,
+    print(utils_print.COLOUR_RED + 'ERROR: ' + message + utils_print.NO_COLOUR,
           file=sys.stderr)
     traceback.print_stack()
     sys.exit(rc)
-
-def VerbosePrint(message):
-    if verbose:
-        print(message)
-
 
 
 def ensure_dir(path):
@@ -151,8 +137,7 @@ class SetVerbosity(argparse.Action):
     def __init__(self, option_strings, dest, nargs, **kwargs):
         super(SetVerbosity, self).__init__(option_strings, dest, nargs, **kwargs)
     def __call__(self, parser, namespace, values, option_string):
-        global verbose
-        verbose = False
+        utils_print.verbose = False
 
 # Common arguments for `run` scripts.
 def AddCommonRunOptions(parser):
@@ -255,7 +240,7 @@ def PrintResult(data, key=None, indentation=''):
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:
-            utils_stats.PrintTable([''] + utils_stats.stats_headers,
+            utils_print.PrintTable([''] + utils_stats.stats_headers,
                                    ['s'] + utils_stats.stats_formats,
                                    entries)
             print('')

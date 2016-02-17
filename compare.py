@@ -21,6 +21,7 @@ import pickle
 from collections import OrderedDict
 
 from tools import utils
+from tools import utils_print
 from tools import utils_stats
 
 def BuildOptions():
@@ -48,7 +49,7 @@ def PrintDiff(data_1, data_2, key=None, indentation=''):
                 if maybe_entry is not None:
                     entries.append(maybe_entry)
             if entries:
-                utils_stats.PrintTable([''] + utils_stats.stats_diff_headers,
+                utils_print.PrintTable([''] + utils_stats.stats_diff_headers,
                                        ['s'] + utils_stats.stats_diff_formats,
                                        entries)
                 print('')

@@ -29,6 +29,7 @@ dir_tools = os.path.join(dir_benchs, '..')
 sys.path.insert(0, dir_tools)
 import utils
 import utils_adb
+import utils_print
 import utils_stats
 
 bench_runner_main = 'org.linaro.bench.RunBench'
@@ -94,7 +95,7 @@ def RunBenchADB(mode, compiler_mode, auto_calibrate, apk, classname, target):
         # Run the benchmark as a main class directly
         apk_arguments += " %s" % (classname)
 
-    if utils.verbose:
+    if utils_print.verbose:
         apk_arguments += " --debug"
 
     dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
@@ -143,7 +144,7 @@ def RunBench(apk, classname,
                                           target)
             rc += local_rc
             outerr = outerr.rstrip('\n')
-            utils.VerbosePrint(outerr)
+            utils_print.VerbosePrint(outerr)
         except Exception as e:
             utils.Warning(str(e) + "\n  \-> FAILED, continuing anyway\n")
             rc += 1
@@ -174,7 +175,7 @@ def RunBenchs(apk, bench_names,
               mode=utils.default_mode,
               compiler_mode=utils.default_compiler_mode):
     rc = 0
-    utils.VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
+    utils_print.VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
     run_helper = RunBenchADB if target else RunBenchHost
     for bench in bench_names:
         rc += RunBench(apk,
