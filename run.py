@@ -18,8 +18,6 @@ import argparse
 import os
 import sys
 
-from collections import OrderedDict
-
 from tools import utils
 from tools import utils_stats
 from tools.benchmarks.run import GetBenchmarkStats
@@ -46,11 +44,11 @@ if __name__ == "__main__":
         utils.Warning('Running this script is supported only on Linux.')
 
     args = BuildOptions()
-    result = OrderedDict([(utils.benchmarks_label, GetBenchmarkStats(args))])
+    result = dict()
+    result['benchmarks'] = GetBenchmarkStats(args)
 
     if args.target:
-        result[utils.compilation_statistics_label] = GetCompilationStats(args)
+        result['compilation_statistics'] = GetCompilationStats(args)
 
-    utils.PrintResult(result)
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)

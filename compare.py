@@ -17,51 +17,22 @@
 import argparse
 import os
 import pickle
-
-from collections import OrderedDict
+import sys
 
 from tools import utils
 from tools import utils_stats
 
+sys.path.insert(0, os.path.join(utils.dir_tools, 'compilation_statistics'))
+
+from compare import PrintDiff
+
 def BuildOptions():
     parser = argparse.ArgumentParser(
-        description = "Compare two result sets.",
+        description = "Compare two results of the associated `run.py` script.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     utils.AddCommonCompareOptions(parser)
     return parser.parse_args()
-
-def PrintDiff(data_1, data_2, key=None, indentation=''):
-    indentation_level = '    '
-    if data_1 or data_2:
-        if (isinstance(data_1, OrderedDict) or isinstance(data_1, dict) or data_1 is None) and \
-           (isinstance(data_2, OrderedDict) or isinstance(data_2, dict) or data_2 is None):
-            if key is not None:
-                print(indentation + key)
-            entries = []
-            list_1 = list(data_1.keys()) if data_1 else []
-            list_2 = list(data_2.keys()) if data_2 else []
-            for k in utils.MergeLists(list_1, list_2):
-                value_1 = data_1[k] if data_1 and k in data_1 else None
-                value_2 = data_2[k] if data_2 and k in data_2 else None
-                maybe_entry = PrintDiff(value_1, value_2, k, indentation + indentation_level)
-                if maybe_entry is not None:
-                    entries.append(maybe_entry)
-            if entries:
-                utils_stats.PrintTable([''] + utils_stats.stats_diff_headers,
-                                       ['s'] + utils_stats.stats_diff_formats,
-                                       entries)
-                print('')
-        elif (isinstance(data_1, list) or data_1 is None) and \
-             (isinstance(data_2, list) or data_2 is None):
-            list_1 = data_1 if data_1 else [0.0]
-            list_2 = data_2 if data_2 else [0.0]
-            m1, M1, ave1, d1, dp1 = utils_stats.ComputeStats(list_1)
-            m2, M2, ave2, d2, dp2 = utils_stats.ComputeStats(list_2)
-            return [indentation + key] + \
-                   [ave1, dp1, ave2, dp2, utils_stats.GetRelativeDiff(ave1, ave2)]
-        elif type(data_1) != type(data_2):
-            utils.Error('The data types differ between result sets.')
 
 if __name__ == "__main__":
     args = BuildOptions()
@@ -71,4 +42,15 @@ if __name__ == "__main__":
     res_2 = pickle.load(pkl_file_2)
     pkl_file_1.close()
     pkl_file_2.close()
-    PrintDiff(res_1, res_2)
+    results = sorted([result for result in res_1.keys() if result in res_2])
+
+    for r in results:
+        if r == 'benchmarks':
+            f = utils_stats.PrintDiff
+        elif r == 'compilation_statistics':
+            f = PrintDiff
+        else:
+            continue
+
+        f(res_1[r], res_2[r])
+        print('')

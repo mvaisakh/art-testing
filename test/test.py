@@ -153,7 +153,7 @@ def TestCompilationStatistics(target=utils.adb_default_target_string):
 
     args.append(os.path.join(utils.dir_build, "bench.apk"))
     run_py = os.path.join(utils.dir_root, "tools", "compilation_statistics", "run.py")
-    compare_py = os.path.join(utils.dir_root, "compare.py")
+    compare_py = os.path.join(utils.dir_root, "tools", "compilation_statistics", "compare.py")
     rc |= TestCommand(["./build.sh", "-t"], _cwd=utils.dir_root)
     rc |= TestCommand([run_py, "--output-pkl=/tmp/res1"] + args, _cwd=utils.dir_root)
     rc |= TestCommand([run_py, "--output-pkl=/tmp/res2"] + args, _cwd=utils.dir_root)
