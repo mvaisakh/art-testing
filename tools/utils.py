@@ -23,8 +23,14 @@ import sys
 import time
 import traceback
 
+from collections import OrderedDict
 
 dir_tools = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dir_tools)
+
+import utils_stats
+
+
 dir_root = os.path.realpath(os.path.join(dir_tools, '..'))
 dir_benchmarks = os.path.join(dir_root, 'benchmarks')
 dir_out = os.path.join(dir_root, 'out')
@@ -34,7 +40,12 @@ dir_framework = os.path.join(dir_root, 'framework')
 
 
 # Constant shared values that should not be modified.
-si_factors = {'m' : 0.001, 'n' : 0.000000001, 'u' : 0.000001}
+si_unit_prefixes = {'' : 1, 'G' : 10 ** 9, 'K' : 10 ** 3, 'M' : 10 ** 6, 'm' : 10 ** -3, 'n' : 10 ** -9, 'u' : 10 ** -6}
+benchmarks_label = 'benchmarks'
+compilation_statistics_label = 'compilation statistics'
+compilation_times_label = 'compilation times'
+memory_stats_label = 'memory statistics'
+oat_size_label = 'oat size'
 adb_default_target_string = '<default>'
 adb_default_target_copy_path = '/data/local/tmp'
 default_mode = ''
@@ -84,17 +95,23 @@ def ensure_dir(path):
     except:
         Error('Failed to ensure the directory `%s` exists.' % path)
 
-def GetTimeValue(value, si_prefix):
-    return value * si_factors[si_prefix] if si_prefix else value
+def MergeLists(x, y):
+    # To simplify things, assume that either y is the same as x, or it contains
+    # elements that are ordered after those in x.
+    # TODO: Use topological sorting or a more efficient algorithm.
+    return x + [e for e in y if e not in x]
 
 def PrettySIFactor(value):
     si_factor = float('inf')
     si_prefix = ''
 
-    for i in si_factors.items():
+    for i in si_unit_prefixes.items():
         if i[1] < si_factor and value < i[1] * 1000:
             si_factor = i[1]
             si_prefix = i[0]
+
+    if si_factor == float('inf'):
+        si_factor = 1
 
     return si_factor, si_prefix
 
@@ -226,3 +243,21 @@ def CheckDependencies(dependencies):
 
         if rc:
             Error("Couldn't find `" + d + "`.")
+
+def PrintResult(data, key=None, indentation=''):
+    indentation_level = '    '
+    if isinstance(data, OrderedDict) or isinstance(data, dict):
+        if key is not None:
+            print(indentation + key)
+        entries = []
+        for k in data:
+            maybe_entry = PrintResult(data[k], k, indentation + indentation_level)
+            if maybe_entry is not None:
+                entries.append(maybe_entry)
+        if entries:
+            utils_stats.PrintTable([''] + utils_stats.stats_headers,
+                                   ['s'] + utils_stats.stats_formats,
+                                   entries)
+            print('')
+    elif isinstance(data, list):
+        return [indentation + key] + list(utils_stats.ComputeStats(data))

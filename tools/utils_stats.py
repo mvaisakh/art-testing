@@ -18,6 +18,12 @@ import math
 
 from functools import reduce
 
+stats_diff_headers = ['mean1', 'stdev1 (% of mean1)', 'mean2',
+                      'stdev2 (% of mean2)', '(mean2 - mean1) / mean1 * 100']
+stats_diff_formats = ['.3f', '.3f', '.3f', '.3f', '.3f']
+stats_headers = ['min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
+stats_formats = ['.3f', '.3f', '.3f', '.3f', '.3f']
+
 def CalcGeomean(nums):
     assert len(nums) != 0
     return math.exp((sum(map(lambda x: math.log(x), nums))) / len(nums))
@@ -51,7 +57,7 @@ def GetSuiteName(benchmark):
     return benchmark.split("/", 2)[1]
 
 def PrintStats(dict_results, iterations = None):
-    headers = ['', 'min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
+    headers = [''] + stats_headers
     results = []
 
     stats_dict = {}
@@ -67,7 +73,7 @@ def PrintStats(dict_results, iterations = None):
 
         results.append([benchmark] + list(data))
 
-    PrintTable(headers, ['.3f'] * len(headers), results)
+    PrintTable(headers, ['.3f'] + stats_formats, results)
 
     # overall and per suite geomeans calculations
     print("\nGEOMEANS:")
@@ -105,8 +111,7 @@ def PrintDiff(res_1, res_2, title = ''):
     # Only print results for benchmarks present in both sets of results.
     # Pay attention to maintain the order of the keys.
     benchmarks = [b for b in res_1.keys() if b in res_2.keys()]
-    headers = [title, 'mean1', 'stdev1 (% of mean1)', 'mean2', 'stdev2 (% of mean2)',
-               '(mean2 - mean1) / mean1 * 100']
+    headers = [title] + stats_diff_headers
     results = []
     stats_dict = {}
     # collecting data
@@ -125,7 +130,7 @@ def PrintDiff(res_1, res_2, title = ''):
         diff = GetRelativeDiff(ave1, ave2)
         results.append([bench, ave1, dp1, ave2, dp2, diff])
 
-    PrintTable(headers, ['.3f'] * len(headers), results)
+    PrintTable(headers, ['.3f'] + stats_diff_formats, results)
 
     # overall and per suite geomeans calculations
     print("\nGEOMEANS:")

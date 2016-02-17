@@ -256,13 +256,13 @@ def GetBenchmarkStats(args):
         utils.Error("The benchmarks did *not* run successfully. (rc = %d)" % rc, rc)
 
     res = OrderedDict(sorted(result.items()))
-    utils_stats.PrintStats(res, iterations = args.iterations)
-    print('')
     return res
 
 if __name__ == "__main__":
     args = BuildOptions()
     result = GetBenchmarkStats(args)
+    utils_stats.PrintStats(result, iterations = args.iterations)
+    print('')
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)
     # Output in CSV format.
