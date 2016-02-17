@@ -51,7 +51,8 @@ def PrintDiff(data_1, data_2, key=None, indentation=''):
             if entries:
                 utils_print.PrintTable([''] + utils_stats.stats_diff_headers,
                                        ['s'] + utils_stats.stats_diff_formats,
-                                       entries)
+                                       entries,
+                                       line_start=indentation)
                 print('')
         elif (isinstance(data_1, list) or data_1 is None) and \
              (isinstance(data_2, list) or data_2 is None):
@@ -59,7 +60,7 @@ def PrintDiff(data_1, data_2, key=None, indentation=''):
             list_2 = data_2 if data_2 else [0.0]
             m1, M1, ave1, d1, dp1 = utils_stats.ComputeStats(list_1)
             m2, M2, ave2, d2, dp2 = utils_stats.ComputeStats(list_2)
-            return [indentation + key] + \
+            return [key] + \
                    [ave1, dp1, ave2, dp2, utils_stats.GetRelativeDiff(ave1, ave2)]
         elif type(data_1) != type(data_2):
             utils.Error('The data types differ between result sets.')

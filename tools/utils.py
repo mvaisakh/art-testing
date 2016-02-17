@@ -242,7 +242,8 @@ def PrintResult(data, key=None, indentation=''):
         if entries:
             utils_print.PrintTable([''] + utils_stats.stats_headers,
                                    ['s'] + utils_stats.stats_formats,
-                                   entries)
+                                   entries,
+                                   line_start=indentation)
             print('')
     elif isinstance(data, list):
-        return [indentation + key] + list(utils_stats.ComputeStats(data))
+        return [key] + list(utils_stats.ComputeStats(data))

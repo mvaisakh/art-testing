@@ -36,7 +36,9 @@ NO_COLOUR = ColourCode("\x1b[0m")
 # - lines: a list of lists of data.
 #     [['name1', 0.123, 0.456],
 #      ['name2', 1.1, 2.2]]
-def PrintTable(headers, line_format, lines):
+# - line_start: a string, which will be printed at the beginning of every line
+#   of the table.
+def PrintTable(headers, line_format, lines, line_start=''):
     expected_number_of_fields = len(headers)
     col_lengths = [len(field) for field in headers]
 
@@ -63,8 +65,8 @@ def PrintTable(headers, line_format, lines):
     # Print the table.
     headers_format = '  '.join(headers_formats_list)
     format = '  '.join(formats_list)
-    print(headers_format.format(*headers))
+    print(line_start + headers_format.format(*headers))
     delimiters = ['-' * l for l in col_lengths]
-    print(headers_format.format(*delimiters))
+    print(line_start + headers_format.format(*delimiters))
     for line in lines:
-        print(format.format(*line))
+        print(line_start + format.format(*line))
