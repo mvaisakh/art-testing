@@ -141,7 +141,7 @@ JAVA_FRAMEWORK_FILES="$(find $DIR_FRAMEWORK -type f -name '*'.java)"
 
 verbose_safe rm -rf $DIR_BUILD
 verbose_safe mkdir -p $DIR_BUILD/classes/
-verbose_safe javac -target $JAVA_VERSION -source $JAVA_VERSION -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
+verbose_safe javac -encoding UTF-8 -target $JAVA_VERSION -source $JAVA_VERSION -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
 verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
 DX=$(which dx)
 if [ $TARGET_BUILD = "true" ] || [ -n "$DX" ]; then
