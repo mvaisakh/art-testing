@@ -58,7 +58,7 @@ def ComputeStats(nums):
 def GetSuiteName(benchmark):
     return benchmark.split("/", 2)[1]
 
-def PrintStats(dict_results, iterations = None):
+def PrintStats(dict_results):
     headers = [''] + stats_headers
     results = []
 

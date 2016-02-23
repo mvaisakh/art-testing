@@ -229,14 +229,14 @@ def CheckDependencies(dependencies):
         if rc:
             Error("Couldn't find `" + d + "`.")
 
-def PrintResult(data, key=None, indentation=''):
+def PrintData(data, key=None, indentation=''):
     indentation_level = '    '
     if isinstance(data, OrderedDict) or isinstance(data, dict):
         if key is not None:
             print(indentation + key)
         entries = []
         for k in data:
-            maybe_entry = PrintResult(data[k], k, indentation + indentation_level)
+            maybe_entry = PrintData(data[k], k, indentation + indentation_level)
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:

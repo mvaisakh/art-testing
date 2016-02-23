@@ -206,7 +206,7 @@ def FilterBenchmarks(benchmarks, filters, filters_out):
         res = [b for b in res if not utils.NameMatchesAnyFilter(b, filters_out)]
     return res
 
-def GetBenchmarkStats(args):
+def GetBenchmarkResults(args):
     if getattr(args, 'filter', []) == []:
         setattr(args, 'filter', None)
 
@@ -261,8 +261,8 @@ def GetBenchmarkStats(args):
 
 if __name__ == "__main__":
     args = BuildOptions()
-    result = GetBenchmarkStats(args)
-    utils_stats.PrintStats(result, iterations = args.iterations)
+    result = GetBenchmarkResults(args)
+    utils_stats.PrintStats(result)
     print('')
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)

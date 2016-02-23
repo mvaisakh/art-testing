@@ -147,7 +147,7 @@ def GetISA(target, mode):
 
     return isa
 
-def GetCompilationStats(args):
+def GetCompilationStatisticsResults(args):
     utils.CheckDependencies(['adb', 'size'])
     isa = GetISA(args.target, args.mode)
     res = OrderedDict()
@@ -178,7 +178,7 @@ if __name__ == "__main__":
         utils.Error('Running this script is supported only on Linux.')
 
     args = BuildOptions()
-    stats = GetCompilationStats(args)
-    utils.PrintResult(stats)
+    stats = GetCompilationStatisticsResults(args)
+    utils.PrintData(stats)
     utils.OutputObject(stats, 'pkl', args.output_pkl)
     utils.OutputObject(stats, 'json', args.output_json)

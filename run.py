@@ -22,8 +22,8 @@ from collections import OrderedDict
 
 from tools import utils
 from tools import utils_stats
-from tools.benchmarks.run import GetBenchmarkStats
-from tools.compilation_statistics.run import GetCompilationStats
+from tools.benchmarks.run import GetBenchmarkResults
+from tools.compilation_statistics.run import GetCompilationStatisticsResults
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
@@ -46,11 +46,12 @@ if __name__ == "__main__":
         utils.Warning('Running this script is supported only on Linux.')
 
     args = BuildOptions()
-    result = OrderedDict([(utils.benchmarks_label, GetBenchmarkStats(args))])
+    result = OrderedDict([(utils.benchmarks_label, GetBenchmarkResults(args))])
 
     if args.target:
-        result[utils.compilation_statistics_label] = GetCompilationStats(args)
+        result[utils.compilation_statistics_label] = \
+            GetCompilationStatisticsResults(args)
 
-    utils.PrintResult(result)
+    utils.PrintData(result)
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)
