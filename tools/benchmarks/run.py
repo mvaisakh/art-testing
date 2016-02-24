@@ -259,12 +259,17 @@ def GetBenchmarkResults(args):
     res = OrderedDict(sorted(result.items()))
     return res
 
+def GetAndPrintBenchmarkResults(args):
+    results = GetBenchmarkResults(args)
+    utils.PrintData(results)
+    utils_stats.ComputeAndPrintGeomean(results)
+    print('')
+    return results
+
 if __name__ == "__main__":
     args = BuildOptions()
-    result = GetBenchmarkResults(args)
-    utils.PrintData(result)
-    utils_stats.ComputeAndPrintGeomean(result)
-    print('')
+    result = GetAndPrintBenchmarkResults(args)
+
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)
     # Output in CSV format.

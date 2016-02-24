@@ -191,13 +191,19 @@ def GetCompilationStatisticsResults(args):
     shutil.rmtree(work_dir)
     return res
 
+def GetAndPrintCompilationStatisticsResults(args):
+    results = GetCompilationStatisticsResults(args)
+    utils.PrintData(results)
+    print('')
+    return results
+
 if __name__ == "__main__":
     # TODO: Mac OS support
     if os.uname().sysname != 'Linux':
         utils.Error('Running this script is supported only on Linux.')
 
     args = BuildOptions()
-    stats = GetCompilationStatisticsResults(args)
-    utils.PrintData(stats)
+    stats = GetAndPrintCompilationStatisticsResults(args)
+
     utils.OutputObject(stats, 'pkl', args.output_pkl)
     utils.OutputObject(stats, 'json', args.output_json)
