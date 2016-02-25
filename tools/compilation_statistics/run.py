@@ -104,8 +104,19 @@ def GetStats(apk,
     # The rest of the statistics are deterministic, so there is no need to run several
     # iterations; just get the values from the last run.
     out = out[compile_time.end():]
-    memory_stats = OrderedDict((m[0], [int(m[1]) * memory_unit_prefixes[m[2]]]) for m
-                               in re.findall(' (.*?)=([0-9]+)([GKM]{,1})B', out))
+    memory_stats = OrderedDict()
+
+    for m in re.findall(' (.*?)=([0-9]+)([GKM]?)B( \(([0-9]+)B\))?', out):
+        # Old versions of dex2oat do not show the exact memory usage values in bytes, so
+        # try to parse the output in the new format first, and if that fails, fall back
+        # to the legacy one.
+        if m[4]:
+            value = int(m[4])
+        else:
+            value = int(m[1]) * memory_unit_prefixes[m[2]]
+
+        memory_stats[m[0]] = [value]
+
     local_oat = os.path.join(utils.dir_root, work_dir, apk + '.oat')
     utils_adb.pull(oat, local_oat, target)
     command = ['size', '-A', '-d', local_oat]
