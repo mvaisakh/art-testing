@@ -58,54 +58,46 @@ def ComputeStats(nums):
 def GetSuiteName(benchmark):
     return benchmark.split("/", 2)[1]
 
-def PrintStats(dict_results):
-    headers = [''] + stats_headers
-    results = []
-
+def ComputeGeomean(dict_results):
     stats_dict = {}
 
     for benchmark in dict_results:
         suite_name = GetSuiteName(benchmark)
-
         if (suite_name not in stats_dict):
              stats_dict[suite_name] = {}
+        stats_dict[suite_name][benchmark] = dict_results[benchmark]
 
-        data = ComputeStats(dict_results[benchmark])
-        stats_dict[suite_name][benchmark] = data
-
-        results.append([benchmark] + list(data))
-
-    utils_print.PrintTable(headers, ['.3f'] + stats_formats, results)
-
-    # overall and per suite geomeans calculations
-    print("\nGEOMEANS:")
+    # Overall and per suite geomean calculations.
     mean_list  = []
     stdev_list = []
-    headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
     results = []
 
     for suite_name in stats_dict:
         suite_mean_list = []
         suite_stdev_list = []
+
         for benchmark in stats_dict[suite_name]:
-            bench_mean  = stats_dict[suite_name][benchmark][2]
-            bench_stdev = stats_dict[suite_name][benchmark][3]
-
-            suite_mean_list.append(bench_mean)
-            suite_stdev_list.append(bench_stdev)
-
-            mean_list.append(bench_mean)
-            stdev_list.append(bench_stdev)
+            m, M, mean, stdev, dp = ComputeStats(stats_dict[suite_name][benchmark])
+            suite_mean_list.append(mean)
+            suite_stdev_list.append(stdev)
+            mean_list.append(mean)
+            stdev_list.append(stdev)
 
         suite_geomean     = CalcGeomean(suite_mean_list)
         suite_geomean_err = CalcGeomeanError(suite_mean_list, suite_stdev_list, suite_geomean)
         results.append([suite_name, suite_geomean, suite_geomean_err,
-                suite_geomean_err / suite_geomean * 100])
+                        suite_geomean_err / suite_geomean * 100])
 
     geomean     = CalcGeomean(mean_list)
     geomean_err = CalcGeomeanError(mean_list, stdev_list, geomean)
 
     results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
+    return results
+
+def ComputeAndPrintGeomean(dict_results):
+    results = ComputeGeomean(dict_results)
+    print("GEOMEANS:")
+    headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
     utils_print.PrintTable(headers, ['.3f'] * len(headers), results)
 
 # Print a table showing the difference between two runs of benchmarks.

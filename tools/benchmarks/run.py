@@ -262,7 +262,8 @@ def GetBenchmarkResults(args):
 if __name__ == "__main__":
     args = BuildOptions()
     result = GetBenchmarkResults(args)
-    utils_stats.PrintStats(result)
+    utils.PrintData(result)
+    utils_stats.ComputeAndPrintGeomean(result)
     print('')
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)
