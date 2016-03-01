@@ -134,6 +134,49 @@ public class Intrinsics {
   }
 
   /**
+   * BitCount.
+   **/
+
+  // both Integer and Long's bitCount() return int type.
+  private static int[] resultsBitCountInteger = new int[NUM_INVOKES];
+  private static int[] resultsBitCountLong = new int[NUM_INVOKES];
+  private static int[] resultsBitCountIntegerRandom = new int[NUM_INVOKES];
+  private static int[] resultsBitCountLongRandom = new int[NUM_INVOKES];
+
+  public void timeBitCountInteger(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsBitCountInteger[i] = Integer.bitCount(0x1234abcd);
+      }
+    }
+  }
+
+  public void timeBitCountLong(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsBitCountLong[i] = Long.bitCount(0x1234abcd1234abcdL);
+      }
+    }
+  }
+
+  public void timeBitCountIntegerRandom(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsBitCountIntegerRandom[i] = Integer.bitCount(rand[i % NUM_RANDS]);
+      }
+    }
+  }
+
+  public void timeBitCountLongRandom(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsBitCountLongRandom[i] =
+          Long.bitCount((long)rand[i % NUM_RANDS] << 32 + rand[i % NUM_RANDS]);
+      }
+    }
+  }
+
+  /**
    * RotateRight.
    **/
 
@@ -276,6 +319,11 @@ public class Intrinsics {
 
     obj.timeRotateRandomInteger(100000);
     obj.timeRotateRandomLong(100000);
+
+    obj.timeBitCountInteger(100000);
+    obj.timeBitCountLong(100000);
+    obj.timeBitCountIntegerRandom(100000);
+    obj.timeBitCountLongRandom(100000);
 
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/Intrinsics: " + (after - before));
