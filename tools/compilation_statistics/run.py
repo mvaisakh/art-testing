@@ -105,6 +105,7 @@ def GetStats(apk,
     # iterations; just get the values from the last run.
     out = out[compile_time.end():]
     memory_stats = OrderedDict()
+    byte_size = True
 
     for m in re.findall(' (.*?)=([0-9]+)([GKM]?)B( \(([0-9]+)B\))?', out):
         # Old versions of dex2oat do not show the exact memory usage values in bytes, so
@@ -115,7 +116,14 @@ def GetStats(apk,
         else:
             value = int(m[1]) * memory_unit_prefixes[m[2]]
 
+            if m[2]:
+                byte_size = False
+
         memory_stats[m[0]] = [value]
+
+    if not byte_size:
+        utils.Warning('Memory usage values have been rounded down, so they might be '
+                      'inaccurate.')
 
     local_oat = os.path.join(utils.dir_root, work_dir, apk + '.oat')
     utils_adb.pull(oat, local_oat, target)
@@ -125,8 +133,8 @@ def GetStats(apk,
                                 in re.findall('(\S+)\s+([0-9]+).*', outerr)
                                 if s[0] in sections)
     return OrderedDict([(utils.compilation_times_label, compilation_times),
-                       (utils.memory_stats_label, memory_stats),
-                       (utils.oat_size_label, section_sizes)])
+                        (utils.memory_stats_label, memory_stats),
+                        (utils.oat_size_label, section_sizes)])
 
 def GetISA(target, mode):
     if not mode:
