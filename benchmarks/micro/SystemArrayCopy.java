@@ -38,11 +38,17 @@ public class SystemArrayCopy {
   private static int ARRAY_COPY_MEDIUM = 128;
   private static int ARRAY_COPY_LARGE = 1024;
   private static int MAX_BUFFER_BYTES = 8192;
+  private static int ARRAY_LENGTH = 1024;
   private static String RANDOM_STRING = generateRandomString(MAX_BUFFER_BYTES);
   private static char[] cbuf = new char[MAX_BUFFER_BYTES];
   private static char arrayCopyCharBufferedReadSmallResult;
   private static char arrayCopyCharBufferedReadMediumResult;
   private static char arrayCopyCharBufferedReadLargeResult;
+
+  private static String[] stringArray = new String[ARRAY_LENGTH];
+  private static String[] stringArraySmall = new String[ARRAY_LENGTH];
+  private static String[] stringArrayMedium = new String[ARRAY_LENGTH];
+  private static String[] stringArrayLarge = new String[ARRAY_LENGTH];
 
   private static String generateRandomString(int sz) {
     StringBuilder sb = new StringBuilder();
@@ -50,6 +56,19 @@ public class SystemArrayCopy {
       sb.append(Character.valueOf((char)rnd.nextInt()));
     }
     return sb.toString();
+  }
+
+  private static void generateRandomStrings() {
+    for (int i = 0; i < ARRAY_LENGTH; i++) {
+      stringArray[i] = generateRandomString(MAX_BUFFER_BYTES);
+      stringArraySmall[i] = generateRandomString(MAX_BUFFER_BYTES);
+      stringArrayMedium[i] = generateRandomString(MAX_BUFFER_BYTES);
+      stringArrayLarge[i] = generateRandomString(MAX_BUFFER_BYTES);
+    }
+  }
+
+  static  {
+    generateRandomStrings();
   }
 
   private void bufferedReadLoop(char[] cbuf, int copyLength) throws IOException {
@@ -64,6 +83,16 @@ public class SystemArrayCopy {
 
   public boolean verify() {
     boolean result = true;
+    for (int i = 0; i < ARRAY_COPY_SMALL; i++) {
+      result &= stringArray[i].equals(stringArraySmall[i]);
+    }
+    for (int i = 0; i < ARRAY_COPY_MEDIUM; i++) {
+      result &= stringArray[i].equals(stringArrayMedium[i]);
+    }
+    for (int i = 0; i < ARRAY_COPY_LARGE; i++) {
+      result &= stringArray[i].equals(stringArrayLarge[i]);
+    }
+
     result &= arrayCopyCharBufferedReadSmallResult == RANDOM_STRING.charAt(MAX_BUFFER_BYTES - 1);
     result &= arrayCopyCharBufferedReadMediumResult == RANDOM_STRING.charAt(MAX_BUFFER_BYTES - 1);
     result &= arrayCopyCharBufferedReadLargeResult == RANDOM_STRING.charAt(MAX_BUFFER_BYTES - 1);
@@ -91,11 +120,33 @@ public class SystemArrayCopy {
     }
   }
 
+  public void timeArrayCopySmall(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      System.arraycopy(stringArray, 0, stringArraySmall, 0, ARRAY_COPY_SMALL);
+    }
+  }
+
+  public void timeArrayCopyMedium(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      System.arraycopy(stringArray, 0, stringArrayMedium, 0, ARRAY_COPY_MEDIUM);
+    }
+  }
+
+  public void timeArrayCopyLarge(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      System.arraycopy(stringArray, 0, stringArrayLarge, 0, ARRAY_COPY_LARGE);
+    }
+  }
+
   public static void main(String[] args) {
     int result = 0;
     SystemArrayCopy obj = new SystemArrayCopy();
     long before = System.currentTimeMillis();
     try {
+      obj.timeArrayCopySmall(30000);
+      obj.timeArrayCopyMedium(30000);
+      obj.timeArrayCopyLarge(30000);
+
       obj.timeArrayCopyCharBufferedReadSmall(30000);
       obj.timeArrayCopyCharBufferedReadMedium(30000);
       obj.timeArrayCopyCharBufferedReadLarge(30000);
