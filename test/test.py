@@ -112,8 +112,8 @@ def TestBenchmarksCompareScript():
     run_py = os.path.join(".", "tools", "benchmarks", "run.py")
     compare_py = os.path.join(".", "tools", "benchmarks", "compare.py")
     benchmarks_filter = ["--filter", "benchmarks/algorithm/*"]
-    rc |= TestCommand([run_py, "--output-pkl=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
-    rc |= TestCommand([run_py, "--output-pkl=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-json=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-json=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
@@ -138,8 +138,8 @@ def TestTopLevelWrapperScripts():
     non_root_path = os.path.join(utils.dir_root, "test", "foobar")
     rc |= TestCommand(["mkdir", "-p", non_root_path])
     rc |= TestCommand([os.path.join(utils.dir_root, "./run.py")], _cwd=non_root_path)
-    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res1"], _cwd=utils.dir_root)
-    rc |= TestCommand(["./run.py", "--output-pkl=/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py", "--output-json=/tmp/res1"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./run.py", "--output-json=/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
@@ -155,8 +155,8 @@ def TestCompilationStatistics(target=utils.adb_default_target_string):
     run_py = os.path.join(utils.dir_root, "tools", "compilation_statistics", "run.py")
     compare_py = os.path.join(utils.dir_root, "compare.py")
     rc |= TestCommand(["./build.sh", "-t"], _cwd=utils.dir_root)
-    rc |= TestCommand([run_py, "--output-pkl=/tmp/res1"] + args, _cwd=utils.dir_root)
-    rc |= TestCommand([run_py, "--output-pkl=/tmp/res2"] + args, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-json=/tmp/res1"] + args, _cwd=utils.dir_root)
+    rc |= TestCommand([run_py, "--output-json=/tmp/res2"] + args, _cwd=utils.dir_root)
     rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     # Test executing from a different path than the root.
     non_root_path = os.path.join(utils.dir_root, "test", "foobar")
