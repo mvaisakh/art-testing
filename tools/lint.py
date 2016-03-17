@@ -33,13 +33,15 @@ def BuildOptions():
                         help='Lint using N jobs')
     return parser.parse_args()
 
+def ExcludeJavaFiles(filename):
+    return filename.endswith('Linpack.java')
 
 def GetJavaFiles():
     java_files = []
     for dir_java_files in [utils.dir_framework, utils.dir_benchmarks]:
         for root, dirs, files in os.walk(dir_java_files):
             files = map(lambda x : os.path.join(root, x), files)
-            java_files += [f for f in files if f.endswith('.java')]
+            java_files += [f for f in files if (f.endswith('.java') and (not ExcludeJavaFiles(f)))]
     java_files.sort()
     return java_files
 
