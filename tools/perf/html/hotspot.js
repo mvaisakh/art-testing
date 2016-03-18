@@ -75,7 +75,11 @@ function compare_events(a, b) {
 function init() {
   // Initialize events map.
   events_table = events_table.concat(events_generic);
-  events_table = events_table.concat(events_pmu);
+  if (cpu_type == "a53") {
+    events_table = events_table.concat(events_pmu_a53);
+  } else if (cpu_type == "a57") {
+    events_table = events_table.concat(events_pmu_a57);
+  }
 
   // Set document title.
   var bench_index = Utils.getURLParam("bench_index");
