@@ -146,7 +146,7 @@ def RunBench(apk, classname,
             outerr = outerr.rstrip('\n')
             utils_print.VerbosePrint(outerr)
         except Exception as e:
-            utils.Warning(str(e) + "\n  \-> FAILED, continuing anyway\n")
+            utils.Warning(str(e) + "\n  \-> FAILED, continuing anyway\n", e)
             rc += 1
             continue
 
@@ -160,7 +160,7 @@ def RunBench(apk, classname,
                         result[name] = list()
                     result[name].append(score)
         except Exception as e:
-            utils.Warning(str(e) + "\n  \-> Error parsing output from %s")
+            utils.Warning(str(e) + "\n  \-> Error parsing output from %s", e)
             rc += 1
             break
 

@@ -55,10 +55,11 @@ default_compiler_mode = None
 default_n_iterations = 1
 
 
-def Warning(message):
-    print(utils_print.COLOUR_ORANGE + 'WARNING: ' + message + \
-          utils_print.NO_COLOUR,
-          file=sys.stderr)
+def Warning(message, exc=None):
+    print(utils_print.COLOUR_ORANGE + 'WARNING: ' + message, file=sys.stderr)
+    if exc != None:
+        traceback.print_exception(type(exc), exc, None)
+    print(utils_print.NO_COLOUR)
     traceback.print_stack()
 
 def Error(message, rc=1):
