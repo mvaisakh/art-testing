@@ -16,8 +16,8 @@
 #
 
 import argparse
+import json
 import os
-import pickle
 import sys
 
 from collections import OrderedDict
@@ -135,10 +135,10 @@ def FilterBenchmarks(benchmarks, filters, filters_out):
 
 if __name__ == "__main__":
     args = BuildOptions()
-    pkl_file_1 = open(args.res_1, 'rb')
-    pkl_file_2 = open(args.res_2, 'rb')
-    res_1 = pickle.load(pkl_file_1)
-    res_2 = pickle.load(pkl_file_2)
+    file_1 = open(args.res_1, 'r')
+    file_2 = open(args.res_2, 'r')
+    res_1 = json.load(file_1, object_pairs_hook=OrderedDict)
+    res_2 = json.load(file_2, object_pairs_hook=OrderedDict)
     res_1 = FilterBenchmarks(res_1, args.filter, args.filter_out)
     res_2 = FilterBenchmarks(res_2, args.filter, args.filter_out)
 
@@ -155,5 +155,5 @@ if __name__ == "__main__":
     else:
         utils_stats.PrintDiff(res_1, res_2)
 
-    pkl_file_1.close()
-    pkl_file_2.close()
+    file_1.close()
+    file_2.close()
