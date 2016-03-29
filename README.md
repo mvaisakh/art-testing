@@ -64,9 +64,9 @@ And similarly on target
 The results of `run.py` can be compared using `compare.py`.
 
 
-    ./run.py --target --iterations=10 --output-pkl=/tmp/res1.pkl
-    ./run.py --target --iterations=10 --output-pkl=/tmp/res2.pkl
-    ./compare.py /tmp/res1.pkl /tmp/res2.pkl
+    ./run.py --target --iterations=10 --output-json=/tmp/res1.json
+    ./run.py --target --iterations=10 --output-json=/tmp/res2.json
+    ./compare.py /tmp/res1.json /tmp/res2.json
 
 
 

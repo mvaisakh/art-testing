@@ -185,7 +185,7 @@ def GetDex2oatOptions(compiler_mode):
         Error('Unsupported compiler mode: ' + compiler_mode)
 
 
-default_output_formats = ['pkl', 'json']
+default_output_formats = ['json', 'pkl']
 
 def OutputObject(object, format, output_filename):
     if format not in default_output_formats:
