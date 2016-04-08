@@ -109,9 +109,7 @@ shift $((OPTIND - 1))
 # Disable wildcard expansion.
 set -f
 # Find what Java files we need to compile.
-JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java     \
-                                                   ! -name Linpack.java \
-)"
+JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
 # Reenable wildcard expansion.
 set +f
 

@@ -1,5 +1,11 @@
 /*
 
+Modified 3/23/2016 by Tim Zhang tim.zhang@linaro.org
+Modifications performed:
+ - Added runLinpack() method for running the linpack without computing the float rate.
+ - Added timeLinpack() method for running with different iterations.
+ - Updated main() method.
+
 Modified 3/3/97 by David M. Doolin (dmd) doolin@cs.utk.edu
 Fixed error in matgen() method. Added some comments.
 
@@ -31,6 +37,8 @@ Translated to C by Bonnie Toy 5/88
 
 */
 
+// CHECKSTYLE.OFF: .*
+package benchmarks.algorithm;
 
 import java.net.*;
 import java.io.*;
@@ -39,7 +47,7 @@ import java.util.*;
 
 public class Linpack {
 
-  public static void main(String[] args)
+  public static void main_(String[] args)
   {
     Linpack l = new Linpack();
     l.run_benchmark();
@@ -626,4 +634,90 @@ matrix in column order. --dmd 3/3/97
     }
   }
 
+  // CHECKSTYLE.ON: .*
+  /*
+    This function derived from run_benchmark() function in the original file.
+    Modifications:
+    - Keep the code that is used to timing.
+    - Ignore the computing of Linpack result in Mflops/s.
+  */
+  public void runLinpack() {
+    double [][]a = new double[200][201];
+    double []b = new double[200];
+    double norma;
+    int n;
+    int info;
+    int lda;
+    int []ipvt = new int[200];
+
+    lda = 201;
+    n = 100;
+
+    norma = matgen(a,lda,n,b);
+    info = dgefa(a,lda,n,ipvt);
+    dgesl(a,lda,n,ipvt,b,0);
+  }
+
+  public void timeLinpack(int iterations) {
+    for (int iter = 0; iter < iterations; iter++) {
+      runLinpack();
+    }
+  }
+
+  public boolean verifyLinpack() {
+    // A copy of `runLinpack.
+    double [][]a = new double[200][201];
+    double []b = new double[200];
+    double norma;
+    int n;
+    int info;
+    int lda;
+    int []ipvt = new int[200];
+
+    lda = 201;
+    n = 100;
+
+    norma = matgen(a,lda,n,b);
+    info = dgefa(a,lda,n,ipvt);
+    dgesl(a,lda,n,ipvt,b,0);
+
+    // Verifying code: sum the values in the arrays.
+    double found = norma + info;
+    for (int i = 0; i < 200; i++) {
+      for (int j = 0; j < 201; j++) {
+        found += a[i][j];
+      }
+    }
+
+    for (int i = 0; i < 200; i++) {
+      found += b[i];
+    }
+
+    for (int i = 0; i < 200; i++) {
+      found += ipvt[i];
+    }
+
+    double expected = 7430.571892474999;
+    if (expected != found) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    Linpack obj = new Linpack();
+
+    long before = System.currentTimeMillis();
+    obj.timeLinpack(1);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/algorithm/Linpack: " + (after - before));
+
+    if (!obj.verifyLinpack()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }
