@@ -50,7 +50,6 @@ def PrintDiff(data_1, data_2, key=None, indentation=''):
                     entries.append(maybe_entry)
             if entries:
                 utils_print.PrintTable([''] + utils_stats.stats_diff_headers,
-                                       ['s'] + utils_stats.stats_diff_formats,
                                        entries,
                                        line_start=indentation)
                 print('')

@@ -22,9 +22,7 @@ import utils_print
 
 stats_diff_headers = ['mean1', 'stdev1 (% of mean1)', 'mean2',
                       'stdev2 (% of mean2)', '(mean2 - mean1) / mean1 * 100']
-stats_diff_formats = ['.3f', '.3f', '.3f', '.3f', '.3f']
 stats_headers = ['min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
-stats_formats = ['.3f', '.3f', '.3f', '.3f', '.3f']
 
 def CalcGeomean(nums):
     assert len(nums) != 0
@@ -100,7 +98,7 @@ def ComputeAndPrintGeomean(dict_results):
     results = ComputeGeomean(dict_results)
     print("GEOMEANS:")
     headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
-    utils_print.PrintTable(headers, ['.3f'] * len(headers), results)
+    utils_print.PrintTable(headers, results)
 
 # Print a table showing the difference between two runs of benchmarks.
 def PrintDiff(res_1, res_2, title = ''):
@@ -127,7 +125,7 @@ def PrintDiff(res_1, res_2, title = ''):
         diff = GetRelativeDiff(ave1, ave2)
         results.append([bench, ave1, dp1, ave2, dp2, diff])
 
-    utils_print.PrintTable(headers, ['.3f'] + stats_diff_formats, results)
+    utils_print.PrintTable(headers, results)
 
     # overall and per suite geomeans calculations
     print("\nGEOMEANS:")
@@ -172,4 +170,4 @@ def PrintDiff(res_1, res_2, title = ''):
             stdev_list1, stdev_list2, geomean)
 
     results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
-    utils_print.PrintTable(headers, ['.3f'] * len(headers), results)
+    utils_print.PrintTable(headers, results)

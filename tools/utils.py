@@ -263,7 +263,6 @@ def PrintData(data, key=None, indentation=''):
                 entries.append(maybe_entry)
         if entries:
             utils_print.PrintTable([''] + utils_stats.stats_headers,
-                                   ['s'] + utils_stats.stats_formats,
                                    entries,
                                    line_start=indentation)
             print('')
