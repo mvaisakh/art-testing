@@ -17,6 +17,43 @@
 
 . $(dirname $0)/common.sh
 
+
+# Arguments handling
+
+usage="Usage: $(basename "$0")
+Do performance analysis for the benchmarks.
+
+Options:
+    -h                  Show this help message.
+    -b SUITE/BENCH.java Collect perf data only for particular benchmark.
+                        Example: -b micro/ShifterOperand.java.
+"
+
+while getopts ':hb:' option; do
+  case "$option" in
+    h) echo "$usage"; exit ;;
+    b) single_bench_mode="ON"
+       single_bench=$OPTARG
+       ;;
+    \?)
+      echo "Illegal option: -$OPTARG" >&2
+      echo "$usage"
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+if [[ $# -ne 0 ]]; then
+  echo "$usage"
+  error "Wrong number of arguments"
+fi
+
 # Check if the AOSP build matches the target board.
 board=$($ADB shell getprop ro.build.product)
 print_info Board : $board
@@ -25,12 +62,24 @@ if [ "$(basename $ANDROID_PRODUCT_OUT)" != "$board" ] ; then
   error AOSP build does not match the target board!
 fi
 
-safe cd $(dirname $UBENCH_SRC_FOLDER)
-bench_sources=$(find $(basename $UBENCH_SRC_FOLDER) -name "*.java")
-safe cd -
+if [[ $single_bench_mode == "ON" ]]; then
+  bench="benchmarks/$single_bench"
+  bench_realpath="$UBENCH_SRC_FOLDER/$single_bench"
 
-# Build benchmark.
-$SCRIPT_PATH/build-wrapper.sh || exit 1
+  if [[ ! (-f $bench_realpath) || ("${bench_realpath##*.}" != "java") ]]; then
+    error "$0: Provide a proper benchmark for single benchmark mode."
+  fi
+
+  bench_sources=$bench
+  print_info "$0: Single benchmark mode: \"$bench\""
+
+  $SCRIPT_PATH/build-wrapper.sh -b $bench_realpath || exit 1
+else
+  safe cd $(dirname $UBENCH_SRC_FOLDER)
+  bench_sources=$(find $(basename $UBENCH_SRC_FOLDER) -name "*.java")
+  safe cd -
+  $SCRIPT_PATH/build-wrapper.sh || exit 1
+fi
 
 # Initialize js file.
 safe mkdir -p $PERF_OUT

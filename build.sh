@@ -70,9 +70,6 @@ verbose_safe() {
   "$@" || error "FAILED command:\n$*";
 }
 
-
-
-
 # Arguments handling
 
 usage="Usage: $(basename "$0")
@@ -80,23 +77,33 @@ Build Java benchmark class, APK, and jar files.
 The script will automatically attempt to build the APK if the \`dx\` command is
 available in the PATH.
 Output files are produced in $DIR_BUILD.
+Single benchmark mode can be used if the last argument is a path to a java file.
 
 Options:
-	-h	Show this help message.
-	-t	Build for the target. Requires building from an Android environment.
-	-v	Verbose. Print the commands executed.
-	-W	Do not treat build warnings as errors.
+    -h           Show this help message.
+    -t           Build for the target. Requires building from an Android environment.
+    -v           Verbose. Print the commands executed.
+    -W           Do not treat build warnings as errors.
+    -b BENCHMARK Include only one benchmark file, specified by its absolute path.
+                 Example: -b /data/art-testing/benchmarks/micro/ShifterOperand.java.
 "
 
-while getopts ':htlvW' option; do
+while getopts ':htlvWb:' option; do
   case "$option" in
     h) echo "$usage"; exit ;;
     t) TARGET_BUILD=true ;;
     v) VERBOSE=true ;;
     W) WERROR=false ;;
+    b) single_bench_mode="ON"
+       single_bench=$OPTARG
+       ;;
     \?)
       printf "Illegal option: -%s\n" "$OPTARG" >&2
       echo "$usage"
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
       exit 1
       ;;
   esac
@@ -104,12 +111,27 @@ done
 
 shift $((OPTIND - 1))
 
-
+if [[ $# -ne 0 ]]; then
+  echo "$usage"
+  error "Wrong number of arguments"
+fi
 
 # Disable wildcard expansion.
 set -f
 # Find what Java files we need to compile.
-JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
+
+if [[ $single_bench_mode == "ON" ]]; then
+  echo "$0: Single benchmark mode: \"$single_bench\""
+
+  if [[ ! (-f $single_bench) || ("${single_bench##*.}" != "java") ]]; then
+      error "Provide a proper benchmark for single benchmark mode."
+  fi
+  JAVA_BENCHMARK_FILES=$single_bench
+else
+  echo "$0: Whole set mode"
+  JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
+fi
+
 # Reenable wildcard expansion.
 set +f
 

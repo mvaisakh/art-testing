@@ -19,7 +19,9 @@
 
 # Build bench apk and push it to target device.
 safe cd $UBENCH_ROOT
-safe ./build.sh -t
+
+safe ./build.sh -t "$@"
+
 safe $ADB push $UBENCH_LOCAL $UBENCH_REMOTE
 safe cd -
 
