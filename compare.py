@@ -30,6 +30,9 @@ def BuildOptions():
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     utils.AddCommonCompareOptions(parser)
+    parser.add_argument('--print-means',
+                        action='store_true', default=False,
+                        help='Print means for both data sets.')
     return parser.parse_args()
 
 def IsDictionaryOrNone(d):
@@ -38,8 +41,12 @@ def IsDictionaryOrNone(d):
 def IsListOrNone(d):
     return isinstance(d, list) or d is None
 
-def PrintDiff(data_1, data_2, key=None, indentation=''):
+def PrintDiff(data_1, data_2, key=None, indentation='', print_means=False):
     indentation_level = '    '
+    if print_means:
+        headers = ['', 'diff (%)', 'mean1', 'stdev1 (%)', 'mean2', 'stdev2 (%)']
+    else:
+        headers = ['', 'diff (%)', 'stdev1 (%)', 'stdev2 (%)']
 
     if not data_1 and not data_2:
         # There is nothing to compare or print.
@@ -54,13 +61,13 @@ def PrintDiff(data_1, data_2, key=None, indentation=''):
         for k in utils.MergeLists(list_1, list_2):
             value_1 = data_1[k] if data_1 and k in data_1 else None
             value_2 = data_2[k] if data_2 and k in data_2 else None
-            maybe_entry = PrintDiff(value_1, value_2, k, indentation + indentation_level)
+            maybe_entry = PrintDiff(value_1, value_2, k,
+                                    indentation + indentation_level,
+                                    print_means=print_means)
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:
-            utils_print.PrintTable([''] + utils_stats.stats_diff_headers,
-                                   entries,
-                                   line_start=indentation)
+            utils_print.PrintTable(headers, entries, line_start=indentation)
             print('')
     elif IsListOrNone(data_1) and IsListOrNone(data_2):
         no_results = ('', '', '', '', '')
@@ -70,9 +77,13 @@ def PrintDiff(data_1, data_2, key=None, indentation=''):
                 utils_stats.ComputeStats(data_2) if data_2 else no_results
         diff = utils_stats.GetRelativeDiff(ave1, ave2) \
                 if data_1 and data_2 else ''
-        return [key, ave1, dp1, ave2, dp2, diff]
-    elif type(data_1) != type(data_2):
-        utils.Error('The data types differ between result sets.')
+        if print_means:
+            return [key, diff, ave1, dp1, ave2, dp2]
+        else:
+            return [key, diff, dp1, dp2]
+    else:
+        utils.Error('Unexpected data types %s and %s.' % \
+                    (str(type(data_1)), str(type(data_2))))
 
 if __name__ == "__main__":
     args = BuildOptions()
@@ -86,4 +97,4 @@ if __name__ == "__main__":
     res_1 = utils.Filter(res_1, args.filter, args.filter_out)
     res_2 = utils.Filter(res_2, args.filter, args.filter_out)
 
-    PrintDiff(res_1, res_2)
+    PrintDiff(res_1, res_2, print_means=args.print_means)

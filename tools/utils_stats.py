@@ -20,8 +20,6 @@ from functools import reduce
 
 import utils_print
 
-stats_diff_headers = ['mean1', 'stdev1 (% of mean1)', 'mean2',
-                      'stdev2 (% of mean2)', '(mean2 - mean1) / mean1 * 100']
 stats_headers = ['min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
 
 def CalcGeomean(nums):
@@ -106,7 +104,8 @@ def PrintDiff(res_1, res_2, title = ''):
     # Pay attention to maintain the order of the keys.
     benchmarks = [b for b in res_1.keys() if b in res_2.keys()]
     if not benchmarks: return
-    headers = [title] + stats_diff_headers
+    headers = [title, 'mean1', 'stdev1 (% of mean1)', 'mean2',
+               'stdev2 (% of mean2)', '(mean2 - mean1) / mean1 * 100']
     results = []
     stats_dict = {}
     # collecting data
