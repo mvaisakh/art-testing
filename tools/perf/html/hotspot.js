@@ -63,6 +63,8 @@ function resetTable() {
           + 'event=' + events[i].name + '&hotspot=' + hotspot_name + '&bench=' + bench_name + '&data=' + file_prefix + events[i].file
           + '" title="' + events[i].file + '">'  + events[i].rate + "%</a></td>";
     html += '<td class="benchmarkTableData">' + event_description + "</td>";
+    html += '<td class="benchmarkTableData">' + events[i].total + "</td>";
+
     html += "</tr>";
   }
   document.getElementById("benchs").innerHTML = html;

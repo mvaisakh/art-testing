@@ -49,7 +49,7 @@ PERF_RECORD="perf record"
 #     cd <linux sources>/tools/perf
 #     make
 HOST_PERF_BINARY=perf
-PERF_REPORT="$HOST_PERF_BINARY report"
+PERF_REPORT="$HOST_PERF_BINARY report --show-total-period"
 PERF_SCRIPT="$HOST_PERF_BINARY script"
 PERF_ANNOTATE="$HOST_PERF_BINARY annotate"
 PERF_OUT=$SCRIPT_PATH/perf-out

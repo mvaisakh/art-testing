@@ -122,17 +122,26 @@ while [ $i -le $max_hotspots ] ; do
     # version of perf distributed in Ubuntu 15.04 (3.19.3 at least) has a bug
     # that ignore the `-i` option for `perf annotate`. So instead we locally
     # copy the `perf.data` file.
-    $NEED_PERF_DATA_WORK_AROUND && safe cp -f $data/${event}.perf.data ./perf.data
     if $NEED_PERF_DATA_WORK_AROUND ; then
-      rate=$(echo $(safe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
+      safe cp -f $data/${event}.perf.data ./perf.data
+      hotspot_line=$(safe $PERF_REPORT $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG \
+          | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1)
+      # Remove the local copy of perf.data
+      # TODO: Remove the below line, once the local copy is no longer needed.
+      safe rm -f ./perf.data
     else
-      rate=$(echo $(safe $PERF_REPORT -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1 | awk -F"%" '{print $1}'))
+      hotspot_line=$(safe $PERF_REPORT -i $data/${event}.perf.data $PERF_BINUTILS_FLAG $PERF_SYMBOL_FLAG \
+          | grep -P "^\s*\d*\.\d*%" | grep -F "$hotspot" | head -n 1)
     fi
-    # Remove the local copy of perf.data
-    # TODO: Remove the below line, once the local copy is no longer needed.
-    $NEED_PERF_DATA_WORK_AROUND && safe rm -f ./perf.data
+
+    rate=$(echo $hotspot_line | awk -F"%" '{print $1}')
+    total=$(echo $hotspot_line | awk -F" " '{ print $2 }')
+
     if [ "$rate" = "" ] ; then
       rate=0
+    fi
+    if [ "$total" = "" ] ; then
+      total=0
     fi
 # Annotate in plan_src folder if exists, since we do not have path information for java sources.
     test -d $STRUCTURED_SOURCE_FOLDER && safe cd $STRUCTURED_SOURCE_FOLDER
@@ -154,7 +163,7 @@ while [ $i -le $max_hotspots ] ; do
     test -d $STRUCTURED_SOURCE_FOLDER && safe cd -
 # Append information to temp js file.
     echo -n "
-        {name:'$event',rate:$rate,file:'hotspot_${i}.${event}.perf.annotate'}," >> $temp_js_file
+        {name:'$event',rate:$rate,total:$total,file:'hotspot_${i}.${event}.perf.annotate'}," >> $temp_js_file
   done
 # Append information to temp js file.
   echo -n "
