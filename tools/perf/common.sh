@@ -41,7 +41,7 @@ PERF_BINUTILS_FLAG=--objdump=aarch64-linux-android-objdump
 # After transition some parts of the scripts doesn't work (Flamegraph, etc).
 #
 # TODO: check and fix the rest of the scripts.
-PERF_RECORD="simpleperf record"
+PERF_RECORD="perf record"
 # The `--input` option is broken for `perf annotate` in some versions of
 # `perf`. Abstracting the perf binary makes it easy to use a custom `perf`
 # binary on host within these scripts.
