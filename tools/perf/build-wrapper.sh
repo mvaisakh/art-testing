@@ -17,10 +17,52 @@
 
 . $(dirname $0)/common.sh
 
+usage="Usage: $(basename "$0")
+Build benchmarks apk and symbolize binaries.
+
+Options:
+    -h            Show this help message.
+    -b BENCHMARK  Include only one benchmark file, specified by its absolute path.
+                  Example: -b /data/art-testing/benchmarks/micro/ShifterOperand.java.
+    -f            Pass options to dalvikvm in quotes.
+                  Example: -f \"-Xcompiler-option -g\".
+"
+
+while getopts ':hb:f:' option; do
+  case "$option" in
+    h) echo "$usage"; exit ;;
+    b) single_bench_mode="ON"
+       single_bench=$OPTARG
+       ;;
+    f) vm_cl_flags=$OPTARG
+       ;;
+    \?)
+      echo "Illegal option: -$OPTARG" >&2
+      echo "$usage"
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+if [[ $# -gt 1 ]]; then
+  echo "$usage"
+  error "Wrong number of arguments"
+fi
+
 # Build bench apk and push it to target device.
 safe cd $UBENCH_ROOT
 
-safe ./build.sh -t "$@"
+if [[ $single_bench_mode == "ON" ]]; then
+  safe ./build.sh -t -b "$single_bench"
+else
+  safe ./build.sh -t
+fi
 
 safe $ADB push $UBENCH_LOCAL $UBENCH_REMOTE
 safe cd -
@@ -40,7 +82,7 @@ for dalvikvm in $REMOTE_DALVIKVMS ; do
   vm=$(basename $dalvikvm)
   $HAS_ART_DISASSEMBLER && VM_CFG_FLAG="-Xcompiler-option -j1 -Xcompiler-option --dump-cfg=$UBENCH_REMOTE_DIR/bench.${vm}.cfg"
 # Trigger the build with debug symbols generated.
-  safe $ADB shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $vm -Xcompiler-option -g $VM_CFG_FLAG -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
+  safe $ADB shell ANDROID_DATA=$UBENCH_REMOTE_DIR DEX_LOCATION=$UBENCH_REMOTE_DIR $vm $vm_cl_flags -Xcompiler-option -g $VM_CFG_FLAG -cp $UBENCH_REMOTE org.linaro.bench.RunBench --help > /dev/null
   safe mkdir -p $CFG_FOLDER
 # Pull CFG file if can be generated or create an empty one.
   if $HAS_ART_DISASSEMBLER ; then

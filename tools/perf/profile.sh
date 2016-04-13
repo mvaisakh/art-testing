@@ -17,7 +17,6 @@
 
 . $(dirname $0)/common.sh
 
-
 # Arguments handling
 
 usage="Usage: $(basename "$0")
@@ -27,13 +26,18 @@ Options:
     -h                  Show this help message.
     -b SUITE/BENCH.java Collect perf data only for particular benchmark.
                         Example: -b micro/ShifterOperand.java.
+    -f                  Pass options to dalvikvm in quotes.
+                        Example: -f \"-Xcompiler-option -g\".
 "
 
-while getopts ':hb:' option; do
+while getopts ':hb:f:' option; do
   case "$option" in
     h) echo "$usage"; exit ;;
     b) single_bench_mode="ON"
        single_bench=$OPTARG
+       ;;
+    f) vm_cl_flags_opt="-f $OPTARG"
+       vm_cl_flags="$OPTARG"
        ;;
     \?)
       echo "Illegal option: -$OPTARG" >&2
@@ -70,15 +74,17 @@ if [[ $single_bench_mode == "ON" ]]; then
     error "$0: Provide a proper benchmark for single benchmark mode."
   fi
 
+  echo "$0: bench_realpath: $bench_realpath"
+
   bench_sources=$bench
   print_info "$0: Single benchmark mode: \"$bench\""
 
-  $SCRIPT_PATH/build-wrapper.sh -b $bench_realpath || exit 1
+  $SCRIPT_PATH/build-wrapper.sh -b $bench_realpath "$vm_cl_flags_opt" || exit 1
 else
   safe cd $(dirname $UBENCH_SRC_FOLDER)
   bench_sources=$(find $(basename $UBENCH_SRC_FOLDER) -name "*.java")
   safe cd -
-  $SCRIPT_PATH/build-wrapper.sh || exit 1
+  $SCRIPT_PATH/build-wrapper.sh "$vm_cl_flags_opt" || exit 1
 fi
 
 # Initialize js file.
@@ -97,7 +103,7 @@ for bench in $bench_sources ; do
   for dalvikvm in $REMOTE_DALVIKVMS ; do
     vm=$(basename $dalvikvm)
     print_info Recording events for $bench_name on $vm
-    $SCRIPT_PATH/record-events.sh "$vm -cp /data/local/tmp/bench.apk $bench_name" $PERF_OUT/${bench_name}_${vm} || exit 1
+    $SCRIPT_PATH/record-events.sh "$vm $vm_cl_flags -cp /data/local/tmp/bench.apk $bench_name" $PERF_OUT/${bench_name}_${vm} || exit 1
     test $analyze_pid -eq 0 || safe wait $analyze_pid
     print_info Analyzing profile data for $bench_name on $vm
     $SCRIPT_PATH/analyze.sh $PERF_OUT/${bench_name}_${vm} ${bench_name}_${vm} $PERF_OUT/bench_result.js || exit 1 &
