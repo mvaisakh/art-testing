@@ -17,7 +17,7 @@
 
 // a57 pmu events definition.
 // Can be found: http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0488g/way1382543438508.html
-var events_pmu_a57 = [
+var events_pmu = [
   {
     "EventCode": "0x00",
     "EventName": "SW_INCR",

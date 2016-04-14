@@ -28,9 +28,10 @@ Options:
                         Example: -b micro/ShifterOperand.java.
     -f                  Pass options to dalvikvm in quotes.
                         Example: -f \"-Xcompiler-option -g\".
+    -c                  Use specific PMU counters from a file.
 "
 
-while getopts ':hb:f:' option; do
+while getopts ':hb:f:c::' option; do
   case "$option" in
     h) echo "$usage"; exit ;;
     b) single_bench_mode="ON"
@@ -39,6 +40,7 @@ while getopts ':hb:f:' option; do
     f) vm_cl_flags_opt="-f $OPTARG"
        vm_cl_flags="$OPTARG"
        ;;
+    c) pmu_counters_file=$OPTARG ;;
     \?)
       echo "Illegal option: -$OPTARG" >&2
       echo "$usage"
@@ -85,6 +87,14 @@ else
   bench_sources=$(find $(basename $UBENCH_SRC_FOLDER) -name "*.java")
   safe cd -
   $SCRIPT_PATH/build-wrapper.sh "$vm_cl_flags_opt" || exit 1
+fi
+
+# Configure pmu counters.
+if [[ -n "$pmu_counters_file" ]]; then
+  if [[ ! (-f $pmu_counters_file) ]]; then
+    error "Provide a valid file with PMU counters"
+  fi
+  safe ln -fs $pmu_counters_file config/events-pmu-custom.js
 fi
 
 # Initialize js file.

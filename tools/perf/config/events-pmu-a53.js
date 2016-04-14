@@ -17,7 +17,7 @@
 
 // a53 pmu events definition.
 // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0500f/BIIDBAFB.html
-var events_pmu_a53 = [
+var events_pmu = [
   {
     "EventCode": "0x00",
     "EventName": "SW_INCR",
