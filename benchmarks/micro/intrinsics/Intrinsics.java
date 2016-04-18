@@ -27,8 +27,9 @@ public class Intrinsics {
   /* Invoke each intrinsic in question the same no. of times */
   private static final int NUM_INVOKES = 64;
 
-  /* Random pool size */
-  private static final int NUM_RANDS = 1000;
+  /* Random pool size.
+   * Use a power of two to make the modulo operations below fast. */
+  private static final int NUM_RANDS = 1024;
 
   /* Pre-allocated pool of random integers from [0, Integer.MAX_VALUE) */
   private static final int[] rand = new int[NUM_RANDS];
