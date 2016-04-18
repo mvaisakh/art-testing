@@ -199,22 +199,26 @@ public class Dhrystone {
     }
 
     if (ptrGlob.strComp.toString().compareTo(str) != 0) {
-      System.out.println("ERROR: ptrGlob.strComp should be " + str + ", but found " + ptrGlob.strComp);
+      System.out.println("ERROR: ptrGlob.strComp should be " + str + ", but found " +
+                          ptrGlob.strComp);
       return false;
     }
 
     if (nextPtrGlob.discr != 0) {
-      System.out.println("ERROR: nextPtrGlob.discr should be 0, but found " + nextPtrGlob.discr);
+      System.out.println("ERROR: nextPtrGlob.discr should be 0, but found " +
+                          nextPtrGlob.discr);
       return false;
     }
 
     if (nextPtrGlob.enumComp != 1) {
-      System.out.println("ERROR: nextPtrGlob.enumComp should be 1, but found " + nextPtrGlob.enumComp);
+      System.out.println("ERROR: nextPtrGlob.enumComp should be 1, but found " +
+                         nextPtrGlob.enumComp);
       return false;
     }
 
     if (nextPtrGlob.intComp != 18) {
-      System.out.println("ERROR: nextPtrGlob.intComp should be 18, but found " + nextPtrGlob.intComp);
+      System.out.println("ERROR: nextPtrGlob.intComp should be 18, but found " +
+                          nextPtrGlob.intComp);
       return false;
     }
 
