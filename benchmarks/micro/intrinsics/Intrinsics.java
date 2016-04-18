@@ -15,7 +15,7 @@
  *
  */
 
-package benchmarks.micro;
+package benchmarks.micro.intrinsics;
 
 import java.lang.System;
 import java.util.EnumMap;
