@@ -104,6 +104,8 @@ def RunBenchADB(mode, compiler_mode, auto_calibrate, apk, classname, target):
         # We want the compiler options to be used both for the APK and the
         # boot-image.
         dalvikvm_options += ' -Ximage-compiler-option %s' % opt
+    if compiler_mode == 'jit':
+        dalvikvm_options += ' -Xusejit:true'
 
     command = 'cd {workdir} && ' + ' '.join([environment_config, dalvikvm, dalvikvm_options, '-cp', apk, apk_arguments])
     command = command.format(**format_data)

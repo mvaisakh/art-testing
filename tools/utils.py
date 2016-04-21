@@ -161,7 +161,9 @@ def AddCommonRunOptions(parser):
                       target.''')
     opts.add_argument('--noverbose', action=SetVerbosity, nargs=0,
                       help='Do not print extra information and commands run.')
-    opts.add_argument('--compiler-mode', choices=['optimizing', 'quick'],
+    compiler_modes = ['optimizing', 'quick', 'interpreter', 'jit']
+    compiler_modes += [x + '-pic' for x in compiler_modes]
+    opts.add_argument('--compiler-mode', choices=compiler_modes,
                       default=default_compiler_mode,
                       help='''The compiler to use on target. When this option is
                       not specified no additional arguments are passed so the
@@ -178,13 +180,30 @@ def ValidateCommonRunOptions(args):
 def GetDex2oatOptions(compiler_mode):
     if compiler_mode is None:
         return []
-    elif compiler_mode == 'optimizing':
-        return ['--compiler-backend=Optimizing']
+
+    options = []
+    pic = False
+
+    if compiler_mode.endswith('-pic'):
+        # We want the `pic` option to follow the compiler backend option.
+        pic = True
+        compiler_mode = compiler_mode[0:-len('-pic')]
+
+    if compiler_mode == 'optimizing':
+        options.append('--compiler-backend=Optimizing')
     elif compiler_mode == 'quick':
-        return ['--compiler-backend=Quick']
+        options.append('--compiler-backend=Quick')
+    elif compiler_mode == 'interpreter':
+        options.append('--compiler-filter=interpret-only')
+    elif compiler_mode == 'jit':
+        options.append('--compiler-filter=verify-at-runtime')
     else:
         Error('Unsupported compiler mode: ' + compiler_mode)
 
+    if pic:
+        options.append('--compile-pic')
+
+    return options
 
 default_output_formats = ['json', 'pkl']
 
