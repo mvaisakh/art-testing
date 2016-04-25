@@ -73,4 +73,8 @@ if __name__ == "__main__":
     res_2 = json.load(file_2, object_pairs_hook=OrderedDict)
     file_1.close()
     file_2.close()
+
+    res_1 = utils.Filter(res_1, args.filter, args.filter_out)
+    res_2 = utils.Filter(res_2, args.filter, args.filter_out)
+
     PrintDiff(res_1, res_2)

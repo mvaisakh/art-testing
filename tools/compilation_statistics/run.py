@@ -133,7 +133,7 @@ def GetStats(apk,
         # Only the output of the first command is necessary; execute in a subshell
         # to guarantee PID value; only one thread is used for compilation to reduce
         # measurement noise.
-        command = '(echo $BASHPID && exec dex2oat -j1 ' + \
+        command = '(echo $BASHPID && exec dex2oat -j1 --runtime-arg -Xnorelocate' + \
                   ' '.join(dex2oat_options) + \
                   ' --dex-file=' + apk_path + ' --oat-file=' + oat
         command += ' --instruction-set=' + isa + ') | head -n1'

@@ -55,11 +55,6 @@ def BuildOptions():
                         help = '''Results with a deviation higher than this
                         threshold (in %%) will be included in the significant
                         results even if the difference threshold is not met.''')
-    parser.add_argument('-f', '--filter', action = 'append',
-                        help='Quoted (benchmark name) filter pattern.')
-    parser.add_argument('-F', '--filter-out', action = 'append',
-                        help='''Filter out the benchmarks matching this patern
-                        from the results.''')
     return parser.parse_args()
 
 
@@ -114,33 +109,14 @@ def OrderResultsByDifference(in_1, in_2):
     return (regressions_1, regressions_2), (improvements_1, improvements_2)
 
 
-def FilterBenchmarks(benchmarks, filters, filters_out):
-    # We cannot use dictionary comprehension because need to preserve the order
-    # of keys.
-    res = benchmarks
-    if filters:
-        tmp = OrderedDict({})
-        for b in res:
-            if utils.NameMatchesAnyFilter(b, filters):
-                tmp[b] = benchmarks[b]
-        res = tmp
-    if filters_out:
-        tmp = OrderedDict({})
-        for b in res:
-            if not utils.NameMatchesAnyFilter(b, filters_out):
-                tmp[b] = res[b]
-        res = tmp
-    return res
-
-
 if __name__ == "__main__":
     args = BuildOptions()
     file_1 = open(args.res_1, 'r')
     file_2 = open(args.res_2, 'r')
     res_1 = json.load(file_1, object_pairs_hook=OrderedDict)
     res_2 = json.load(file_2, object_pairs_hook=OrderedDict)
-    res_1 = FilterBenchmarks(res_1, args.filter, args.filter_out)
-    res_2 = FilterBenchmarks(res_2, args.filter, args.filter_out)
+    res_1 = utils.Filter(res_1, args.filter, args.filter_out)
+    res_2 = utils.Filter(res_2, args.filter, args.filter_out)
 
     if args.significant_changes:
         res_1, res_2 = \

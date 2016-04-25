@@ -59,6 +59,7 @@ def GetSuiteName(benchmark):
     return benchmark.split("/", 2)[1]
 
 def ComputeGeomean(dict_results):
+    if not dict_results: return
     stats_dict = {}
 
     for benchmark in dict_results:
@@ -95,6 +96,7 @@ def ComputeGeomean(dict_results):
     return results
 
 def ComputeAndPrintGeomean(dict_results):
+    if not dict_results: return
     results = ComputeGeomean(dict_results)
     print("GEOMEANS:")
     headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
@@ -105,6 +107,7 @@ def PrintDiff(res_1, res_2, title = ''):
     # Only print results for benchmarks present in both sets of results.
     # Pay attention to maintain the order of the keys.
     benchmarks = [b for b in res_1.keys() if b in res_2.keys()]
+    if not benchmarks: return
     headers = [title] + stats_diff_headers
     results = []
     stats_dict = {}

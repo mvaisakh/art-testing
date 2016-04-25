@@ -24,7 +24,7 @@ import sys
 dir_test = os.path.dirname(os.path.realpath(__file__))
 dir_root = os.path.realpath(os.path.join(dir_test, '..'))
 dir_tools = os.path.join(dir_root,'tools')
-sys.path.insert(0, dir_tools)
+sys.path.append(dir_tools)
 import lint
 import utils
 
@@ -141,6 +141,7 @@ def TestTopLevelWrapperScripts():
     rc |= TestCommand(["./run.py", "--output-json=/tmp/res1"], _cwd=utils.dir_root)
     rc |= TestCommand(["./run.py", "--output-json=/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./compare.py", "--filter", "benchmarks", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     return rc
 
 

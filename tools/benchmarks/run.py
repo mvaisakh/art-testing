@@ -45,17 +45,20 @@ def BuildOptions():
     utils.AddOutputFormatOptions(parser, utils.default_output_formats + ['csv'])
     parser.add_argument('--dont-auto-calibrate',
                         action='store_true', default = False,
-                        dest = 'no_auto_calibrate', help='''Do not auto-calibrate
-                        the benchmarks. Instead, run each benchmark's `main()`
-                        function directly.''')
+                        dest = 'no_auto_calibrate',
+                        help='''Do not auto-calibrate the benchmarks. Instead,
+                        run each benchmark's `main()` function directly.''')
     parser.add_argument('-n', '--norun', action='store_true',
-                        help='Build and configure everything, but do not run the benchmarks.')
+                        help='''Build and configure everything, but do not run
+                        the benchmarks.''')
     parser.add_argument('-f', '--filter', action = 'append',
-                        help='Quoted (benchmark name) filter pattern.')
+                        help='''Quoted (benchmark name) filter pattern. If no
+                        filters match, filtering will be attempted with all the
+                        patterns prefixed and suffixed with `*`.''')
     parser.add_argument('-F', '--filter-out', action = 'append',
-                        help='''Filter out the benchmarks matching this patern.
-                             Defaults to \'benchmarks/deprecated/*\' if no other filter is
-                             specified.''')
+                        help='''Filter out the benchmarks matching this pattern.
+                        Defaults to \'benchmarks/deprecated/*\' if no other
+                        filter is specified.''')
 
     args = parser.parse_args()
 
@@ -200,14 +203,6 @@ def ListAllBenchmarks():
     return benchs
 
 
-def FilterBenchmarks(benchmarks, filters, filters_out):
-    res = benchmarks
-    if filters:
-        res = [b for b in res if utils.NameMatchesAnyFilter(b, filters)]
-    if filters_out:
-        res = [b for b in res if not utils.NameMatchesAnyFilter(b, filters_out)]
-    return res
-
 def GetBenchmarkResults(args):
     if getattr(args, 'filter', []) == []:
         setattr(args, 'filter', None)
@@ -245,7 +240,7 @@ def GetBenchmarkResults(args):
         filter_out = args.filter_out
     else:
         filter_out = ['benchmarks/deprecated/*']
-    benchmarks = FilterBenchmarks(benchmarks, args.filter, filter_out)
+    benchmarks = utils.FilterList(benchmarks, args.filter, filter_out)
 
     rc = RunBenchs(remote_apk,
                    benchmarks,

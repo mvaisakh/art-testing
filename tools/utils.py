@@ -54,6 +54,9 @@ default_mode = ''
 default_compiler_mode = None
 default_n_iterations = 1
 
+# TODO: Use python's logging and warning capabilities instead!
+def Info(message):
+    print('INFO: ' + message)
 
 def Warning(message, exc=None):
     print(utils_print.COLOUR_ORANGE + 'WARNING: ' + message, file=sys.stderr)
@@ -101,15 +104,6 @@ def PrettySIFactor(value):
         si_factor = 1
 
     return si_factor, si_prefix
-
-def NameMatchesAnyFilter(name, filters):
-    # Ensure we have a list of filters. This lets the function work if only one
-    # filter is passed as a string.
-    filters = list(filters)
-    for f in filters:
-        if fnmatch.fnmatch(name, f):
-            return True
-    return False
 
 # Wrapper around `subprocess.Popen` returning the output of the given command.
 def Command(command, command_string=None, exit_on_error=True, cwd=None):
@@ -241,6 +235,14 @@ def AddOutputFormatOptions(parser, formats=default_output_formats):
 def AddCommonCompareOptions(parser):
     parser.add_argument('res_1', metavar = 'res_1.pkl')
     parser.add_argument('res_2', metavar = 'res_2.pkl')
+    parser.add_argument('-f', '--filter', action = 'append',
+                        help='''Quoted (benchmark name) filter pattern. If no
+                        filters match, filtering will be attempted with all the
+                        patterns prefixed and suffixed with `*`.''')
+    parser.add_argument('-F', '--filter-out', action = 'append',
+                        help='''Filter out the benchmarks matching this pattern
+                        from the results. Filters failing are **not** retried
+                        with added wildcards.''')
 
 def CheckDependencies(dependencies):
     for d in dependencies:
@@ -267,3 +269,77 @@ def PrintData(data, key=None, indentation=''):
             print('')
     elif isinstance(data, list):
         return [key] + list(utils_stats.ComputeStats(data))
+
+
+def NameMatchesAnyFilter(name, filters):
+    assert(isinstance(name, str))
+    if filters is None:
+        return False
+    # Ensure we have a list of filters. This lets the function work if only one
+    # filter is passed as a string.
+    filters = list(filters)
+    for f in filters:
+        if fnmatch.fnmatch(name, f):
+            return True
+    return False
+
+
+def FilterListHelper(data, filters, negative_filter=False):
+    assert(isinstance(data, list))
+    return [x for x in data \
+            if NameMatchesAnyFilter(x, filters) != negative_filter]
+
+
+def FilterList(data, filters, filters_out):
+    assert(isinstance(data, list))
+
+    res = data
+
+    if filters:
+        res = FilterListHelper(data, filters)
+        if not res:
+            # Try again with all patterns prefixed and suffixed with `*`.
+            extended_filters = list(map(lambda f: '*' + f + '*', filters))
+            Info('The filters ' + str(filters) + ' did not match any ' + \
+                 'data. Retrying with ' + str(extended_filters) + '.')
+            res = FilterListHelper(data, extended_filters)
+    if filters_out:
+        res = FilterListHelper(res, filters_out, negative_filter=True)
+
+    return res
+
+
+def FilterHelper(data, filters, negative_filter=False):
+    if (not isinstance(data, dict) and not isinstance(data, OrderedDict)):
+        return data if negative_filter else None
+    res = OrderedDict()
+    for key in data:
+        name_matches_any_filter = NameMatchesAnyFilter(key, filters)
+        if not name_matches_any_filter:
+            # Filter the sub-data and keep it if it is not empty.
+            subres = FilterHelper(data[key], filters, negative_filter)
+            if subres:
+                res[key] = subres
+        elif not negative_filter:
+            res[key] = data[key]
+    return res
+
+
+def Filter(data, filters, filters_out):
+    if not isinstance(data, dict) and not isinstance(data, OrderedDict):
+        return data
+
+    res = data
+
+    if filters:
+        res = FilterHelper(data, filters)
+        if not res:
+            # Try again with all patterns prefixed and suffixed with `*`.
+            extended_filters = list(map(lambda f: '*' + f + '*', filters))
+            Info('The filters ' + str(filters) + ' did not match any ' + \
+                 'data. Retrying with ' + str(extended_filters) + '.')
+            res = FilterHelper(data, extended_filters)
+    if filters_out:
+        res = FilterHelper(res, filters_out, negative_filter=True)
+
+    return res
