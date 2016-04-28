@@ -20,10 +20,9 @@ from functools import reduce
 
 import utils_print
 
-stats_headers = ['min', 'max', 'mean', 'stdev', 'stdev (% of mean)']
-
 def CalcGeomean(nums):
     assert len(nums) != 0
+    # We calculate it this way so that we don't lose precision.
     return math.exp((sum(map(lambda x: math.log(x), nums))) / len(nums))
 
 def CalcGeomeanErrorImpl(nums, stdevs, geomean, length):
@@ -43,13 +42,25 @@ def CalcGeomeanRelationError(nums1, nums2, stdevs1, stdevs2, geomean):
 def GetRelativeDiff(x1, x2):
     return (x2 - x1) / x1 * 100 if x1 else float("inf")
 
+def GetRatio(x1, x2):
+    return x1 / x2 * 100 if x2 else float("inf")
+
+def CalcMAD(nums, median):
+    # Calculate absolute deviations about the median.
+    nums = map(lambda x: abs(x - median), nums)
+    mad = statistics.median(nums)
+    return mad
+
 def ComputeStats(nums):
         m = min(nums)
         M = max(nums)
+        median = statistics.median(nums)
+        mad = CalcMAD(nums, median)
+        madp = GetRatio(mad, median)
         ave = statistics.mean(nums)
         d = statistics.pstdev(nums, ave)
-        dp = d / ave * 100 if ave != 0 else float("inf")
-        return m, M, ave, d, dp
+        dp = GetRatio(d, ave)
+        return m, M, median, mad, madp, ave, d, dp
 
 def GetSuiteName(benchmark):
     return benchmark.split("/", 2)[1]
@@ -74,7 +85,7 @@ def ComputeGeomean(dict_results):
         suite_stdev_list = []
 
         for benchmark in stats_dict[suite_name]:
-            m, M, mean, stdev, dp = ComputeStats(stats_dict[suite_name][benchmark])
+            m, M, median, mad, madp, mean, stdev, dp = ComputeStats(stats_dict[suite_name][benchmark])
             suite_mean_list.append(mean)
             suite_stdev_list.append(stdev)
             mean_list.append(mean)
@@ -83,12 +94,13 @@ def ComputeGeomean(dict_results):
         suite_geomean     = CalcGeomean(suite_mean_list)
         suite_geomean_err = CalcGeomeanError(suite_mean_list, suite_stdev_list, suite_geomean)
         results.append([suite_name, suite_geomean, suite_geomean_err,
-                        suite_geomean_err / suite_geomean * 100])
+                        GetRatio(suite_geomean_err, suite_geomean)])
 
     geomean     = CalcGeomean(mean_list)
     geomean_err = CalcGeomeanError(mean_list, stdev_list, geomean)
 
-    results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
+    results.append(['OVERALL', geomean, geomean_err,
+                    GetRatio(geomean_err, geomean)])
     return results
 
 def ComputeAndPrintGeomean(dict_results):
@@ -116,8 +128,8 @@ def PrintDiff(res_1, res_2, title = ''):
              stats_dict[suite_name] = {}
 
         stats_dict[suite_name][bench] = []
-        data1 = m1, M1, ave1, d1, dp1 = ComputeStats(res_1[bench])
-        data2 = m2, M2, ave2, d2, dp2 = ComputeStats(res_2[bench])
+        data1 = m1, M1, median1, mad1, madp1, ave1, d1, dp1 = ComputeStats(res_1[bench])
+        data2 = m2, M2, median2, mad2, madp2, ave2, d2, dp2 = ComputeStats(res_2[bench])
 
         stats_dict[suite_name][bench].append(data1)
         stats_dict[suite_name][bench].append(data2)
@@ -142,10 +154,10 @@ def PrintDiff(res_1, res_2, title = ''):
         suite_stdev_list2 = []
 
         for benchmark in stats_dict[suite_name]:
-            bench_mean1  = stats_dict[suite_name][benchmark][0][2]
-            bench_mean2  = stats_dict[suite_name][benchmark][1][2]
-            bench_stdev1 = stats_dict[suite_name][benchmark][0][3]
-            bench_stdev2 = stats_dict[suite_name][benchmark][1][3]
+            bench_mean1  = stats_dict[suite_name][benchmark][0][5]
+            bench_mean2  = stats_dict[suite_name][benchmark][1][5]
+            bench_stdev1 = stats_dict[suite_name][benchmark][0][6]
+            bench_stdev2 = stats_dict[suite_name][benchmark][1][6]
 
             suite_mean_list1.append(bench_mean1)
             suite_mean_list2.append(bench_mean2)
@@ -162,11 +174,12 @@ def PrintDiff(res_1, res_2, title = ''):
         suite_geomean_err = CalcGeomeanRelationError(suite_mean_list1, suite_mean_list2,
                 suite_stdev_list1, suite_stdev_list2, suite_geomean)
         results.append([suite_name, suite_geomean, suite_geomean_err,
-                suite_geomean_err / suite_geomean * 100])
+                GetRatio(suite_geomean_err, suite_geomean)])
 
     geomean     = CalcGeomean(mean_list2) / CalcGeomean(mean_list1)
     geomean_err = CalcGeomeanRelationError(mean_list1, mean_list2,
             stdev_list1, stdev_list2, geomean)
 
-    results.append(['OVERALL', geomean, geomean_err, geomean_err / geomean * 100])
+    results.append(['OVERALL', geomean, geomean_err,
+                    GetRatio(geomean_err, geomean)])
     utils_print.PrintTable(headers, results)

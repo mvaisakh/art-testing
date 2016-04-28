@@ -29,9 +29,9 @@ def BuildOptions():
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     utils.AddCommonCompareOptions(parser)
-    parser.add_argument('--print-means',
+    parser.add_argument('--print-extended',
                         action='store_true', default=False,
-                        help='Print means for both data sets.')
+                        help='Print medians and means for both data sets.')
     return parser.parse_args()
 
 def IsDictionaryOrNone(d):
@@ -40,12 +40,13 @@ def IsDictionaryOrNone(d):
 def IsListOrNone(d):
     return isinstance(d, list) or d is None
 
-def PrintDiff(data_1, data_2, key=None, indentation='', print_means=False):
+def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
     indentation_level = '    '
-    if print_means:
-        headers = ['', 'diff (%)', 'mean1', 'stdev1 (%)', 'mean2', 'stdev2 (%)']
-    else:
-        headers = ['', 'diff (%)', 'stdev1 (%)', 'stdev2 (%)']
+    headers = ['',
+               'median diff (%)', 'mad1 (%)', 'mad2 (%)',
+               'mean diff (%)', 'stdev1 (%)', 'stdev2 (%)']
+    if print_extended:
+        headers += ['median1', 'median2', 'mean1', 'mean2']
 
     if not data_1 and not data_2:
         # There is nothing to compare or print.
@@ -62,7 +63,7 @@ def PrintDiff(data_1, data_2, key=None, indentation='', print_means=False):
             value_2 = data_2[k] if data_2 and k in data_2 else None
             maybe_entry = PrintDiff(value_1, value_2, k,
                                     indentation + indentation_level,
-                                    print_means=print_means)
+                                    print_extended=print_extended)
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:
@@ -70,16 +71,20 @@ def PrintDiff(data_1, data_2, key=None, indentation='', print_means=False):
             print('')
     elif IsListOrNone(data_1) and IsListOrNone(data_2):
         no_results = ('', '', '', '', '')
-        _, _, ave1, _, dp1 = \
+        _, _, med1, _, madp1, ave1, _, dp1 = \
                 utils_stats.ComputeStats(data_1) if data_1 else no_results
-        _, _, ave2, _, dp2 = \
+        _, _, med2, _, madp2, ave2, _, dp2 = \
                 utils_stats.ComputeStats(data_2) if data_2 else no_results
-        diff = utils_stats.GetRelativeDiff(ave1, ave2) \
-                if data_1 and data_2 else ''
-        if print_means:
-            return [key, diff, ave1, dp1, ave2, dp2]
+        if data_1 and data_2:
+            median_diff = utils_stats.GetRelativeDiff(med1, med2)
+            mean_diff = utils_stats.GetRelativeDiff(ave1, ave2)
         else:
-            return [key, diff, dp1, dp2]
+            median_diff = ''
+            mean_diff = ''
+        res = [key, median_diff, madp1, madp2, mean_diff, dp1, dp2]
+        if print_extended:
+            res += [med1, med2, ave1, ave2]
+        return res
     else:
         utils.Error('Unexpected data types %s and %s.' % \
                     (str(type(data_1)), str(type(data_2))))
@@ -96,4 +101,4 @@ if __name__ == "__main__":
     res_1 = utils.Filter(res_1, args.filter, args.filter_out)
     res_2 = utils.Filter(res_2, args.filter, args.filter_out)
 
-    PrintDiff(res_1, res_2, print_means=args.print_means)
+    PrintDiff(res_1, res_2, print_extended=args.print_extended)

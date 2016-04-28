@@ -65,8 +65,8 @@ def FilterSignificantChanges(in_1, in_2, diff_threshold, dev_threshold):
     out_2 = {}
     benchmarks = set(in_1.keys()).intersection(set(in_2.keys()))
     for bench in benchmarks:
-        m1, M1, ave1, d1, dp1 = utils_stats.ComputeStats(in_1[bench])
-        m2, M2, ave2, d2, dp2 = utils_stats.ComputeStats(in_2[bench])
+        m1, M1, _, _, _, ave1, d1, dp1 = utils_stats.ComputeStats(in_1[bench])
+        m2, M2, _, _, _, ave2, d2, dp2 = utils_stats.ComputeStats(in_2[bench])
         diff = utils_stats.GetRelativeDiff(ave1, ave2)
         if abs(diff) >= diff_threshold \
                 or dp1 >= dev_threshold \
@@ -85,8 +85,8 @@ def OrderResultsByDifference(in_1, in_2):
     improvements_2 = OrderedDict({})
     benchmarks = set(in_1.keys()).intersection(set(in_2.keys()))
     for bench in benchmarks:
-        m1, M1, ave1, d1, dp1 = utils_stats.ComputeStats(in_1[bench])
-        m2, M2, ave2, d2, dp2 = utils_stats.ComputeStats(in_2[bench])
+        m1, M1, _, _, _, ave1, d1, dp1 = utils_stats.ComputeStats(in_1[bench])
+        m2, M2, _, _, _, ave2, d2, dp2 = utils_stats.ComputeStats(in_2[bench])
         diff = utils_stats.GetRelativeDiff(ave1, ave2)
         if diff > 0:
             regressions[bench] = diff

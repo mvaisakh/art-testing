@@ -271,9 +271,10 @@ def PrintData(data, key=None, indentation=''):
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:
-            utils_print.PrintTable([''] + utils_stats.stats_headers,
-                                   entries,
-                                   line_start=indentation)
+            headers = ['', 'min', 'max',
+                       'median', 'mad', 'mad (%)',
+                       'mean', 'stdev', 'stdev (% of mean)']
+            utils_print.PrintTable(headers, entries, line_start=indentation)
             print('')
     elif isinstance(data, list):
         return [key] + list(utils_stats.ComputeStats(data))
