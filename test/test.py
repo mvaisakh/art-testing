@@ -142,6 +142,7 @@ def TestTopLevelWrapperScripts():
     rc |= TestCommand(["./run.py", "--output-json=/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./compare.py", "--filter", "benchmarks", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
+    rc |= TestCommand(["./compare.py", "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
     rc |= TestCommand(["./report.py", "/tmp/res1"], _cwd=utils.dir_root)
     rc |= TestCommand(["./report.py", "--filter", "Floor", "/tmp/res1"], _cwd=utils.dir_root)
     return rc

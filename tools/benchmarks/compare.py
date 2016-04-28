@@ -37,10 +37,6 @@ def BuildOptions():
     parser.add_argument('--order-by-diff', '-o',
                         action = 'store_true', default = False,
                         help = 'Show results with bigger differences first.')
-    parser.add_argument('--significant-changes', '-s',
-                        action = 'store_true', default = False,
-                        help = '''Only show significant changes between the two
-                        sets of results.''')
     # TODO: The default threshold values below have been calibrated for Nexus9.
     #        Make sure they are relevant for other platforms.
     parser.add_argument('--significant-diff-threshold', '--sdiff',

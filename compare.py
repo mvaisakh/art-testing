@@ -34,6 +34,19 @@ def BuildOptions():
                         help='Print medians and means for both data sets.')
     return parser.parse_args()
 
+# Filter out benchmarks that do not show any significant difference between the
+# two set of results.
+def FilterSignificantChanges(in_1, in_2, wilcoxon_p_threshold, ttest_p_threshold):
+    out_1 = {}
+    out_2 = {}
+    benchmarks = set(in_1.keys()).intersection(set(in_2.keys()))
+    for bench in benchmarks:
+        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(in_1[bench], in_2[bench])
+        if wilcoxon_p < wilcoxon_p_threshold and ttest_p < ttest_p_threshold:
+            out_1[bench] = in_1[bench]
+            out_2[bench] = in_2[bench]
+    return out_1, out_2
+
 def IsDictionaryOrNone(d):
     return isinstance(d, OrderedDict) or isinstance(d, dict) or d is None
 
@@ -42,7 +55,7 @@ def IsListOrNone(d):
 
 def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
     indentation_level = '    '
-    headers = ['',
+    headers = ['', 'Wilcoxon P', 'T-test P',
                'median diff (%)', 'mad1 (%)', 'mad2 (%)',
                'mean diff (%)', 'stdev1 (%)', 'stdev2 (%)']
     if print_extended:
@@ -75,13 +88,15 @@ def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
                 utils_stats.ComputeStats(data_1) if data_1 else no_results
         _, _, med2, _, madp2, ave2, _, dp2 = \
                 utils_stats.ComputeStats(data_2) if data_2 else no_results
+        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(data_1, data_2)
         if data_1 and data_2:
             median_diff = utils_stats.GetRelativeDiff(med1, med2)
             mean_diff = utils_stats.GetRelativeDiff(ave1, ave2)
         else:
             median_diff = ''
             mean_diff = ''
-        res = [key, median_diff, madp1, madp2, mean_diff, dp1, dp2]
+        res = [key, wilcoxon_p, ttest_p,
+               median_diff, madp1, madp2, mean_diff, dp1, dp2]
         if print_extended:
             res += [med1, med2, ave1, ave2]
         return res
@@ -100,5 +115,11 @@ if __name__ == "__main__":
 
     res_1 = utils.Filter(res_1, args.filter, args.filter_out)
     res_2 = utils.Filter(res_2, args.filter, args.filter_out)
+
+    if args.significant_changes:
+        res_1, res_2 = \
+            FilterSignificantChanges(res_1, res_2,
+                                     args.wilcoxon_p_threshold,
+                                     args.ttest_p_threshold)
 
     PrintDiff(res_1, res_2, print_extended=args.print_extended)

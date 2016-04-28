@@ -246,6 +246,24 @@ def AddFilterOptions(parser):
                         help='''Filter out the benchmarks matching this pattern
                         from the results. Filters failing are **not** retried
                         with added wildcards.''')
+    parser.add_argument('--significant-changes', '-s',
+                        action = 'store_true', default = False,
+                        help = '''Only show statistically significant changes
+                        between the two sets of results. The tests used are the
+                        Wilcoxon signed test and Student's t-test.''')
+    parser.add_argument('--wilcoxon-p-threshold', '--wilcp',
+                        type = float, default = 0.05,
+                        help = '''Minimum p-value allowed for the Wilcoxon test.
+                        All results with a higher p-value than specified are
+                        discarded. The default is 0.05, corresponding to 95%%
+                        certainty of rejecting the null hypothesis.''')
+    parser.add_argument('--ttest-p-threshold', '--ttp',
+                        type = float, default = 0.05,
+                        help = '''Minimum p-value allowed for the Student's
+                        t-test.  All results with a higher p-value than
+                        specified are discarded. The default is 0.05,
+                        corresponding to 95%% certainty of rejecting the null
+                        hypothesis.''')
 
 # Common arguments for `compare` scripts.
 def AddCommonCompareOptions(parser):

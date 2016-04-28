@@ -14,7 +14,18 @@
 
 import math
 import statistics
-import math
+import warnings
+
+try:
+    import scipy.stats
+except:
+    # TODO - utils defines a Warning() function, but utils already imports
+    # utils_stats, so importing utils here would cause a circular dependency.
+    # Either refactor utils and utils_stats so that there's no need for circular
+    # includes, or use warnings.warn in utils_stats.
+    warnings.warn("You don't have SciPy installed, t-test and Wilcoxon tests "
+                  "won't be reported. You will see `nan` in the appropriate "
+                  "fields.")
 
 from functools import reduce
 
@@ -61,6 +72,21 @@ def ComputeStats(nums):
         d = statistics.pstdev(nums, ave)
         dp = GetRatio(d, ave)
         return m, M, median, mad, madp, ave, d, dp
+
+def ComputeStatsTests(list1, list2):
+    wilcoxon_p = float('NaN')
+    ttest_p = float('NaN')
+    if len(list1) < 10 or len(list2) < 10:
+        warnings.warn("Number of samples too small to compute Wilcoxon test.")
+    try:
+        wilcoxon_p = scipy.stats.wilcoxon(list1, list2)[1]
+    except:
+        pass
+    try:
+        ttest_p = scipy.stats.ttest_rel(list1, list2)[1]
+    except:
+        pass
+    return wilcoxon_p, ttest_p
 
 def GetSuiteName(benchmark):
     return benchmark.split("/", 2)[1]
