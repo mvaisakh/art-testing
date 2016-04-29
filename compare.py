@@ -47,12 +47,6 @@ def FilterSignificantChanges(in_1, in_2, wilcoxon_p_threshold, ttest_p_threshold
             out_2[bench] = in_2[bench]
     return out_1, out_2
 
-def IsDictionaryOrNone(d):
-    return isinstance(d, OrderedDict) or isinstance(d, dict) or d is None
-
-def IsListOrNone(d):
-    return isinstance(d, list) or d is None
-
 def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
     indentation_level = '    '
     headers = ['', 'Wilcoxon P', 'T-test P',
@@ -65,7 +59,7 @@ def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
         # There is nothing to compare or print.
         return
 
-    if IsDictionaryOrNone(data_1) and IsDictionaryOrNone(data_2):
+    if utils.IsDictionaryOrNone(data_1) and utils.IsDictionaryOrNone(data_2):
         if key is not None:
             print(indentation + key)
         entries = []
@@ -82,7 +76,7 @@ def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
         if entries:
             utils_print.PrintTable(headers, entries, line_start=indentation)
             print('')
-    elif IsListOrNone(data_1) and IsListOrNone(data_2):
+    elif utils.IsListOrNone(data_1) and utils.IsListOrNone(data_2):
         no_results = ('', '', '', '', '')
         _, _, med1, _, madp1, ave1, _, dp1 = \
                 utils_stats.ComputeStats(data_1) if data_1 else no_results

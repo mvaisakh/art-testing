@@ -16,6 +16,8 @@ import math
 import statistics
 import warnings
 
+from collections import OrderedDict
+
 try:
     import scipy.stats
 except:
@@ -91,50 +93,42 @@ def ComputeStatsTests(list1, list2):
 def GetSuiteName(benchmark):
     return benchmark.split("/", 2)[1]
 
-def ComputeGeomean(dict_results):
-    if not dict_results: return
-    stats_dict = {}
+def ComputeGeomeanHelper(data, res, current_key, compute_leaf_geomean):
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
+        means = []
+        stdevs = []
+        for k in data:
+            sub_means, sub_stdevs = ComputeGeomeanHelper(data[k], res, k,
+                                                         compute_leaf_geomean)
+            means += sub_means
+            stdevs += sub_stdevs
+        geomean     = CalcGeomean(means)
+        geomean_err = CalcGeomeanError(means, stdevs, geomean)
+        res.append([current_key, geomean, geomean_err])
+        return means, stdevs
+    elif isinstance(data, list):
+        _, _, _, _, _, mean, stdev, _ = ComputeStats(data)
+        if compute_leaf_geomean:
+            geomean     = CalcGeomean(data)
+            geomean_err = CalcGeomeanError([mean], [stdev], geomean)
+            res.append([current_key, geomean, geomean_err])
+        return [mean], [stdev]
+    else:
+        # TODO: We want to use `utils`, but there is a circular dependency.
+        print("ERROR: Unexpected data type: %s." % type(data))
+        sys.exit(1)
 
-    for benchmark in dict_results:
-        suite_name = GetSuiteName(benchmark)
-        if (suite_name not in stats_dict):
-             stats_dict[suite_name] = {}
-        stats_dict[suite_name][benchmark] = dict_results[benchmark]
+def ComputeGeomean(data, key='OVERALL', compute_leaf_geomean=False):
+    res = []
+    ComputeGeomeanHelper(data, res, key,
+                         compute_leaf_geomean=compute_leaf_geomean)
+    return res
 
-    # Overall and per suite geomean calculations.
-    mean_list  = []
-    stdev_list = []
-    results = []
-
-    for suite_name in stats_dict:
-        suite_mean_list = []
-        suite_stdev_list = []
-
-        for benchmark in stats_dict[suite_name]:
-            m, M, median, mad, madp, mean, stdev, dp = ComputeStats(stats_dict[suite_name][benchmark])
-            suite_mean_list.append(mean)
-            suite_stdev_list.append(stdev)
-            mean_list.append(mean)
-            stdev_list.append(stdev)
-
-        suite_geomean     = CalcGeomean(suite_mean_list)
-        suite_geomean_err = CalcGeomeanError(suite_mean_list, suite_stdev_list, suite_geomean)
-        results.append([suite_name, suite_geomean, suite_geomean_err,
-                        GetRatio(suite_geomean_err, suite_geomean)])
-
-    geomean     = CalcGeomean(mean_list)
-    geomean_err = CalcGeomeanError(mean_list, stdev_list, geomean)
-
-    results.append(['OVERALL', geomean, geomean_err,
-                    GetRatio(geomean_err, geomean)])
-    return results
-
-def ComputeAndPrintGeomean(dict_results):
-    if not dict_results: return
-    results = ComputeGeomean(dict_results)
-    print("GEOMEANS:")
-    headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
-    utils_print.PrintTable(headers, results)
+def ComputeAndPrintGeomeanWithRelativeDiff(data, key='OVERALL', compute_leaf_geomean=False):
+    res = ComputeGeomean(data, key, compute_leaf_geomean)
+    # Make the error relative.
+    res = list(map(lambda x: [x[0], x[1], GetRatio(x[2], x[1])], res))
+    utils_print.PrintTable(['', 'geomean', 'geomean error (%)'], res)
 
 # Print a table showing the difference between two runs of benchmarks.
 def PrintDiff(res_1, res_2, title = ''):

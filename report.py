@@ -20,6 +20,7 @@ import json
 from collections import OrderedDict
 
 from tools import utils
+from tools import utils_stats
 
 def BuildOptions():
     parser = argparse.ArgumentParser(
@@ -33,10 +34,11 @@ def BuildOptions():
 def Report(data):
     data = utils.Filter(data, args.filter, args.filter_out)
     utils.PrintData(data)
+    unflattened_data = utils.Unflatten(data)
+    utils_stats.ComputeAndPrintGeomeanWithRelativeDiff(unflattened_data)
 
 if __name__ == "__main__":
     args = BuildOptions()
     with open(args.result_file, 'r') as result_file:
         data = json.load(result_file, object_pairs_hook=OrderedDict)
-
     Report(data)

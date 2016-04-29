@@ -274,7 +274,8 @@ def GetBenchmarkResults(args):
 def GetAndPrintBenchmarkResults(args):
     results = GetBenchmarkResults(args)
     utils.PrintData(results)
-    utils_stats.ComputeAndPrintGeomean(results)
+    unflattened_results = utils.Unflatten(results)
+    utils_stats.ComputeAndPrintGeomeanWithRelativeDiff(unflattened_results)
     print('')
     return results
 

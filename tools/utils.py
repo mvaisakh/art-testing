@@ -92,6 +92,15 @@ def MergeLists(x, y):
     # TODO: Use topological sorting or a more efficient algorithm.
     return x + [e for e in y if e not in x]
 
+def IsDictionary(data):
+    return isinstance(data, dict) or isinstance(data, OrderedDict)
+
+def IsDictionaryOrNone(d):
+    return IsDictionary(d) or d is None
+
+def IsListOrNone(d):
+    return isinstance(d, list) or d is None
+
 def PrettySIFactor(value):
     si_factor = float('inf')
     si_prefix = ''
@@ -369,4 +378,29 @@ def Filter(data, filters, filters_out):
     if filters_out:
         res = FilterHelper(res, filters_out, negative_filter=True)
 
+    return res
+
+def UnflattenHelper(res, key_list, value):
+    while key_list:
+        key = key_list.pop(0)
+        if not key_list:
+            # We currently do not handle conflicts.
+            assert(not key in res)
+            res[key] = value
+            break
+        elif key not in res:
+            res[key] = {}
+        res = res[key]
+
+# Unflatten a data structure by splitting the keys according to the `separator`
+# character.
+def Unflatten(data, separator='/'):
+    if isinstance(data, list):
+        return data
+    elif not isinstance(data, dict) and not isinstance(data, OrderedDict):
+        Error("Unexpected data type: %s." % type(data))
+
+    res = OrderedDict()
+    for k in data:
+        UnflattenHelper(res, k.split(separator), Unflatten(data[k], separator))
     return res
