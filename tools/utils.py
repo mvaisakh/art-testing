@@ -237,11 +237,7 @@ def AddOutputFormatOptions(parser, formats=default_output_formats):
                           metavar='FILE',
                           help=format_help_message.format(type=f))
 
-
-# Common arguments for `compare` scripts.
-def AddCommonCompareOptions(parser):
-    parser.add_argument('res_1', metavar = 'res_1.pkl')
-    parser.add_argument('res_2', metavar = 'res_2.pkl')
+def AddFilterOptions(parser):
     parser.add_argument('-f', '--filter', action = 'append',
                         help='''Quoted (benchmark name) filter pattern. If no
                         filters match, filtering will be attempted with all the
@@ -250,6 +246,12 @@ def AddCommonCompareOptions(parser):
                         help='''Filter out the benchmarks matching this pattern
                         from the results. Filters failing are **not** retried
                         with added wildcards.''')
+
+# Common arguments for `compare` scripts.
+def AddCommonCompareOptions(parser):
+    parser.add_argument('res_1', metavar = 'res_1.pkl')
+    parser.add_argument('res_2', metavar = 'res_2.pkl')
+    AddFilterOptions(parser)
 
 def CheckDependencies(dependencies):
     for d in dependencies:
