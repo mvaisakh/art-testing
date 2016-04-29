@@ -82,7 +82,7 @@ def GetStats(apk,
         art = "%s/boot.%s.art" % (target_copy_path, isa)
 
         # Check if dump file exists.
-        dump_oat_file_location = "/data/local/boot.oat.%s.txt" % (isa)
+        dump_oat_file_location = "/data/local/tmp/boot.oat.%s.txt" % (isa)
         dump_exists_command = "if [ -f %s ] ; then echo found; fi; exit 0" \
                               % (dump_oat_file_location)
         # Since we are interested in whether the dump file exists or not, we can't simply execute
@@ -199,11 +199,20 @@ def GetCompilationStatisticsResults(args):
     work_dir = tempfile.mkdtemp()
     apk_list = []
 
-    boot_oat_files = []
+    # Instruction set architecture for
+    isa = utils_adb.GetISA(args.target, args.mode)
+    boot_oat_file = ''
+    # Check to see if multiple boot.oat "apks" have been passed.
+    boot_oat_f = False
     for pathname in args.pathnames:
         if os.path.isfile(pathname):
             apk_list.append(pathname)
         elif pathname == "boot.oat":
+            if not boot_oat_f:
+                boot_oat_f = True
+            else:
+                continue
+            # Get isa list to check that environment is in a good state.
             isa_list = utils_adb.GetISAList(args.target)
             # Find .oat file on device (for each arch).
             find_command = 'find / -type d \( -name proc -o -name sys \) -prune -o ' \
@@ -223,26 +232,21 @@ def GetCompilationStatisticsResults(args):
             isa_list.sort()
             boot_oat_files.sort()
 
-            for isa_l in isa_list:
-                apk_list.append("boot.oat " + isa_l)
+            # Remove leading dot and pass to function.
+            oat_file_ind = isa_list.index(isa)
+            boot_oat_file = boot_oat_files[oat_file_ind][1:]
+            apk_list.append("boot.oat " + isa)
         else:
             dentries = [dentry for dentry in glob.glob(os.path.join(pathname, '*.apk'))
                         if os.path.isfile(dentry)]
             apk_list[len(apk_list):] = dentries
-    # Oat file index.
-    oat_file_ind = 0
 
     for apk in sorted(apk_list):
         if apk[:8] == "boot.oat":
-            isa = apk[9:]
-            # Remove leading dot and pass to function.
-            boot_oat_files[oat_file_ind] = boot_oat_files[oat_file_ind][1:]
             res[apk] = GetStats(apk, args.target, isa,
                                 args.compiler_mode, args.target_copy_path,
-                                args.iterations, work_dir, True, boot_oat_files[oat_file_ind])
-            oat_file_ind += 1
+                                args.iterations, work_dir, True, boot_oat_file)
         else:
-            isa = utils_adb.GetISA(args.target, args.mode)
             utils_adb.push(apk, args.target_copy_path, args.target)
             apk_name = os.path.basename(apk)
             res[apk_name] = GetStats(apk_name, args.target, isa,
