@@ -28,10 +28,30 @@ def BuildOptions():
         description = "Compare two result sets.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    utils.AddCommonCompareOptions(parser)
+    parser.add_argument('res_1', metavar = 'res_1.pkl')
+    parser.add_argument('res_2', metavar = 'res_2.pkl')
+    utils.AddFilterOptions(parser)
     parser.add_argument('--print-extended',
                         action='store_true', default=False,
                         help='Print medians and means for both data sets.')
+    parser.add_argument('--significant-changes', '-s',
+                        action = 'store_true', default = False,
+                        help = '''Only show statistically significant changes
+                        between the two sets of results. The tests used are the
+                        Wilcoxon signed test and Student's t-test.''')
+    parser.add_argument('--wilcoxon-p-threshold', '--wilcp',
+                        type = float, default = 0.05,
+                        help = '''Minimum p-value allowed for the Wilcoxon test.
+                        All results with a higher p-value than specified are
+                        discarded. The default is 0.05, corresponding to 95%%
+                        certainty of rejecting the null hypothesis.''')
+    parser.add_argument('--ttest-p-threshold', '--ttp',
+                        type = float, default = 0.05,
+                        help = '''Minimum p-value allowed for the Student's
+                        t-test.  All results with a higher p-value than
+                        specified are discarded. The default is 0.05,
+                        corresponding to 95%% certainty of rejecting the null
+                        hypothesis.''')
     return parser.parse_args()
 
 # Filter out benchmarks that do not show any significant difference between the
