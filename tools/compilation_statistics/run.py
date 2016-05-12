@@ -74,10 +74,8 @@ def GetStats(apk,
              target_copy_path,
              iterations,
              work_dir,
-             boot_oat_comp,
              boot_oat_file):
-    apk_path = os.path.join(target_copy_path, apk)
-    if boot_oat_comp:
+    if boot_oat_file:
         oat = "%s/boot.%s.oat" % (target_copy_path, isa)
         art = "%s/boot.%s.art" % (target_copy_path, isa)
 
@@ -128,6 +126,7 @@ def GetStats(apk,
         command = re.sub("\n$", "", command)
         command = '(echo $BASHPID && exec ' + command + ' ) | head -n1'
     else:
+        apk_path = os.path.join(target_copy_path, apk)
         oat = apk_path + '.oat'
         dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
         # Only the output of the first command is necessary; execute in a subshell
@@ -178,7 +177,7 @@ def GetStats(apk,
         utils.Warning('Memory usage values have been rounded down, so they might be '
                       'inaccurate.')
 
-    if boot_oat_comp:
+    if boot_oat_file:
         local_oat = os.path.join(utils.dir_root, work_dir, "boot.%s.oat" % isa)
     else:
         local_oat = os.path.join(utils.dir_root, work_dir, apk + '.oat')
@@ -195,63 +194,60 @@ def GetStats(apk,
 
 def GetCompilationStatisticsResults(args):
     utils.CheckDependencies(['adb', 'size'])
+    isa = utils_adb.GetISA(args.target, args.mode)
     res = OrderedDict()
     work_dir = tempfile.mkdtemp()
-    apk_list = []
+    apk_list = set()
+    boot_oat_file = None
 
-    # Instruction set architecture for
-    isa = utils_adb.GetISA(args.target, args.mode)
-    boot_oat_file = ''
-    # Check to see if multiple boot.oat "apks" have been passed.
-    boot_oat_f = False
     for pathname in args.pathnames:
-        if os.path.isfile(pathname):
-            apk_list.append(pathname)
-        elif pathname == "boot.oat":
-            if not boot_oat_f:
-                boot_oat_f = True
-            else:
+        if pathname == "boot.oat":
+            # Check if multiple boot.oat parameters have been passed.
+            if boot_oat_file:
                 continue
-            # Get isa list to check that environment is in a good state.
+
+            # Get ISA list to check that the environment is in a good state.
             isa_list = utils_adb.GetISAList(args.target)
-            # Find .oat file on device (for each arch).
+            # Find oat file on device.
             find_command = 'find / -type d \( -name proc -o -name sys \) -prune -o ' \
                            '-name "*boot.oat" -print 2>/dev/null'
             rc, out = utils_adb.shell(find_command, args.target)
             boot_oat_files = out.split('\n')[:-1]
 
             if len(boot_oat_files) != len(isa_list):
-                utils.Error("Number of architectures different from number of boot.oat files." \
-                            " The list of boot.oat files is here:\n\n %s\n\nMake sure there are" \
-                            " no stale boot.oat files in /data/local or some other directory." \
-                            " Another possibility is that you didn't build your device with" \
-                            " WITH_DEXPREOPT=false. Do a lunch and then WITH_DEX_PREOPT=false" \
-                            " make -j$(nproc) ." % boot_oat_files)
+                utils.Error("Number of architectures different from number of boot.oat files. " \
+                            "The list of boot.oat files is here:\n\n %s\n\nMake sure there are " \
+                            "no stale boot.oat files in /data/local/tmp or some other directory. " \
+                            "Another possibility is that you didn't build Android with " \
+                            "`WITH_DEXPREOPT=false`. Do a `lunch` and then `WITH_DEX_PREOPT=false " \
+                            "make -j$(nproc)`." % boot_oat_files)
             # Order both lists. Now, as long as both oat files have the same parent dir, order
             # should match.
             isa_list.sort()
             boot_oat_files.sort()
-
-            # Remove leading dot and pass to function.
-            oat_file_ind = isa_list.index(isa)
-            boot_oat_file = boot_oat_files[oat_file_ind][1:]
-            apk_list.append("boot.oat " + isa)
+            # Remove leading dot.
+            boot_oat_file = boot_oat_files[isa_list.index(isa)][1:]
+            apk_list.add("boot.oat " + isa)
+        elif os.path.isfile(pathname):
+            apk_list.add(pathname)
         else:
             dentries = [dentry for dentry in glob.glob(os.path.join(pathname, '*.apk'))
                         if os.path.isfile(dentry)]
-            apk_list[len(apk_list):] = dentries
+
+            for d in dentries:
+                apk_list.add(d)
 
     for apk in sorted(apk_list):
         if apk[:8] == "boot.oat":
             res[apk] = GetStats(apk, args.target, isa,
                                 args.compiler_mode, args.target_copy_path,
-                                args.iterations, work_dir, True, boot_oat_file)
+                                args.iterations, work_dir, boot_oat_file)
         else:
             utils_adb.push(apk, args.target_copy_path, args.target)
             apk_name = os.path.basename(apk)
             res[apk_name] = GetStats(apk_name, args.target, isa,
                                      args.compiler_mode, args.target_copy_path,
-                                     args.iterations, work_dir, False, None)
+                                     args.iterations, work_dir, None)
 
     shutil.rmtree(work_dir)
     return res
