@@ -404,3 +404,17 @@ def Unflatten(data, separator='/'):
     for k in data:
         UnflattenHelper(res, k.split(separator), Unflatten(data[k], separator))
     return res
+
+
+def HaveSameKeys(data_1, data_2):
+    if IsDictionary(data_1) and IsDictionary(data_2):
+        diff = set(data_1.keys()) ^ set(data_2.keys())
+        if diff:
+            return False
+        for k in data_1:
+            if not HaveSameKeys(data_1[k], data_2[k]):
+                return False
+        return True
+    elif type(data_1) == type(data_2):
+        return True
+    return False

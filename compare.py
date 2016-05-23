@@ -117,3 +117,9 @@ if __name__ == "__main__":
                                      args.ttest_p_threshold)
 
     PrintDiff(res_1, res_2, print_extended=args.print_extended)
+    if utils.HaveSameKeys(res_1, res_2):
+        utils_stats.ComputeAndPrintRelationGeomean(utils.Unflatten(res_1),
+                                                   utils.Unflatten(res_2))
+    else:
+        utils.Info("Not comparing the geomeans because the two result sets "
+                   "have different keys.")

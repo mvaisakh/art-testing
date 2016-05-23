@@ -90,9 +90,6 @@ def ComputeStatsTests(list1, list2):
         pass
     return wilcoxon_p, ttest_p
 
-def GetSuiteName(benchmark):
-    return benchmark.split("/", 2)[1]
-
 def ComputeGeomeanHelper(data, res, current_key, compute_leaf_geomean):
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         means = []
@@ -130,76 +127,22 @@ def ComputeAndPrintGeomeanWithRelativeDiff(data, key='OVERALL', compute_leaf_geo
     res = list(map(lambda x: [x[0], x[1], GetRatio(x[2], x[1])], res))
     utils_print.PrintTable(['', 'geomean', 'geomean error (%)'], res)
 
-# Print a table showing the difference between two runs of benchmarks.
-def PrintDiff(res_1, res_2, title = ''):
-    # Only print results for benchmarks present in both sets of results.
-    # Pay attention to maintain the order of the keys.
-    benchmarks = [b for b in res_1.keys() if b in res_2.keys()]
-    if not benchmarks: return
-    headers = [title, 'mean1', 'stdev1 (% of mean1)', 'mean2',
-               'stdev2 (% of mean2)', '(mean2 - mean1) / mean1 * 100']
-    results = []
-    stats_dict = {}
-    # collecting data
-    for bench in benchmarks:
-        suite_name = GetSuiteName(bench)
+def ComputeAndPrintRelationGeomean(data_1, data_2):
+    if not data_1 or not data_2:
+        return
+    geomeans_1 = ComputeGeomean(data_1)
+    geomeans_2 = ComputeGeomean(data_2)
+    assert(len(geomeans_1) == len(geomeans_2))
+    res = []
+    for i in range(len(geomeans_1)):
+        g1 = geomeans_1[i]
+        g2 = geomeans_2[i]
+        assert(g1[0] == g2[0])
+        res.append([g1[0],                                          # Name.
+                    GetRatio(g1[1], g2[1]),                         # Diff.
+                    GetRatio(g1[2], g1[1]), GetRatio(g2[2], g2[1]), # Errors.
+                    g1[1], g2[1]])                                  # Values.
 
-        if (suite_name not in stats_dict):
-             stats_dict[suite_name] = {}
-
-        stats_dict[suite_name][bench] = []
-        data1 = m1, M1, median1, mad1, madp1, ave1, d1, dp1 = ComputeStats(res_1[bench])
-        data2 = m2, M2, median2, mad2, madp2, ave2, d2, dp2 = ComputeStats(res_2[bench])
-
-        stats_dict[suite_name][bench].append(data1)
-        stats_dict[suite_name][bench].append(data2)
-        diff = GetRelativeDiff(ave1, ave2)
-        results.append([bench, ave1, dp1, ave2, dp2, diff])
-
-    utils_print.PrintTable(headers, results)
-
-    # overall and per suite geomeans calculations
-    print("\nGEOMEANS:")
-    mean_list1  = []
-    mean_list2  = []
-    stdev_list1 = []
-    stdev_list2 = []
-    headers = ['suite', 'geomean', 'error', 'error (% of geomean)']
-    results = []
-
-    for suite_name in stats_dict:
-        suite_mean_list1  = []
-        suite_mean_list2  = []
-        suite_stdev_list1 = []
-        suite_stdev_list2 = []
-
-        for benchmark in stats_dict[suite_name]:
-            bench_mean1  = stats_dict[suite_name][benchmark][0][5]
-            bench_mean2  = stats_dict[suite_name][benchmark][1][5]
-            bench_stdev1 = stats_dict[suite_name][benchmark][0][6]
-            bench_stdev2 = stats_dict[suite_name][benchmark][1][6]
-
-            suite_mean_list1.append(bench_mean1)
-            suite_mean_list2.append(bench_mean2)
-            suite_stdev_list1.append(bench_stdev1)
-            suite_stdev_list2.append(bench_stdev2)
-
-            mean_list1.append(bench_mean1)
-            mean_list2.append(bench_mean2)
-
-            stdev_list1.append(bench_stdev1)
-            stdev_list2.append(bench_stdev2)
-
-        suite_geomean = CalcGeomean(suite_mean_list2) / CalcGeomean(suite_mean_list1)
-        suite_geomean_err = CalcGeomeanRelationError(suite_mean_list1, suite_mean_list2,
-                suite_stdev_list1, suite_stdev_list2, suite_geomean)
-        results.append([suite_name, suite_geomean, suite_geomean_err,
-                GetRatio(suite_geomean_err, suite_geomean)])
-
-    geomean     = CalcGeomean(mean_list2) / CalcGeomean(mean_list1)
-    geomean_err = CalcGeomeanRelationError(mean_list1, mean_list2,
-            stdev_list1, stdev_list2, geomean)
-
-    results.append(['OVERALL', geomean, geomean_err,
-                    GetRatio(geomean_err, geomean)])
-    utils_print.PrintTable(headers, results)
+    utils_print.PrintTable(['', 'geomean diff (%)',
+                            'geomean error 1 (%)', 'geomean error 2 (%)',
+                            'geomean 1', 'geomean 2',], res)
