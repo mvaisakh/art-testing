@@ -77,7 +77,7 @@ def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
             utils_print.PrintTable(headers, entries, line_start=indentation)
             print('')
     elif utils.IsListOrNone(data_1) and utils.IsListOrNone(data_2):
-        no_results = ('', '', '', '', '')
+        no_results = ('', '', '', '', '', '', '', '')
         _, _, med1, _, madp1, ave1, _, dp1 = \
                 utils_stats.ComputeStats(data_1) if data_1 else no_results
         _, _, med2, _, madp2, ave2, _, dp2 = \

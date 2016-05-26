@@ -78,7 +78,7 @@ def ComputeStats(nums):
 def ComputeStatsTests(list1, list2):
     wilcoxon_p = float('NaN')
     ttest_p = float('NaN')
-    if len(list1) < 10 or len(list2) < 10:
+    if not list1 or not list2 or len(list1) < 10 or len(list2) < 10:
         warnings.warn("Number of samples too small to compute Wilcoxon test.")
     try:
         wilcoxon_p = scipy.stats.wilcoxon(list1, list2)[1]
