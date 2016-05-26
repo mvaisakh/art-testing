@@ -107,21 +107,6 @@ def TestBenchmarksOnTarget(target):
     return TestBenchmarksCommon(target)
 
 
-def TestBenchmarksCompareScript():
-    rc = 0
-    run_py = os.path.join(".", "tools", "benchmarks", "run.py")
-    compare_py = os.path.join(".", "tools", "benchmarks", "compare.py")
-    benchmarks_filter = ["--filter", "benchmarks/algorithm/*"]
-    rc |= TestCommand([run_py, "--output-json=/tmp/res1"] + benchmarks_filter, _cwd=utils.dir_root)
-    rc |= TestCommand([run_py, "--output-json=/tmp/res2"] + benchmarks_filter, _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "--significant-changes", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "--order-by-diff", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "--filter", "benchmarks/algorithm/Crypto*", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    rc |= TestCommand([compare_py, "--filter-out", "benchmarks/algorithm/Crypto*", "/tmp/res1", "/tmp/res2"], _cwd=utils.dir_root)
-    return rc
-
-
 def TestBenchmarkPackages():
     benchmark_files = []
     # TODO: Automatically test that each benchmark has the correct package.
@@ -180,7 +165,6 @@ if __name__ == "__main__":
     rc = 0
     if not args.no_host_tests:
         rc |= TestBenchmarksOnHost()
-        rc |= TestBenchmarksCompareScript()
         rc |= TestBenchmarkPackages()
         rc |= TestLint(args.jobs)
         rc |= TestTopLevelWrapperScripts()

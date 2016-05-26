@@ -119,13 +119,9 @@ if __name__ == "__main__":
             FilterSignificantChanges(res_1, res_2,
                                      args.significant_diff_threshold,
                                      args.significant_deviation_threshold)
-    if args.order_by_diff:
-        regressions, improvements = OrderResultsByDifference(res_1, res_2)
-        utils_stats.PrintDiff(regressions[0], regressions[1], "REGRESSIONS")
-        print("")
-        utils_stats.PrintDiff(improvements[0], improvements[1], "IMPROVEMENTS")
-    else:
-        utils_stats.PrintDiff(res_1, res_2)
+
+    utils.Error('This script is deprecated. Use the top-level `compare.py` '
+                'script instead.')
 
     file_1.close()
     file_2.close()
