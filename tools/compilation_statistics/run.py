@@ -90,7 +90,7 @@ def GetStats(apk,
         # to adb not executing properly.
         rc, out = utils_adb.shell(dump_exists_command, target)
         # The command prints an extra new line as well.
-        if out[:-1] == "found":
+        if out.strip() == "found":
             print("Dump file exists, move on.")
         else:
             # Dump oat file the first time (for each arch).
@@ -104,7 +104,7 @@ def GetStats(apk,
         rc, out = utils_adb.shell(dex2oat_host_command, target)
         if rc:
             utils.Error("Dump file doesn't contain dex2oat-host.")
-        if out == 'dex2oat-host = x86-64\n':
+        if out.strip() == 'dex2oat-host = x86-64':
             utils.Error("boot.oat was built on a x84-64 machine, which is most likely the" \
                         " host: %s \nWe want it to be built on the target instead. Have you" \
                         " configured the device with WITH_DEXPREOPT=false ?" % out)
@@ -114,7 +114,7 @@ def GetStats(apk,
         rc, out = utils_adb.shell(dex2oat_cmdline_command, target)
         if rc:
             utils.Error("Dump file doesn't contain dex2oat-cmldine.")
-        command = out
+        command = out.strip()
         # Replace destination: --oat-file, fix beginning of command.
         command = re.sub("--oat-file=(.+?) --", "--oat-file=%s --" % oat, command)
         command = re.sub("--image=(.+?) --", "--image=%s --" % art, command)
@@ -208,6 +208,8 @@ def GetCompilationStatisticsResults(args):
 
             # Get ISA list to check that the environment is in a good state.
             isa_list = utils_adb.GetISAList(args.target)
+            # The oat cache is accessible only to root.
+            utils_adb.root(args.target)
             # Find oat file on device.
             find_command = 'find / -type d \( -name proc -o -name sys \) -prune -o ' \
                            '-name "*boot.oat" -print 2>/dev/null'
@@ -219,14 +221,14 @@ def GetCompilationStatisticsResults(args):
                             "The list of boot.oat files is here:\n\n %s\n\nMake sure there are " \
                             "no stale boot.oat files in /data/local/tmp or some other directory. " \
                             "Another possibility is that you didn't build Android with " \
-                            "`WITH_DEXPREOPT=false`. Do a `lunch` and then `WITH_DEX_PREOPT=false " \
+                            "`WITH_DEXPREOPT=false`. Do a `lunch` and then `WITH_DEXPREOPT=false " \
                             "make -j$(nproc)`." % boot_oat_files)
             # Order both lists. Now, as long as both oat files have the same parent dir, order
             # should match.
             isa_list.sort()
             boot_oat_files.sort()
-            # Remove leading dot.
-            boot_oat_file = boot_oat_files[isa_list.index(isa)][1:]
+            # Remove leading dot and trailing whitespace.
+            boot_oat_file = boot_oat_files[isa_list.index(isa)][1:].strip()
             apk_list.add("boot.oat " + isa)
         elif os.path.isfile(pathname):
             apk_list.add(pathname)

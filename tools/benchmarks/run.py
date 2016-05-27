@@ -161,7 +161,7 @@ def RunBench(apk, classname,
                                           classname,
                                           target)
             rc += local_rc
-            outerr = outerr.rstrip('\n')
+            outerr = outerr.rstrip('\r\n')
             utils_print.VerbosePrint(outerr)
         except Exception as e:
             utils.Warning(str(e) + "\n  \-> FAILED, continuing anyway\n", e)

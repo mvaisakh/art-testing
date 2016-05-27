@@ -40,6 +40,10 @@ def push(f,
         exit_on_error=exit_on_error)
 
 
+def root(target=utils.adb_default_target_string, exit_on_error=True):
+    return utils.Command(['adb'] + GetTargetArgs(target) + ['root'], exit_on_error=exit_on_error)
+
+
 def shell(command,
           target=utils.adb_default_target_string,
           exit_on_error=True):
