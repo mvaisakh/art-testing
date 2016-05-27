@@ -90,14 +90,10 @@ def GetStats(apk,
         # to adb not executing properly.
         rc, out = utils_adb.shell(dump_exists_command, target)
         # The command prints an extra new line as well.
-        if out.strip() == "found":
-            print("Dump file exists, move on.")
-        else:
-            # Dump oat file the first time (for each arch).
-            # Remove leading dot from filename.
-            dump_command = "oatdump --oat-file=%s --output=%s" % (boot_oat_file, \
-                                                                  dump_oat_file_location)
-            print("Dumping oat file...")
+        if out.strip() != "found":
+            # Dump the oat file the first time, keeping only the parts we are interested in.
+            dump_command = 'oatdump --oat-file=%s | grep "dex2oat-" > %s' % (boot_oat_file, \
+                                                                           dump_oat_file_location)
             utils_adb.shell(dump_command, target)
         # Read dex2oat-host from dump file.
         dex2oat_host_command = 'grep "dex2oat-host" %s' % (dump_oat_file_location)
