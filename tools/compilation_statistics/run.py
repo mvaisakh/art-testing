@@ -123,7 +123,7 @@ def GetStats(apk,
         command = '(echo $BASHPID && exec ' + command + ' ) | head -n1'
     else:
         apk_path = os.path.join(target_copy_path, apk)
-        oat = apk_path + '.oat'
+        oat = apk_path + '.' + isa + '.oat'
         dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
         # Only the output of the first command is necessary; execute in a subshell
         # to guarantee PID value; only one thread is used for compilation to reduce
