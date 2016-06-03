@@ -23,12 +23,32 @@
  *
  */
 
+/*
+ * This benchmark has been modified from original fastaredux.java.
+ * Original benchmark implements a Random class which is a random double generator,
+ * and is heavily used by RandomFasta in its inner calculation.
+ *
+ * This behavior can be very unfriendly to ART AOT because:
+ * Random is a user defined class. Currently in AOT mode,
+ * ART cannot assume this class is always loaded,
+ * thus ART AOT compiler has to generate LoadClass check before invoking Random.next() method.
+ * Since Random.next() is called inside a loop of a hot function addLine(),
+ * the LoadClass check overhead causes this benchmark runs twice slower
+ * in AOT mode compared to JIT mode.
+ *
+ * In interpreter + JIT mode, JIT compiler can assume that a user defined class is always loaded
+ * during previous interpretation stage, thus it avoid generating LoadClass check.
+ *
+ * In this revised benchmark, random double generation is implemented as part of RandomFasta class,
+ * thus LoadClass check is avoided in ART AOT, and the performance becomes as good as ART JIT.
+ */
+
 package benchmarks.benchmarksgame;
 
 import java.io.*;
 
 // CHECKSTYLE.OFF: .*
-public class fastaredux {
+public class fastaredux_revised {
 
     static final int LINE_LENGTH = 60;
     static final int OUT_BUFFER_SIZE = 256*1024;
@@ -78,19 +98,6 @@ public class fastaredux {
         a[a.length - 1].p = LOOKUP_SCALE;
     }
 
-    static final class Random {
-    
-        static final int IM = 139968;
-        static final int IA = 3877;
-        static final int IC = 29573;
-        static final double SCALE = LOOKUP_SCALE / IM;
-        static int last = 42;
-
-        static double next() {
-            return SCALE * (last = (last * IA + IC) % IM);
-        }
-    }
-
     static final class Out {
     
         static byte buf[] = new byte[OUT_BUFFER_SIZE];
@@ -111,6 +118,16 @@ public class fastaredux {
     static final class RandomFasta {
 
         static final Freq[] lookup=new Freq[LOOKUP_SIZE];
+    
+        static final int IM = 139968;
+        static final int IA = 3877;
+        static final int IC = 29573;
+        static final double SCALE = LOOKUP_SCALE / IM;
+        static int last = 42;
+
+        static double nextRandDouble() {
+            return SCALE * (last = (last * IA + IC) % IM);
+        }
         
         static void makeLookup(Freq[] a) {
             for (int i = 0, j = 0; i < LOOKUP_SIZE; i++) {
@@ -123,7 +140,7 @@ public class fastaredux {
             Out.checkFlush();
             int lct=Out.ct;
             while(lct<Out.ct+bytes){
-                double r = Random.next();  // Problematic for AOT! See fastaredux_revised.java.
+                double r = nextRandDouble();  // Avoid introducing LoadClass in ART AOT.
                 int ai = (int) r; while (lookup[ai].p < r) ai++;
                 Out.buf[lct++] = lookup[ai].c;
             }
