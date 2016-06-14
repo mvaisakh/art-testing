@@ -139,7 +139,7 @@ def ComputeAndPrintRelationGeomean(data_1, data_2):
         g2 = geomeans_2[i]
         assert(g1[0] == g2[0])
         res.append([g1[0],                                          # Name.
-                    GetRatio(g1[1], g2[1]),                         # Diff.
+                    GetRelativeDiff(g1[1], g2[1]),                  # Diff.
                     GetRatio(g1[2], g1[1]), GetRatio(g2[2], g2[1]), # Errors.
                     g1[1], g2[1]])                                  # Values.
 
