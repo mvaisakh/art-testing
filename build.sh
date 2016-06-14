@@ -81,11 +81,12 @@ Single benchmark mode can be used if the last argument is a path to a java file.
 
 Options:
     -h           Show this help message.
-    -t           Build for the target. Requires building from an Android environment.
+    -t           Build for the target. Requires building from an Android
+                 environment.
     -v           Verbose. Print the commands executed.
     -W           Do not treat build warnings as errors.
-    -b BENCHMARK Include only one benchmark file, specified by its absolute path.
-                 Example: -b /data/art-testing/benchmarks/micro/ShifterOperand.java.
+    -b BENCHMARK Include only one benchmark file, specified by its path.
+                 Example: -b benchmarks/micro/ShifterOperand.java.
 "
 
 while getopts ':htlvWb:' option; do
@@ -126,7 +127,7 @@ if [[ $single_bench_mode == "ON" ]]; then
   if [[ ! (-f $single_bench) || ("${single_bench##*.}" != "java") ]]; then
       error "Provide a proper benchmark for single benchmark mode."
   fi
-  JAVA_BENCHMARK_FILES=$single_bench
+  JAVA_BENCHMARK_FILES=$(realpath $single_bench)
 else
   echo "$0: Whole set mode"
   JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
