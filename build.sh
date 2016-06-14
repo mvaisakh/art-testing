@@ -30,7 +30,7 @@ TARGET_BUILD=false
 VERBOSE=false
 # Set to false to not treat build warnings as errors.
 WERROR=true
-
+JAVA_BENCHMARK_FILES=
 
 
 
@@ -72,12 +72,20 @@ verbose_safe() {
 
 # Arguments handling
 
-usage="Usage: $(basename "$0")
+usage="Usage: $(basename "$0") [FILES]
 Build Java benchmark class, APK, and jar files.
 The script will automatically attempt to build the APK if the \`dx\` command is
 available in the PATH.
 Output files are produced in $DIR_BUILD.
-Single benchmark mode can be used if the last argument is a path to a java file.
+By default (when no files are provided on the command-line), all benchmarks are
+included.
+
+    build.sh benchmarks/math/AccessNBody.java benchmarks/math/MathCordic.java
+
+Otherwise only the benchmark files specified on the command-line are
+compiled. For example:
+
+    build.sh benchmarks/math/AccessNBody.java benchmarks/math/MathCordic.java
 
 Options:
     -h           Show this help message.
@@ -85,7 +93,8 @@ Options:
                  environment.
     -v           Verbose. Print the commands executed.
     -W           Do not treat build warnings as errors.
-    -b BENCHMARK Include only one benchmark file, specified by its path.
+    -b BENCHMARK DEPRECATED
+                 Include only one benchmark file, specified by its path.
                  Example: -b benchmarks/micro/ShifterOperand.java.
 "
 
@@ -95,8 +104,7 @@ while getopts ':htlvWb:' option; do
     t) TARGET_BUILD=true ;;
     v) VERBOSE=true ;;
     W) WERROR=false ;;
-    b) single_bench_mode="ON"
-       single_bench=$OPTARG
+    b) JAVA_BENCHMARK_FILES=$OPTARG
        ;;
     \?)
       printf "Illegal option: -%s\n" "$OPTARG" >&2
@@ -112,24 +120,15 @@ done
 
 shift $((OPTIND - 1))
 
-if [[ $# -ne 0 ]]; then
-  echo "$usage"
-  error "Wrong number of arguments"
-fi
+for bench_file in "$@"; do
+  JAVA_BENCHMARK_FILES="${JAVA_BENCHMARK_FILES} $(realpath ${bench_file})"
+done
 
 # Disable wildcard expansion.
 set -f
 # Find what Java files we need to compile.
 
-if [[ $single_bench_mode == "ON" ]]; then
-  echo "$0: Single benchmark mode: \"$single_bench\""
-
-  if [[ ! (-f $single_bench) || ("${single_bench##*.}" != "java") ]]; then
-      error "Provide a proper benchmark for single benchmark mode."
-  fi
-  JAVA_BENCHMARK_FILES=$(realpath $single_bench)
-else
-  echo "$0: Whole set mode"
+if [[ -z $JAVA_BENCHMARK_FILES ]]; then
   JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
 fi
 
