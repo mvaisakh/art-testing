@@ -57,9 +57,9 @@ def BuildOptions():
 # Filter out benchmarks that do not show any significant difference between the
 # two set of results.
 def FilterSignificantChanges(in_1, in_2, wilcoxon_p_threshold, ttest_p_threshold):
-    out_1 = {}
-    out_2 = {}
-    benchmarks = set(in_1.keys()).intersection(set(in_2.keys()))
+    out_1 = OrderedDict()
+    out_2 = OrderedDict()
+    benchmarks = [x for x in in_1 if x in in_2]
     for bench in benchmarks:
         wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(in_1[bench], in_2[bench])
         if wilcoxon_p < wilcoxon_p_threshold and ttest_p < ttest_p_threshold:
