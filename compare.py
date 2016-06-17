@@ -39,6 +39,10 @@ def BuildOptions():
                         help = '''Only show statistically significant changes
                         between the two sets of results. The tests used are the
                         Wilcoxon signed test and Student's t-test.''')
+    parser.add_argument('--order-by-diff', '-o',
+                        action = 'store_true', default = False,
+                        help = '''Order results according to the median
+                        difference.''')
     parser.add_argument('--wilcoxon-p-threshold', '--wilcp',
                         type = float, default = 0.05,
                         help = '''Minimum p-value allowed for the Wilcoxon test.
@@ -67,7 +71,14 @@ def FilterSignificantChanges(in_1, in_2, wilcoxon_p_threshold, ttest_p_threshold
             out_2[bench] = in_2[bench]
     return out_1, out_2
 
-def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
+def OrderByDiff(entries):
+    return sorted(entries, key = lambda values : values[3])
+
+def PrintDiff(data_1, data_2,
+              key=None,
+              indentation='',
+              print_extended=False,
+              order_by_diff=False):
     indentation_level = '    '
     headers = ['', 'Wilcoxon P', 'T-test P',
                'median diff (%)', 'mad1 (%)', 'mad2 (%)',
@@ -94,6 +105,8 @@ def PrintDiff(data_1, data_2, key=None, indentation='', print_extended=False):
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:
+            if order_by_diff:
+                entries = OrderByDiff(entries)
             utils_print.PrintTable(headers, entries, line_start=indentation)
             print('')
     elif utils.IsListOrNone(data_1) and utils.IsListOrNone(data_2):
@@ -136,7 +149,9 @@ if __name__ == "__main__":
                                      args.wilcoxon_p_threshold,
                                      args.ttest_p_threshold)
 
-    PrintDiff(res_1, res_2, print_extended=args.print_extended)
+    PrintDiff(res_1, res_2,
+              print_extended=args.print_extended,
+              order_by_diff=args.order_by_diff)
     if utils.HaveSameKeys(res_1, res_2):
         utils_stats.ComputeAndPrintRelationGeomean(utils.Unflatten(res_1),
                                                    utils.Unflatten(res_2))
