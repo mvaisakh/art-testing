@@ -205,13 +205,16 @@ public class RunBench {
       + "\t--debug              Be more verbose than the verbose mode.\n"
       + "\t--list_benchmarks    List available benchmarks and exit.\n"
       /* TODO: Add a `--list_sub_benchmarks` option. */
-      + "\t--benchmark_run_time <time in s>\n"
+      + "\t--benchmark_run_time <time in ms>\n"
       + "\t                     Set the target running time for benchmarks.\n"
-      + "\t                     (default: " + DEFAULT_BENCH_TARGET_RUN_TIME_NS + ")\n"
-      + "\t--calibration_min_time <time in s>\n"
+      + "\t                     (default: "
+      + TimeUnit.MILLISECONDS.convert(DEFAULT_BENCH_TARGET_RUN_TIME_NS, TimeUnit.NANOSECONDS)
+      + ")\n"
+      + "\t--calibration_min_time <time in ms>\n"
       + "\t                     Set the minimum running time for benchmark calibration.\n"
-      + "\t                     (default: " + DEFAULT_CALIBRATION_MIN_TIME_NS + ")\n"
-      + "";
+      + "\t                     (default: "
+      + TimeUnit.MILLISECONDS.convert(DEFAULT_CALIBRATION_MIN_TIME_NS, TimeUnit.NANOSECONDS)
+      + ")\n";
 
   public int parseCmdlineAndRun(String[] args) {
     int errors = 0;
