@@ -108,9 +108,6 @@ def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk,
         # Run the benchmark as a main class directly
         apk_arguments += " %s" % (classname)
 
-    if utils_print.verbose:
-        apk_arguments += " --debug"
-
     dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
     for opt in dex2oat_options:
         dalvikvm_options += ' -Xcompiler-option %s' % opt
