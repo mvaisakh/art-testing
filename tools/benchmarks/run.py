@@ -118,7 +118,7 @@ def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk,
         # boot-image.
         dalvikvm_options += ' -Ximage-compiler-option %s' % opt
     if compiler_mode == 'jit':
-        dalvikvm_options += ' -Xusejit:true'
+        dalvikvm_options += ' -Xusejit:true -Xnodex2oat'
 
     command = 'cd {workdir} && ' + \
         ' '.join([environment_config, dalvikvm,
