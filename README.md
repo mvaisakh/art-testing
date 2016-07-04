@@ -115,7 +115,7 @@ existing benchmark. Besides, developers should also notice:
    The original license header in the ported benchmark MUST be *preserved* and
    *unmodified*.
 
-2. Porting a benchmark should be done in two commits:
+2. Porting a java benchmark should be done in two commits:
    (1) Add *untouched* original file *with* its license and copyright header.
    (2) Modify the benchmark as necessary.
    This allows easily showing (`git diff <first commit> <second commit>`)
