@@ -1,17 +1,22 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* Copied from https://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_14/SingleSource/Benchmarks
+ * License: LLVM Release License. See Notice file
+ */
 
-    /* Bubble, Quick */
-#define sortelements 5000
-#define srtelements  500
+package benchmarks.stanford;
 
+public class Bubblesort {
 
-    /* global */
-long    seed;  /* converted to long for 16 bit WR*/
+  private static final int sortelements = 5000;
+  private static final int srtelements = 500;
 
-    /* Bubble, Quick */
-int sortlist[sortelements+1], biggest, littlest, top;
+  private boolean error; // Used as flag for the verify() function.
+  private long seed;
+  private int[] sortlist = new int [sortelements + 1];
+  private int biggest;
+  private int littlest;
+  private int top;
 
+// CHECKSTYLE.OFF: .*
 void Initrand () {
     seed = 74755L;   /* constant to long WR*/
 }
@@ -59,13 +64,36 @@ void Bubble(int run) {
 		top=top-1;
 	}
 	if ( (sortlist[1] != littlest) || (sortlist[srtelements] != biggest) )
-	printf ( "Error3 in Bubble.\n");
-	printf("%d\n", sortlist[run + 1]);
+	error = true;
 }
+  // CHECKSTYLE.ON: .*
 
-int main()
-{
-	int i;
-	for (i = 0; i < 100; i++) Bubble(i);
-	return 0;
+  public static boolean verify() {
+    Bubblesort obj = new Bubblesort();
+    obj.timeBubble(1);
+    return !obj.error;
+  }
+
+  public void timeBubble(int iters) {
+    for (int i = 0; i < iters; i++) {
+      Bubble(i);
+    }
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    Bubblesort obj = new Bubblesort();
+
+    long before = System.currentTimeMillis();
+    obj.timeBubble(100);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/stanford/Bubblesort: " + (after - before));
+
+    if (!verify()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }

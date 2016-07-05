@@ -1,17 +1,24 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* Copied from https://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_14/SingleSource/Benchmarks
+ * License: LLVM Release License. See Notice file
+ */
 
+package benchmarks.stanford;
 
-    /* Intmm, Mm */
-#define rowsize 	 40
+public class IntMM {
 
-    /* global */
-long    seed;  /* converted to long for 16 bit WR*/
+  private static final int rowsize = 40;
 
-    /* Intmm, Mm */
+  // Number of (internal) iterations for IntMM runs as per original benchmark
+  private static final int INTMM_ITERS = 10;
+  private static final int EXPECTED = 300;
 
-int   ima[rowsize+1][rowsize+1], imb[rowsize+1][rowsize+1], imr[rowsize+1][rowsize+1];
+  private long seed;
 
+  private int[][] ima = new int[rowsize + 1][rowsize + 1];
+  private int[][] imb = new int[rowsize + 1][rowsize + 1];
+  private int[][] imr = new int[rowsize + 1][rowsize + 1];
+
+// CHECKSTYLE.OFF: .*
 void Initrand () {
     seed = 74755L;   /* constant to long WR*/
 }
@@ -24,7 +31,7 @@ int Rand () {
 
     /* Multiplies two integer matrices. */
 
-void Initmatrix (int m[rowsize+1][rowsize+1]) {
+private void Initmatrix (int m[][]) {
 	int temp, i, j;
 	for ( i = 1; i <= rowsize; i++ )
 	    for ( j = 1; j <= rowsize; j++ ) {
@@ -33,12 +40,13 @@ void Initmatrix (int m[rowsize+1][rowsize+1]) {
 	}
 }
 
-void Innerproduct( int *result, int a[rowsize+1][rowsize+1], int b[rowsize+1][rowsize+1], int row, int column) {
+void Innerproduct( int result[][], int a[][], int b[][], int row, int column) {
 	/* computes the inner product of A[row,*] and B[*,column] */
 	int i;
-	*result = 0;
-	for(i = 1; i <= rowsize; i++ )*result = *result+a[row][i]*b[i][column];
-}
+	int tmp = 0;
+	for(i = 1; i <= rowsize; i++ ) tmp = tmp+a[row][i]*b[i][column];
+	result[row][column] = tmp;
+  }
 
 void Intmm (int run) {
     int i, j;
@@ -47,13 +55,38 @@ void Intmm (int run) {
     Initmatrix (imb);
     for ( i = 1; i <= rowsize; i++ )
 		for ( j = 1; j <= rowsize; j++ )
-			Innerproduct(&imr[i][j],ima,imb,i,j);
-	printf("%d\n", imr[run + 1][run + 1]);
+			Innerproduct(imr,ima,imb,i,j);
 }
+  // CHECKSTYLE.ON: .*
 
-int main()
-{
-	int i;
-	for (i = 0; i < 10; i++) Intmm(i);
-	return 0;
+  public void timeIntmm(int iters) {
+    for (int i = 0; i < iters; i++) {
+      for (int j = 0; j < INTMM_ITERS; j++) {
+        Intmm(j);
+      }
+    }
+  }
+
+  public static boolean verify() {
+    IntMM obj = new IntMM();
+    obj.timeIntmm(1);
+    return obj.imr[INTMM_ITERS][INTMM_ITERS] == EXPECTED;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    IntMM obj = new IntMM();
+
+    long before = System.currentTimeMillis();
+    obj.timeIntmm(10);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/stanford/IntMM: " + (after - before));
+
+    if (!verify()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }

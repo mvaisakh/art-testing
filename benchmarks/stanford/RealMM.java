@@ -1,13 +1,20 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* Copied from https://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_14/SingleSource/Benchmarks
+ * License: LLVM Release License. See Notice file
+ */
 
-    /* Intmm, Mm */
-#define rowsize 	 40
+package benchmarks.stanford;
 
-double rma[rowsize+1][rowsize+1], rmb[rowsize+1][rowsize+1], rmr[rowsize+1][rowsize+1];
+public class RealMM {
 
-long seed;
+  private static final int rowsize = 40;
 
+  private double[][] rma = new double [rowsize + 1][rowsize + 1];
+  private double[][] rmb = new double [rowsize + 1][rowsize + 1];
+  private double[][] rmr = new double [rowsize + 1][rowsize + 1];
+
+  long seed;
+
+// CHECKSTYLE.OFF: .*
 void Initrand () {
     seed = 74755L;   /* constant to long WR*/
 }
@@ -20,7 +27,7 @@ int Rand () {
 
     /* Multiplies two real matrices. */
 
-void rInitmatrix ( double m[rowsize+1][rowsize+1] ) {
+void rInitmatrix ( double m[][] ) {
 	int temp, i, j;
 	for ( i = 1; i <= rowsize; i++ )
 	    for ( j = 1; j <= rowsize; j++ ) {
@@ -29,11 +36,11 @@ void rInitmatrix ( double m[rowsize+1][rowsize+1] ) {
         }
 }
 
-void rInnerproduct(double *result, double a[rowsize+1][rowsize+1], double b[rowsize+1][rowsize+1], int row, int column) {
+void rInnerproduct(double result[][], double a[][], double b[][], int row, int column) {
 	/* computes the inner product of A[row,*] and B[*,column] */
 	int i;
-	*result = 0.0f;
-	for (i = 1; i<=rowsize; i++) *result = *result+a[row][i]*b[i][column];
+	result[row][column] = 0.0f;
+	for (i = 1; i<=rowsize; i++) result[row][column] = result[row][column]+a[row][i]*b[i][column];
 }
 
 void Mm (int run)    {
@@ -43,13 +50,38 @@ void Mm (int run)    {
     rInitmatrix (rmb);
     for ( i = 1; i <= rowsize; i++ )
 		for ( j = 1; j <= rowsize; j++ ) 
-			rInnerproduct(&rmr[i][j],rma,rmb,i,j);
-	printf("%f\n", rmr[run + 1][run + 1]);
+			rInnerproduct(rmr,rma,rmb,i,j);
 }
+  // CHECKSTYLE.ON: .*
 
-int main()
-{
-	int i;
-	for (i = 0; i < 10; i++) Mm(i);
-	return 0;
+  public void timeRealMM(int iters) {
+    for (int i = 0; i < iters; i++) {
+      Mm(i);
+    }
+  }
+
+  public static boolean verify() {
+    RealMM obj = new RealMM();
+    obj.timeRealMM(1);
+    // Expected obj.rmr[1][1] value: -775.9999999999999
+    boolean error = obj.rmr[1][1] < -776.000f || -775.999f < obj.rmr[1][1];
+    return !error;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    RealMM obj = new RealMM();
+
+    long before = System.currentTimeMillis();
+    obj.timeRealMM(10);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/stanford/RealMM: " + (after - before));
+
+    if (!verify()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }

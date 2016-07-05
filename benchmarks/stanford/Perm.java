@@ -1,18 +1,25 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* Copied from https://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_14/SingleSource/Benchmarks
+ * License: LLVM Release License. See Notice file
+ */
 
-    /* Perm */
-#define permrange     10
+package benchmarks.stanford;
 
-    /* Perm */
-int    permarray[permrange+1];
-/* converted pctr to unsigned int for 16 bit WR*/
-unsigned int    pctr;
+public class Perm {
 
+  private static final int permrange = 10;
+
+  private boolean error;
+
+  /* Perm */
+  private int[] permarray = new int [permrange + 1];
+  /* converted pctr to unsigned int for 16 bit WR*/
+  private int  pctr;
+
+// CHECKSTYLE.OFF: .*
     /* Permutation program, heavily recursive, written by Denny Brown. */
-void Swap ( int *a, int *b ) {
+void Swap ( int a[], int ai,  int b[], int bi ) {
 	int t;
-	t = *a;  *a = *b;  *b = t;
+	t = a[ai];  a[ai] = b[bi];  b[bi] = t;
 }
 
 void Initialize () {
@@ -28,9 +35,9 @@ void Permute (int n) {   /* permute */
 	if ( n!=1 )  {
 	    Permute(n-1);
 	    for ( k = n-1; k >= 1; k-- ) {
-			Swap(&permarray[n],&permarray[k]);
+			Swap(permarray, n, permarray, k);
 			Permute(n-1);
-			Swap(&permarray[n],&permarray[k]);
+			Swap(permarray, n, permarray, k);
 		}
     }
 }     /* permute */
@@ -43,14 +50,36 @@ void Perm ()    {   /* Perm */
 		Permute(7);
 	}
     if ( pctr != 43300 )
-	printf(" Error in Perm.\n");
-	printf("%d\n", pctr);
+	error = true;
 }     /* Perm */
+  // CHECKSTYLE.ON: .*
 
-int main()
-{
-	int i;
-	for (i = 0; i < 100; i++) Perm();
-	return 0;
+  public void timePerm(int iters) {
+    for (int i = 0; i < iters; i++) {
+      Perm();
+    }
+  }
+
+  public static boolean verify() {
+    Perm obj = new Perm();
+    obj.timePerm(1);
+    return !obj.error;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    Perm obj = new Perm();
+
+    long before = System.currentTimeMillis();
+    obj.timePerm(100);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/stanford/Perm: " + (after - before));
+
+    if (!verify()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }
-

@@ -1,29 +1,38 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* Copied from https://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_14/SingleSource/Benchmarks
+ * License: LLVM Release License. See Notice file
+ */
 
-#define	 false		0
-#define  true		1
+package benchmarks.stanford;
 
-    /* Towers */
-#define maxcells 	 18
+public class Towers {
 
-    /* Towers */
-#define    stackrange	3
-struct    element {
-	int discsize;
-	int next;
-};
+  private static final int maxcells = 18;
 
-    /* Towers */
-int	   stack[stackrange+1];
-struct element    cellspace[maxcells+1];
-int    freelist,  movesdone;
+  private static final int stackrange = 3;
 
-    /*  Program to Solve the Towers of Hanoi */
+  private boolean error;
 
-void Error (char *emsg) 	{
-	printf(" Error in Towers: %s\n",emsg);
+  class Element {
+    int discsize;
+    int next;
+  }
+
+  int[] stack = new int[stackrange + 1];
+  Element[] cellspace = new Element[maxcells + 1];
+  int freelist;
+  int movesdone;
+
+  public Towers() {
+    for (int i = 0; i < cellspace.length; i++) {
+      cellspace[i] = new Element();
+    }
+  }
+
+// CHECKSTYLE.OFF: .*
+void Error (String emsg) 	{
+  error = true;
 }
+
 
 void Makenull (int s) {
 	stack[s]=0;
@@ -41,8 +50,8 @@ int Getelement () {
 }
 
 void Push(int i, int s)	{
-	int errorfound, localel;
-	errorfound=false;
+	boolean errorfound=false;
+	int localel;
 	if ( stack[s] > 0 )
 		if ( cellspace[stack[s]].discsize<=i ) {
 			errorfound=true;
@@ -103,13 +112,36 @@ void Towers ()    { /* Towers */
     Makenull(3);
     movesdone=0;
     tower(1,2,14);
-    if ( movesdone != 16383 ) printf (" Error in Towers.\n");
-	 printf("%d\n", movesdone);
+    if ( movesdone != 16383 ) error = true;
 } /* Towers */
+  // CHECKSTYLE.ON: .*
 
-int main()
-{
-	int i;
-	for (i = 0; i < 100; i++) Towers();
-	return 0;
+  public void timeTowers(int iters) {
+    for (int i = 0; i < iters; i++) {
+      Towers();
+    }
+  }
+
+  public static boolean verify() {
+    Towers obj = new Towers();
+    obj.timeTowers(1);
+    return !obj.error;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    Towers obj = new Towers();
+
+    long before = System.currentTimeMillis();
+    obj.timeTowers(100);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/stanford/Towers: " + (after - before));
+
+    if (!verify()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }

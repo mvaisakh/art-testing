@@ -1,16 +1,24 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* Copied from https://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_14/SingleSource/Benchmarks
+ * License: LLVM Release License. See Notice file
+ */
 
-    /* Bubble, Quick */
-#define sortelements 5000
-#define srtelements  500
+package benchmarks.stanford;
 
-    /* global */
-long    seed;  /* converted to long for 16 bit WR*/
+public class Quicksort {
 
-    /* Bubble, Quick */
-int sortlist[sortelements+1], biggest, littlest, top;
+  /* Bubble, Quick */
+  private static final int sortelements = 5000;
+  private static final int srtelements = 500;
 
+  private boolean error;
+  long seed;
+
+  int[] sortlist = new int [sortelements + 1];
+  int biggest;
+  int littlest;
+  int inttop;
+
+// CHECKSTYLE.OFF: .*
 void Initrand () {
     seed = 74755L;   /* constant to long WR*/
 }
@@ -59,14 +67,36 @@ void Quicksort( int a[], int l, int r) {
 void Quick (int run) {
     Initarr();
     Quicksort(sortlist,1,sortelements);
-    if ( (sortlist[1] != littlest) || (sortlist[sortelements] != biggest) )	printf ( " Error in Quick.\n");
-	  printf("%d\n", sortlist[run + 1]);
+    if ( (sortlist[1] != littlest) || (sortlist[sortelements] != biggest) )	error = true;
 }
+  // CHECKSTYLE.ON: .*
 
-int main()
-{
-	int i;
-	for (i = 0; i < 100; i++) Quick(i);
-	return 0;
+  public void timeQuicksort(int iters) {
+    for (int i = 0; i < iters; i++) {
+      Quick(i);
+    }
+  }
+
+  public static boolean verify() {
+    Quicksort obj = new Quicksort();
+    obj.timeQuicksort(1);
+    return !obj.error;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    Quicksort obj = new Quicksort();
+
+    long before = System.currentTimeMillis();
+    obj.timeQuicksort(100);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/stanford/Quicksort: " + (after - before));
+
+    if (!verify()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }
-

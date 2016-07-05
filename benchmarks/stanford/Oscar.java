@@ -1,17 +1,35 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* Copied from https://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_14/SingleSource/Benchmarks
+ * License: LLVM Release License. See Notice file
+ */
 
-    /* fft */
-#define fftsize 	 256
-#define fftsize2 	 129
+package benchmarks.stanford;
 
-    /* FFT */
-struct    complex { float rp, ip; } ;
-struct complex    z[fftsize+1], w[fftsize+1], e[fftsize2+1];
-float    zr, zi;
+public class Oscar {
 
-long    seed;  /* converted to long for 16 bit WR*/
+  private static final int fftsize = 256;
+  private static final int fftsize2 = 129;
 
+  class Complex {
+    float rp;
+    float ip;
+  }
+
+  private Complex[] z = new Complex [fftsize + 1];
+  private Complex[] w = new Complex [fftsize + 1];
+  private Complex[] e = new Complex [fftsize2 + 1];
+  private float zr;
+  private float zi;
+  private float[] h = new float[26];
+
+  private long seed;  /* converted to long for 16 bit WR*/
+
+  public Oscar() {
+    for (int i = 0; i < z.length; i++) z[i] = new Complex();
+    for (int i = 0; i < e.length; i++) e[i] = new Complex();
+    for (int i = 0; i < w.length; i++) w[i] = new Complex();
+  }
+
+// CHECKSTYLE.OFF: .*
 float Cos (float x) {
 /* computes cos of x (x in radians) by an expansion */
 int i, factor;
@@ -35,28 +53,12 @@ int Min0( int arg1, int arg2) {
     else  return (arg2);
 }
 
-void Printcomplex(struct complex zarray[], int start, int finish, int increment) {     /* removed unused arg1, arg2 arguments WR*/
-    int i;
-    printf("\n") ;
-
-    i = start;
-    do {
-		printf("  %15.3f%15.3f",zarray[i].rp,zarray[i].ip) ;
-		i = i + increment;
-		printf("  %15.3f%15.3f",zarray[i].rp,zarray[i].ip) ;
-		printf("\n");
-		i = i + increment ;
-    } while ( i <= finish );
-
-}
-
-void Uniform11(int *iy, float *yfl) {
-    *iy = (4855 * *iy + 1731) & 8191;
-    *yfl = *iy/8192.0f;
+int Uniform11(int iy) {
+    return (4855 * iy + 1731) & 8191;
 } /* uniform */ 
 
-void Exptab(int n, struct complex e[]) { /* exptab */
-    float theta, divisor, h[26];
+void Exptab(int n, Complex e[]) { /* exptab */
+    float theta, divisor;
     int i, j, k, l, m;
 
     theta = 3.1415926536f;
@@ -92,7 +94,7 @@ void Exptab(int n, struct complex e[]) { /* exptab */
 
 } /* exptab */
 
-void Fft( int n, struct complex z[], struct complex w[], struct complex e[], float sqrinv) {
+void Fft( int n, Complex z[], Complex w[], Complex e[], float sqrinv) {
     int i, j, k, l, m, index;
     m = n / 2 ;
     l = 1 ;
@@ -120,7 +122,8 @@ void Fft( int n, struct complex z[], struct complex w[], struct complex e[], flo
 	
 		/*z = w ;*/ index = 1;
 		do {
-		    z[index] = w[index];
+		    z[index].rp = w[index].rp;
+		    z[index].ip = w[index].ip;
 		    index = index+1;
 		} while ( index <= n );
 		l = l+l ;
@@ -138,23 +141,51 @@ void Oscar() { /* oscar */
 	Exptab(fftsize,e) ;
 	seed = 5767 ;
 	for ( i = 1; i <= fftsize; i++ ) {
-		int s = seed;
-	    Uniform11( &s, &zr ); /* typecast seed for 16 bit WR*/
-		seed = s;
-	    Uniform11( &s, &zi ); /* typecast seed for 16 bit WR*/
-		seed = s;
+	    seed = Uniform11( (int)seed ); /* typecast seed for 16 bit WR*/
+		zr = seed / 8192.0f;
+	    seed = Uniform11( (int)seed ); /* typecast seed for 16 bit WR*/
+		zi = seed / 8192.0f;
 	    z[i].rp = 20.0f*zr - 10.0f;
 	    z[i].ip = 20.0f*zi - 10.0f;
 	}
 	for ( i = 1; i <= 20; i++ ) {
 	   Fft(fftsize,z,w,e,0.0625f) ;
 	}
-	    Printcomplex( z, 1, 256, 17 );   /* removed 1st 2 args 6, 99, unused by printcomplex WR*/
 } /* oscar */
+  // CHECKSTYLE.ON: .*
 
-int main()
-{
-	int i;
-	for (i = 0; i < 10; i++) Oscar();
-	return 0;
+  public void timeOscar(int iters) {
+    for (int i = 0; i < iters; i++) {
+      Oscar();
+    }
+  }
+
+  public static boolean verify() {
+    Oscar obj = new Oscar();
+    obj.timeOscar(1);
+    // We know for a fact that z[256] = {-9.150383 -0.920413}
+    // So its rp must be between -9.150f and -9.151f, otherwise it is an error.
+    boolean error = obj.z[256].rp < -9.151f || -9.150f < obj.z[256].rp;
+    // And its ip must be between -.920f and -921f, otherwise it is also an error.
+    error = error || (obj.z[256].ip < -.921f || -.920f < obj.z[256].ip);
+    // verify() returns 0 when there is no error.
+    return !error;
+  }
+
+  public static void main(String[] args) {
+    int rc = 0;
+    Oscar obj = new Oscar();
+
+    long before = System.currentTimeMillis();
+    obj.timeOscar(10);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/stanford/Oscar: " + (after - before));
+
+    if (!verify()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }
