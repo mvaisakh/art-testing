@@ -12,6 +12,10 @@ statistics or gather profiling information. See the [Tools][] section.
 All scripts must include a `--help` or `-h` command-line option displaying
 a useful help message.
 
+### Dependencies
+
+For statistical t-test and Wilcoxon tests you will need scipy. On Ubuntu 14.04
+you will need the following apt packages: python3-numpy python3-scipy .
 
 ## Running
 
