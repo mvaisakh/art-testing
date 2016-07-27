@@ -34,6 +34,9 @@ def BuildOptions():
     parser.add_argument('--print-extended',
                         action='store_true', default=False,
                         help='Print medians and means for both data sets.')
+    parser.add_argument('--output-for-linaro-automation',
+                        action='store_true', default=False,
+                        help='Print results formatted for Linaro automation.')
     parser.add_argument('--significant-changes', '-s',
                         action = 'store_true', default = False,
                         help = '''Only show statistically significant changes
