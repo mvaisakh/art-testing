@@ -127,7 +127,7 @@ def ComputeAndPrintGeomeanWithRelativeDiff(data, key='OVERALL', compute_leaf_geo
     res = list(map(lambda x: [x[0], x[1], GetRatio(x[2], x[1])], res))
     utils_print.PrintTable(['', 'geomean', 'geomean error (%)'], res)
 
-def ComputeAndPrintRelationGeomean(data_1, data_2):
+def ComputeAndPrintRelationGeomean(data_1, data_2, print_raw_values=False):
     if not data_1 or not data_2:
         return
     geomeans_1 = ComputeGeomean(data_1)
@@ -138,11 +138,14 @@ def ComputeAndPrintRelationGeomean(data_1, data_2):
         g1 = geomeans_1[i]
         g2 = geomeans_2[i]
         assert(g1[0] == g2[0])
-        res.append([g1[0],                                          # Name.
-                    GetRelativeDiff(g1[1], g2[1]),                  # Diff.
-                    GetRatio(g1[2], g1[1]), GetRatio(g2[2], g2[1]), # Errors.
-                    g1[1], g2[1]])                                  # Values.
+        d = [g1[0],                                          # Name.
+             GetRelativeDiff(g1[1], g2[1]),                  # Diff.
+             GetRatio(g1[2], g1[1]), GetRatio(g2[2], g2[1])] # Errors.
+        if print_raw_values:
+            d.extend([g1[1], g2[1]])                         # Values.
+        res.append(d)
 
-    utils_print.PrintTable(['', 'geomean diff (%)',
-                            'geomean error 1 (%)', 'geomean error 2 (%)',
-                            'geomean 1', 'geomean 2',], res)
+    headers = ['', 'geomean diff (%)', 'geomean error 1 (%)', 'geomean error 2 (%)']
+    if print_raw_values:
+        headers.extend(['geomean 1', 'geomean 2'])
+    utils_print.PrintTable(headers, res)

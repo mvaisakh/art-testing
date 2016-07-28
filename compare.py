@@ -31,12 +31,11 @@ def BuildOptions():
     parser.add_argument('res_1', metavar = 'res_1.pkl')
     parser.add_argument('res_2', metavar = 'res_2.pkl')
     utils.AddFilterOptions(parser)
-    parser.add_argument('--print-extended',
-                        action='store_true', default=False,
-                        help='Print medians and means for both data sets.')
-    parser.add_argument('--output-for-linaro-automation',
-                        action='store_true', default=False,
-                        help='Print results formatted for Linaro automation.')
+    parser.add_argument('--print-extended', '-e',
+                        action='count', default=0,
+                        help='''A cumulative option to print more information.
+                        A first occurrence prints `mean` data. A second prints
+                        raw data on top of relative information''')
     parser.add_argument('--significant-changes', '-s',
                         action = 'store_true', default = False,
                         help = '''Only show statistically significant changes
@@ -59,6 +58,9 @@ def BuildOptions():
                         specified are discarded. The default is 0.05,
                         corresponding to 95%% certainty of rejecting the null
                         hypothesis.''')
+    parser.add_argument('--output-for-linaro-automation',
+                        action='store_true', default=False,
+                        help='Print results formatted for Linaro automation.')
     return parser.parse_args()
 
 # Filter out benchmarks that do not show any significant difference between the
@@ -77,17 +79,21 @@ def FilterSignificantChanges(in_1, in_2, wilcoxon_p_threshold, ttest_p_threshold
 def OrderByDiff(entries):
     return sorted(entries, key = lambda values : values[3])
 
+print_extended_mean_data = 1
+print_extended_raw_data = 2
+
 def PrintDiff(data_1, data_2,
               key=None,
               indentation='',
-              print_extended=False,
+              print_extended=0,
               order_by_diff=False):
     indentation_level = '    '
     headers = ['', 'Wilcoxon P', 'T-test P',
-               'median diff (%)', 'mad1 (%)', 'mad2 (%)',
-               'mean diff (%)', 'stdev1 (%)', 'stdev2 (%)']
-    if print_extended:
-        headers += ['median1', 'median2', 'mean1', 'mean2']
+               'median diff (%)', 'mad1 (%)', 'mad2 (%)']
+    if print_extended >= print_extended_mean_data:
+        headers.extend(['mean diff (%)', 'stdev1 (%)', 'stdev2 (%)'])
+    if print_extended >= print_extended_raw_data:
+        headers.extend(['median1', 'median2', 'mean1', 'mean2'])
 
     if not data_1 and not data_2:
         # There is nothing to compare or print.
@@ -125,10 +131,11 @@ def PrintDiff(data_1, data_2,
         else:
             median_diff = ''
             mean_diff = ''
-        res = [key, wilcoxon_p, ttest_p,
-               median_diff, madp1, madp2, mean_diff, dp1, dp2]
-        if print_extended:
-            res += [med1, med2, ave1, ave2]
+        res = [key, wilcoxon_p, ttest_p, median_diff, madp1, madp2]
+        if print_extended >= print_extended_mean_data:
+            res.extend([mean_diff, dp1, dp2])
+        if print_extended >= print_extended_raw_data:
+            res.extend([med1, med2, ave1, ave2])
         return res
     else:
         utils.Error('Unexpected data types %s and %s.' % \
@@ -156,8 +163,10 @@ if __name__ == "__main__":
               print_extended=args.print_extended,
               order_by_diff=args.order_by_diff)
     if utils.HaveSameKeys(res_1, res_2):
-        utils_stats.ComputeAndPrintRelationGeomean(utils.Unflatten(res_1),
-                                                   utils.Unflatten(res_2))
+        utils_stats.ComputeAndPrintRelationGeomean(
+            utils.Unflatten(res_1),
+            utils.Unflatten(res_2),
+            args.print_extended >= print_extended_raw_data)
     else:
         utils.Info("Not comparing the geomeans because the two result sets "
                    "have different keys.")
