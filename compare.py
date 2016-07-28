@@ -71,7 +71,7 @@ def FilterSignificantChanges(in_1, in_2, wilcoxon_p_threshold, ttest_p_threshold
     benchmarks = [x for x in in_1 if x in in_2]
     for bench in benchmarks:
         wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(in_1[bench], in_2[bench])
-        if wilcoxon_p < wilcoxon_p_threshold and ttest_p < ttest_p_threshold:
+        if wilcoxon_p < wilcoxon_p_threshold or ttest_p < ttest_p_threshold:
             out_1[bench] = in_1[bench]
             out_2[bench] = in_2[bench]
     return out_1, out_2
