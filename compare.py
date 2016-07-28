@@ -58,8 +58,15 @@ def BuildOptions():
                         specified are discarded. The default is 0.05,
                         corresponding to 95%% certainty of rejecting the null
                         hypothesis.''')
+    class LinaroAutomationAction(argparse.Action):
+        def __init__(self, option_strings, **kwargs):
+            super(LinaroAutomationAction, self).__init__(option_strings, **kwargs)
+        def __call__(self, parser, namespace, values, option_string=None):
+            setattr(namespace, 'significant_changes', True)
     parser.add_argument('--output-for-linaro-automation',
-                        action='store_true', default=False,
+                        action=LinaroAutomationAction,
+                        default=False,
+                        nargs=0,
                         help='Print results formatted for Linaro automation.')
     return parser.parse_args()
 
