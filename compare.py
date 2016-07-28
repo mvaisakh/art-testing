@@ -28,8 +28,8 @@ def BuildOptions():
         description = "Compare two result sets.",
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('res_1', metavar = 'res_1.pkl')
-    parser.add_argument('res_2', metavar = 'res_2.pkl')
+    parser.add_argument('res_1', metavar = 'res_1.json')
+    parser.add_argument('res_2', metavar = 'res_2.json')
     utils.AddFilterOptions(parser)
     parser.add_argument('--print-extended', '-e',
                         action='count', default=0,
