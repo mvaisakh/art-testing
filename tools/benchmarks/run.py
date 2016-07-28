@@ -56,9 +56,7 @@ def BuildOptions():
                         filters match, filtering will be attempted with all the
                         patterns prefixed and suffixed with `*`.''')
     parser.add_argument('-F', '--filter-out', action = 'append',
-                        help='''Filter out the benchmarks matching this pattern.
-                        Defaults to \'benchmarks/deprecated/*\' if no other
-                        filter is specified.''')
+                        help='Filter out the benchmarks matching this pattern.')
 
     args = parser.parse_args()
 
@@ -248,13 +246,7 @@ def GetBenchmarkResults(args):
 
     benchmarks = ListAllBenchmarks()
 
-    # The deprecated benchmarks should not be implicitly filtered out when
-    # filters are explicitly specified on the command line.
-    if args.filter is not None or args.filter_out is not None:
-        filter_out = args.filter_out
-    else:
-        filter_out = ['benchmarks/deprecated/*']
-    benchmarks = utils.FilterList(benchmarks, args.filter, filter_out)
+    benchmarks = utils.FilterList(benchmarks, args.filter, args.filter_out)
 
     rc = RunBenchs(remote_apk,
                    benchmarks,
