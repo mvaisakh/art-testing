@@ -99,6 +99,8 @@ def ComputeGeomeanHelper(data, res, current_key, compute_leaf_geomean):
                                                          compute_leaf_geomean)
             means += sub_means
             stdevs += sub_stdevs
+        if not means:
+            return [], []
         geomean     = CalcGeomean(means)
         geomean_err = CalcGeomeanError(means, stdevs, geomean)
         res.append([current_key, geomean, geomean_err])
@@ -133,6 +135,8 @@ def ComputeAndPrintRelationGeomean(data_1, data_2, print_raw_values=False):
     geomeans_1 = ComputeGeomean(data_1)
     geomeans_2 = ComputeGeomean(data_2)
     assert(len(geomeans_1) == len(geomeans_2))
+    if not geomeans_1 or not geomeans_2:
+        return
     res = []
     for i in range(len(geomeans_1)):
         g1 = geomeans_1[i]

@@ -70,18 +70,28 @@ def BuildOptions():
                         help='Print results formatted for Linaro automation.')
     return parser.parse_args()
 
-# Filter out benchmarks that do not show any significant difference between the
-# two set of results.
-def FilterSignificantChanges(in_1, in_2, wilcoxon_p_threshold, ttest_p_threshold):
-    out_1 = OrderedDict()
-    out_2 = OrderedDict()
-    benchmarks = [x for x in in_1 if x in in_2]
-    for bench in benchmarks:
-        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(in_1[bench], in_2[bench])
-        if wilcoxon_p < wilcoxon_p_threshold or ttest_p < ttest_p_threshold:
-            out_1[bench] = in_1[bench]
-            out_2[bench] = in_2[bench]
-    return out_1, out_2
+# Filter out data entries that do not show any significant difference between
+# the two sets of results.
+def FilterSignificantChanges(data_1, data_2, wilcoxon_p_threshold, ttest_p_threshold):
+    if utils.IsDictionaryOrNone(data_1) and utils.IsDictionaryOrNone(data_2):
+        keys = [k for k in data_1 if k in data_2]
+        for k in keys:
+            significant = FilterSignificantChanges(
+                    data_1[k], data_2[k],
+                    wilcoxon_p_threshold, ttest_p_threshold)
+            if not significant:
+                data_1.pop(k)
+                data_2.pop(k)
+        return True
+
+    elif utils.IsListOrNone(data_1) and utils.IsListOrNone(data_2):
+        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(data_1, data_2)
+        return wilcoxon_p < wilcoxon_p_threshold or ttest_p < ttest_p_threshold
+
+    else:
+        utils.Error('Unexpected data types %s and %s.' % \
+                    (str(type(data_1)), str(type(data_2))))
+        return False
 
 def OrderByDiff(entries):
     return sorted(entries, key = lambda values : values[3])
@@ -161,10 +171,9 @@ if __name__ == "__main__":
     res_2 = utils.Filter(res_2, args.filter, args.filter_out)
 
     if args.significant_changes:
-        res_1, res_2 = \
-            FilterSignificantChanges(res_1, res_2,
-                                     args.wilcoxon_p_threshold,
-                                     args.ttest_p_threshold)
+        FilterSignificantChanges(res_1, res_2,
+                                 args.wilcoxon_p_threshold,
+                                 args.ttest_p_threshold)
 
     PrintDiff(res_1, res_2,
               print_extended=args.print_extended,
