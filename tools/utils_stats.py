@@ -75,9 +75,11 @@ def ComputeStats(nums):
         dp = GetRatio(d, ave)
         return m, M, median, mad, madp, ave, d, dp
 
-def ComputeStatsTests(list1, list2):
+def ComputeStatsTests(list1, list2, filter_warnings=False):
     wilcoxon_p = float('NaN')
     ttest_p = float('NaN')
+    if filter_warnings:
+        warnings.simplefilter("ignore")
     if not list1 or not list2 or len(list1) < 10 or len(list2) < 10:
         warnings.warn("Number of samples too small to compute Wilcoxon test.")
     try:
@@ -88,6 +90,8 @@ def ComputeStatsTests(list1, list2):
         ttest_p = scipy.stats.ttest_rel(list1, list2)[1]
     except:
         pass
+    if filter_warnings:
+        warnings.simplefilter("default")
     return wilcoxon_p, ttest_p
 
 def ComputeGeomeanHelper(data, res, current_key, compute_leaf_geomean):
