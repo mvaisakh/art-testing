@@ -63,6 +63,7 @@ def BuildOptions():
             super(LinaroAutomationAction, self).__init__(option_strings, **kwargs)
         def __call__(self, parser, namespace, values, option_string=None):
             setattr(namespace, 'significant_changes', True)
+            setattr(namespace, 'order_by_diff', True)
     parser.add_argument('--output-for-linaro-automation',
                         action=LinaroAutomationAction,
                         default=False,
@@ -127,7 +128,8 @@ def PrintDiff(data_1, data_2,
             value_2 = data_2[k] if data_2 and k in data_2 else None
             maybe_entry = PrintDiff(value_1, value_2, k,
                                     indentation + indentation_level,
-                                    print_extended=print_extended)
+                                    print_extended=print_extended,
+                                    order_by_diff=order_by_diff)
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:
