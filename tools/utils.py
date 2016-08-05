@@ -215,6 +215,27 @@ def GetDex2oatOptions(compiler_mode):
 
     return options
 
+def GetAndroidRootConfiguration(android_root, is_64bit):
+    path = ''
+    environment = ''
+    runtime_parameters = []
+
+    if android_root:
+        path = android_root + '/bin/'
+        environment = 'ANDROID_ROOT=' + android_root
+        library_path = ' LD_LIBRARY_PATH=' + android_root + '/lib'
+
+        if is_64bit:
+            environment += library_path + '64'
+        else:
+            environment += library_path
+
+        # Note ART will expand this to -Ximage:/data/art-test/${arch}/core.art.
+        runtime_parameters = ['-Ximage:/data/art-test/core.art']
+        runtime_parameters += ['-Xbootclasspath:' + android_root + '/framework/core-libart.jar']
+
+    return path, environment, runtime_parameters
+
 default_output_formats = ['json', 'pkl']
 
 def OutputObject(object, format, output_filename):

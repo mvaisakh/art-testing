@@ -71,10 +71,14 @@ def GetStats(apk,
              target,
              isa,
              compiler_mode,
+             android_root,
              target_copy_path,
              iterations,
              work_dir,
              boot_oat_file):
+    path, env, runtime_param = utils.GetAndroidRootConfiguration(android_root, isa.endswith('64'))
+    dex2oat = os.path.join(path, 'dex2oat')
+
     if boot_oat_file:
         oat = "%s/boot.%s.oat" % (target_copy_path, isa)
         art = "%s/boot.%s.art" % (target_copy_path, isa)
@@ -114,22 +118,27 @@ def GetStats(apk,
         # Replace destination: --oat-file, fix beginning of command.
         command = re.sub("--oat-file=(.+?) --", "--oat-file=%s --" % oat, command)
         command = re.sub("--image=(.+?) --", "--image=%s --" % art, command)
-        command = re.sub("dex2oat-cmdline +=", "dex2oat", command)
+        command = re.sub("dex2oat-cmdline +=", dex2oat, command)
         # Force 1 thread only - we want compilation times to be as stable as possible and we are
         # interested in single thread performance, not multi-thread (throughput).
         command = re.sub(" -j\d+ ", " -j1 ", command)
         # Remove newline at end.
         command = re.sub("\n$", "", command)
-        command = '(echo $BASHPID && exec ' + command + ' ) | head -n1'
+        command = '(echo $BASHPID && ' + env + ' exec ' + command + ') | head -n1'
     else:
+        runtime_arguments = ' --runtime-arg -Xnorelocate '
+
+        for param in runtime_param:
+            runtime_arguments += '--runtime-arg ' + param + ' '
+
         apk_path = os.path.join(target_copy_path, apk)
         oat = apk_path + '.' + isa + '.oat'
         dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
         # Only the output of the first command is necessary; execute in a subshell
         # to guarantee PID value; only one thread is used for compilation to reduce
         # measurement noise.
-        command = '(echo $BASHPID && exec dex2oat -j1 --runtime-arg -Xnorelocate ' + \
-                  ' '.join(dex2oat_options) + \
+        command = '(echo $BASHPID && ' + env + ' exec ' + dex2oat + \
+                  ' -j1' + runtime_arguments + ' '.join(dex2oat_options) + \
                   ' --dex-file=' + apk_path + ' --oat-file=' + oat
         command += ' --instruction-set=' + isa + ') | head -n1'
 
@@ -237,14 +246,13 @@ def GetCompilationStatisticsResults(args):
 
     for apk in sorted(apk_list):
         if apk[:8] == "boot.oat":
-            res[apk] = GetStats(apk, args.target, isa,
-                                args.compiler_mode, args.target_copy_path,
-                                args.iterations, work_dir, boot_oat_file)
+            res[apk] = GetStats(apk, args.target, isa, args.compiler_mode, args.android_root,
+                                args.target_copy_path, args.iterations, work_dir, boot_oat_file)
         else:
             utils_adb.push(apk, args.target_copy_path, args.target)
             apk_name = os.path.basename(apk)
-            res[apk_name] = GetStats(apk_name, args.target, isa,
-                                     args.compiler_mode, args.target_copy_path,
+            res[apk_name] = GetStats(apk_name, args.target, isa, args.compiler_mode,
+                                     args.android_root, args.target_copy_path,
                                      args.iterations, work_dir, None)
 
     shutil.rmtree(work_dir)

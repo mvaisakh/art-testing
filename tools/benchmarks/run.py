@@ -82,23 +82,15 @@ def BuildBenchmarks(build_for_target):
 
 def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk,
                  classname, target):
-    format_data={'workdir': os.path.dirname(apk), 'rootpath': android_root,
-                'mode': {"":"", "32":"", "64":"64"}[mode] }
+    format_data = {'workdir': os.path.dirname(apk)}
+    path, env, runtime_param = utils.GetAndroidRootConfiguration(android_root, mode == '64')
     # Escaping through `adb shell` is fiddly, so we expand the path fully in
     # the environment configuration.
-    environment_config = 'ANDROID_DATA={workdir} DEX_LOCATION={workdir}'
-    dalvikvm = 'dalvikvm%s' % mode
-    dalvikvm_options = ''
+    environment_config = env + ' ANDROID_DATA={workdir} DEX_LOCATION={workdir}'
+    dalvikvm = path + 'dalvikvm%s' % mode
+    dalvikvm_options = ' '.join(runtime_param)
     apk_arguments = ''
 
-    if android_root:
-        # Add additional options.
-        environment_config = "ANDROID_ROOT={rootpath} " + environment_config
-        environment_config += " LD_LIBRARY_PATH={rootpath}/lib{mode}"
-        dalvikvm = android_root + '/bin/' + dalvikvm
-        # Note ART will expand this to -Ximage:/data/art-test/${arch}/core.art
-        dalvikvm_options += ' -Ximage:/data/art-test/core.art'
-        dalvikvm_options += ' -Xbootclasspath:{rootpath}/framework/core-libart.jar'
     if auto_calibrate:
         # Run the benchmark's time* method(s) via bench_runner_main
         apk_arguments += " %s %s" % (bench_runner_main, classname)
