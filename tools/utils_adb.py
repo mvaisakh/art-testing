@@ -14,6 +14,7 @@
 
 import os
 import subprocess
+import tempfile
 
 import utils
 
@@ -46,6 +47,7 @@ def root(target=utils.adb_default_target_string, exit_on_error=True):
 
 def shell(command,
           target=utils.adb_default_target_string,
+          target_copy_path=utils.adb_default_target_copy_path,
           exit_on_error=True):
     if not isinstance(command, list):
         command = [command]
@@ -53,8 +55,23 @@ def shell(command,
     # copy-pasted and executed.
     command_string = ' '.join(['adb'] + GetTargetArgs(target) + \
                               ['shell', '"%s"' % ' '.join(command)])
-    command = ['adb'] + GetTargetArgs(target) + ['shell'] + command
-    return utils.Command(command, command_string=command_string , exit_on_error=exit_on_error)
+    if len(' '.join(command)) < 512:
+        command = ['adb'] + GetTargetArgs(target) + ['shell'] + command
+        return utils.Command(command, command_string=command_string , exit_on_error=exit_on_error)
+    else:
+        fd, path = tempfile.mkstemp()
+        remote_path = utils.TargetPathJoin(target_copy_path, os.path.basename(path))
+        os.write(fd, bytes(' '.join(command), 'UTF-8'))
+        os.close(fd)
+        push(path, remote_path, target)
+        os.remove(path)
+        command = ['adb'] + GetTargetArgs(target) + ['shell', 'source', remote_path]
+        rc, outerr = utils.Command(command,
+                                   command_string=command_string ,
+                                   exit_on_error=exit_on_error)
+        shell(['rm', '-f', remote_path], target, exit_on_error=exit_on_error)
+        return rc, outerr
+
 
 def GetISAList(target):
     # The 32-bit ISA name should be a substring of the 64-bit one.
