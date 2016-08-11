@@ -373,13 +373,27 @@ def UnflattenHelper(res, key_list, value):
 def Unflatten(data, separator='/'):
     if isinstance(data, list):
         return data
-    elif not isinstance(data, dict) and not isinstance(data, OrderedDict):
+    elif not IsDictionary(data):
         Error("Unexpected data type: %s." % type(data))
 
     res = OrderedDict()
     for k in data:
         UnflattenHelper(res, k.split(separator), Unflatten(data[k], separator))
     return res
+
+def Flatten(data, key=''):
+    if isinstance(data, list):
+        return {key: data}
+    elif not IsDictionary(data):
+        Error("Unexpected data type: %s." % type(data))
+
+    res = OrderedDict()
+    for k, v in data.items():
+        new_key = key + '/' + k
+        res.update(Flatten(v, new_key))
+
+    return res
+
 
 
 def HaveSameKeys(data_1, data_2):

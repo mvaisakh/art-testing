@@ -98,6 +98,21 @@ See `tools/compilation_statistics/run.py --help` and
 The `tools/perf` directory includes tools to profile the Java benchmarks on
 target and generate an html output. See `tools/perf/PERF.README` for details.
 
+### bm-plotter
+
+This `convert.py` python script converts the `.json` output of `run.py` scripts
+into the format required by
+[bm-plotter](https://github.com/ARM-software/bm-plotter).
+`bm-plotter` is a tool offering a graphical output representing results.
+You can generate the result image for example with:
+
+    ./run.py --target --iterations=10 --output-json=base.json
+    git checkout patch_1
+    ./run.py --target --iterations=10 --output-json=patch_1.json
+    git checkout patch_2
+    ./run.py --target --iterations=10 --output-json=patch_2.json
+    ./tools/bm-plotter/convert.py base.json patch_1.json patch_2.json > /tmp/bm_out
+    <path/to/bm-plotter>/plot /tmp/bm_out
 
 
 ## How to Write a Benchmark
