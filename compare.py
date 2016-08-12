@@ -62,6 +62,7 @@ def BuildOptions():
         def __init__(self, option_strings, **kwargs):
             super(LinaroAutomationAction, self).__init__(option_strings, **kwargs)
         def __call__(self, parser, namespace, values, option_string=None):
+            setattr(namespace, 'output_for_linaro_automation', True)
             setattr(namespace, 'significant_changes', True)
             setattr(namespace, 'order_by_diff', True)
     parser.add_argument('--output-for-linaro-automation',
@@ -73,20 +74,24 @@ def BuildOptions():
 
 # Filter out data entries that do not show any significant difference between
 # the two sets of results.
-def FilterSignificantChanges(data_1, data_2, wilcoxon_p_threshold, ttest_p_threshold):
+def FilterSignificantChanges(data_1, data_2,
+                             wilcoxon_p_threshold, ttest_p_threshold,
+                             filter_stats_warnings=False):
     if utils.IsDictionaryOrNone(data_1) and utils.IsDictionaryOrNone(data_2):
         keys = [k for k in data_1 if k in data_2]
         for k in keys:
             significant = FilterSignificantChanges(
                     data_1[k], data_2[k],
-                    wilcoxon_p_threshold, ttest_p_threshold)
+                    wilcoxon_p_threshold, ttest_p_threshold,
+                    filter_stats_warnings=filter_stats_warnings)
             if not significant:
                 data_1.pop(k)
                 data_2.pop(k)
         return True
 
     elif utils.IsListOrNone(data_1) and utils.IsListOrNone(data_2):
-        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(data_1, data_2)
+        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(
+            data_1, data_2, filter_warnings=filter_stats_warnings)
         return wilcoxon_p < wilcoxon_p_threshold or ttest_p < ttest_p_threshold
 
     else:
@@ -104,7 +109,8 @@ def PrintDiff(data_1, data_2,
               key=None,
               indentation='',
               print_extended=0,
-              order_by_diff=False):
+              order_by_diff=False,
+              filter_stats_warnings=False):
     indentation_level = '    '
     headers = ['', 'Wilcoxon P', 'T-test P',
                'median diff (%)', 'mad1 (%)', 'mad2 (%)']
@@ -129,7 +135,8 @@ def PrintDiff(data_1, data_2,
             maybe_entry = PrintDiff(value_1, value_2, k,
                                     indentation + indentation_level,
                                     print_extended=print_extended,
-                                    order_by_diff=order_by_diff)
+                                    order_by_diff=order_by_diff,
+                                    filter_stats_warnings=filter_stats_warnings)
             if maybe_entry is not None:
                 entries.append(maybe_entry)
         if entries:
@@ -143,7 +150,8 @@ def PrintDiff(data_1, data_2,
                 utils_stats.ComputeStats(data_1) if data_1 else no_results
         _, _, med2, _, madp2, ave2, _, dp2 = \
                 utils_stats.ComputeStats(data_2) if data_2 else no_results
-        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(data_1, data_2)
+        wilcoxon_p, ttest_p = utils_stats.ComputeStatsTests(
+            data_1, data_2, filter_warnings=filter_stats_warnings)
         if data_1 and data_2:
             median_diff = utils_stats.GetRelativeDiff(med1, med2)
             mean_diff = utils_stats.GetRelativeDiff(ave1, ave2)
@@ -175,11 +183,13 @@ if __name__ == "__main__":
     if args.significant_changes:
         FilterSignificantChanges(res_1, res_2,
                                  args.wilcoxon_p_threshold,
-                                 args.ttest_p_threshold)
+                                 args.ttest_p_threshold,
+                                 filter_stats_warnings=args.output_for_linaro_automation)
 
     PrintDiff(res_1, res_2,
               print_extended=args.print_extended,
-              order_by_diff=args.order_by_diff)
+              order_by_diff=args.order_by_diff,
+              filter_stats_warnings=args.output_for_linaro_automation)
     if utils.HaveSameKeys(res_1, res_2):
         utils_stats.ComputeAndPrintRelationGeomean(
             utils.Unflatten(res_1),
