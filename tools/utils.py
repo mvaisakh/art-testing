@@ -221,9 +221,9 @@ def GetAndroidRootConfiguration(android_root, is_64bit):
     runtime_parameters = []
 
     if android_root:
-        path = android_root + '/bin/'
+        path = TargetPathJoin(android_root, 'bin')
         environment = 'ANDROID_ROOT=' + android_root
-        library_path = ' LD_LIBRARY_PATH=' + android_root + '/lib'
+        library_path = ' LD_LIBRARY_PATH=' + TargetPathJoin(android_root, 'lib')
 
         if is_64bit:
             environment += library_path + '64'
@@ -232,7 +232,8 @@ def GetAndroidRootConfiguration(android_root, is_64bit):
 
         # Note ART will expand this to -Ximage:/data/art-test/${arch}/core.art.
         runtime_parameters = ['-Ximage:/data/art-test/core.art']
-        runtime_parameters += ['-Xbootclasspath:' + android_root + '/framework/core-libart.jar']
+        runtime_parameters += ['-Xbootclasspath:' + \
+                               TargetPathJoin(android_root, 'framework/core-libart.jar')]
 
     return path, environment, runtime_parameters
 
@@ -429,3 +430,11 @@ def HaveSameKeys(data_1, data_2):
     elif type(data_1) == type(data_2):
         return True
     return False
+
+def TargetPathJoin(path, *paths):
+    path = os.path.join(path, *paths)
+
+    if os.sep != '/':
+        path = path.replace(os.sep, '/')
+
+    return path
