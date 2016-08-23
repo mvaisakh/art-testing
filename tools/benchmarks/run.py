@@ -105,7 +105,10 @@ def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk,
         # boot-image.
         dalvikvm_options += ' -Ximage-compiler-option %s' % opt
     if compiler_mode == 'jit':
-        dalvikvm_options += ' -Xusejit:true -Xnodex2oat'
+        # For JIT mode benchmarking, enable following options to make sure:
+        # - No dex2oat compilation triggered.
+        # - Performance critical funtions are JIT compiled as soon as possible.
+        dalvikvm_options += ' -Xusejit:true -Xnodex2oat -Xjitthreshold:100'
 
     command = 'cd {workdir} && ' + \
         ' '.join([environment_config, dalvikvm,
