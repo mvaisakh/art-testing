@@ -26,6 +26,27 @@ import java.lang.System;
 import java.util.Random;
 
 public class Rounding {
+  // The java.util.Random only generates random float/double numbers between 0 and 1.
+  // So we implement our own random floating point numbers here,
+  // based on a well known quick and dirty approach.
+  static final class MyRandom extends Random {
+    static int im = 139968;
+    static int ia = 3877;
+    static int ic = 29573;
+    static int seed = 0;
+
+    public double nextDouble() {
+      double scale = 1000.0d / im;
+      seed = (seed * ia + ic) % im;
+      return scale * seed;
+    }
+
+    public float nextFloat() {
+      float scale = 1000.0f / im;
+      seed = (seed * ia + ic) % im;
+      return scale * seed;
+    }
+  }
 
   /* Invoke each intrinsic in question the same no. of times */
   private static final int NUM_INVOKES = 64;
@@ -38,18 +59,118 @@ public class Rounding {
   private static final float[] rand_float = new float[NUM_RANDS];
   private static final double[] rand_double = new double[NUM_RANDS];
 
+  private static final float[] rand_pos_float = new float[NUM_RANDS];
+  private static final double[] rand_pos_double = new double[NUM_RANDS];
+
+  private static final float[] rand_neg_float = new float[NUM_RANDS];
+  private static final double[] rand_neg_double = new double[NUM_RANDS];
+
   // These are written but not read. The computation routines below store their
   // result to these static variables to ensure the computation code is not
   // removed by DCE.
   private static float res_float;
   private static double res_double;
+  private static int res_int;
+  private static long res_long;
 
   static {
-    Random random = new Random(42L);
+    MyRandom rand = new MyRandom();
+
     for (int i = 0; i < NUM_RANDS; i++) {
-      rand_float[i] = random.nextFloat();
-      rand_double[i] = random.nextDouble();
+      rand_pos_float[i] = rand.nextFloat();
+      rand_pos_double[i] = rand.nextDouble();
+
+      rand_neg_float[i] = rand.nextFloat() * -1f;
+      rand_neg_double[i] = rand.nextDouble() * -1f;
+
+      if (rand.nextInt() % 2 == 0) {
+        rand_float[i] =  rand_pos_float[i];
+        rand_double[i] = rand_pos_double[i];
+      } else {
+        rand_float[i] =  rand_neg_float[i];
+        rand_double[i] = rand_neg_double[i];
+      }
     }
+  }
+
+  public void timeRoundPositiveFloat(int iterations) {
+    int res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.round(rand_pos_float[i % NUM_RANDS]);
+      }
+    }
+    res_int = res;
+  }
+
+  public void timeRoundNegativeFloat(int iterations) {
+    int res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.round(rand_neg_float[i % NUM_RANDS]);
+      }
+    }
+    res_int = res;
+  }
+
+  public void timeRoundFloat(int iterations) {
+    int res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.round(rand_float[i % NUM_RANDS]);
+      }
+    }
+    res_int = res;
+  }
+
+  public void timeRoundPositiveDouble(int iterations) {
+    long res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.round(rand_pos_double[i % NUM_RANDS]);
+      }
+    }
+    res_double = res;
+  }
+
+  public void timeRoundNegativeDouble(int iterations) {
+    long res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.round(rand_neg_double[i % NUM_RANDS]);
+      }
+    }
+    res_long = res;
+  }
+
+  public void timeRoundDouble(int iterations) {
+    long res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.round(rand_double[i % NUM_RANDS]);
+      }
+    }
+    res_double = res;
+  }
+
+  public void timeFloorPositiveFloat(int iterations) {
+    float res = 0.0f;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.floor(rand_pos_float[i % NUM_RANDS]);
+      }
+    }
+    res_float = res;
+  }
+
+  public void timeFloorNegativeFloat(int iterations) {
+    float res = 0.0f;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.floor(rand_neg_float[i % NUM_RANDS]);
+      }
+    }
+    res_float = res;
   }
 
   public void timeFloorFloat(int iterations) {
@@ -62,6 +183,26 @@ public class Rounding {
     res_float = res;
   }
 
+  public void timeFloorPositiveDouble(int iterations) {
+    double res = 0.0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.floor(rand_pos_double[i % NUM_RANDS]);
+      }
+    }
+    res_double = res;
+  }
+
+  public void timeFloorNegativeDouble(int iterations) {
+    double res = 0.0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.floor(rand_neg_double[i % NUM_RANDS]);
+      }
+    }
+    res_double = res;
+  }
+
   public void timeFloorDouble(int iterations) {
     double res = 0.0;
     for (int iter = 0; iter < iterations; ++iter) {
@@ -72,6 +213,26 @@ public class Rounding {
     res_double = res;
   }
 
+  public void timeCeilPositiveFloat(int iterations) {
+    float res = 0.0f;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.ceil(rand_pos_float[i % NUM_RANDS]);
+      }
+    }
+    res_float = res;
+  }
+
+  public void timeCeilNegativeFloat(int iterations) {
+    float res = 0.0f;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.ceil(rand_neg_float[i % NUM_RANDS]);
+      }
+    }
+    res_float = res;
+  }
+
   public void timeCeilFloat(int iterations) {
     float res = 0.0f;
     for (int iter = 0; iter < iterations; ++iter) {
@@ -80,6 +241,27 @@ public class Rounding {
       }
     }
     res_float = res;
+  }
+
+  public void timeCeilPositiveDouble(int iterations) {
+    double res = 0.0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.ceil(rand_pos_double[i % NUM_RANDS]);
+      }
+    }
+    res_double = res;
+  }
+
+
+  public void timeCeilNegativeDouble(int iterations) {
+    double res = 0.0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.ceil(rand_neg_double[i % NUM_RANDS]);
+      }
+    }
+    res_double = res;
   }
 
   public void timeCeilDouble(int iterations) {
@@ -95,10 +277,31 @@ public class Rounding {
   public static void main(String[] args) {
     Rounding obj = new Rounding();
     long before = System.currentTimeMillis();
+
+    obj.timeRoundPositiveFloat(100000);
+    obj.timeRoundNegativeFloat(100000);
+    obj.timeRoundFloat(100000);
+
+    obj.timeRoundPositiveDouble(100000);
+    obj.timeRoundNegativeDouble(100000);
+    obj.timeRoundDouble(100000);
+
+    obj.timeFloorPositiveFloat(100000);
+    obj.timeFloorNegativeFloat(100000);
     obj.timeFloorFloat(100000);
+
+    obj.timeFloorPositiveDouble(100000);
+    obj.timeFloorNegativeDouble(100000);
     obj.timeFloorDouble(100000);
+
+    obj.timeCeilPositiveFloat(100000);
+    obj.timeCeilNegativeFloat(100000);
     obj.timeCeilFloat(100000);
+
+    obj.timeCeilPositiveDouble(100000);
+    obj.timeCeilNegativeDouble(100000);
     obj.timeCeilDouble(100000);
+
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/micro/Rounding: " + (after - before));
