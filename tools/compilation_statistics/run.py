@@ -77,14 +77,14 @@ def GetStats(apk,
              work_dir,
              boot_oat_file):
     path, env, runtime_param = utils.GetAndroidRootConfiguration(android_root, isa.endswith('64'))
-    dex2oat = os.path.join(path, 'dex2oat')
+    dex2oat = utils.TargetPathJoin(path, 'dex2oat')
 
     if boot_oat_file:
-        oat = "%s/boot.%s.oat" % (target_copy_path, isa)
-        art = "%s/boot.%s.art" % (target_copy_path, isa)
+        oat = utils.TargetPathJoin(target_copy_path, 'boot.' + isa + '.oat')
+        art = utils.TargetPathJoin(target_copy_path, 'boot.' + isa + '.art')
 
         # Check if dump file exists.
-        dump_oat_file_location = "/data/local/tmp/boot.oat.%s.txt" % (isa)
+        dump_oat_file_location = utils.TargetPathJoin(target_copy_path, 'boot.oat.' + isa + '.txt')
         dump_exists_command = "if [ -f %s ] ; then echo found; fi; exit 0" \
                               % (dump_oat_file_location)
         # Since we are interested in whether the dump file exists or not, we can't simply execute
@@ -131,7 +131,7 @@ def GetStats(apk,
         for param in runtime_param:
             runtime_arguments += '--runtime-arg ' + param + ' '
 
-        apk_path = os.path.join(target_copy_path, apk)
+        apk_path = utils.TargetPathJoin(target_copy_path, apk)
         oat = apk_path + '.' + isa + '.oat'
         dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
         # Only the output of the first command is necessary; execute in a subshell
@@ -224,10 +224,10 @@ def GetCompilationStatisticsResults(args):
             if len(boot_oat_files) != len(isa_list):
                 utils.Error("Number of architectures different from number of boot.oat files. " \
                             "The list of boot.oat files is here:\n\n %s\n\nMake sure there are " \
-                            "no stale boot.oat files in /data/local/tmp or some other directory. " \
+                            "no stale boot.oat files in %s or some other directory. " \
                             "Another possibility is that you didn't build Android with " \
                             "`WITH_DEXPREOPT=false`. Do a `lunch` and then `WITH_DEXPREOPT=false " \
-                            "make -j$(nproc)`." % boot_oat_files)
+                            "make -j$(nproc)`." % (boot_oat_files, args.target_copy_path))
             # Order both lists. Now, as long as both oat files have the same parent dir, order
             # should match.
             isa_list.sort()
