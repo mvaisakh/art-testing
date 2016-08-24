@@ -116,7 +116,7 @@ public class mandelbrot {
     mandelbrot obj = new mandelbrot();
 
     final long before = System.currentTimeMillis();
-    obj.timeMandelbrot(75);
+    obj.timeMandelbrot(65);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyMandelbrot()) {

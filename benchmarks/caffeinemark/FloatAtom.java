@@ -197,7 +197,7 @@ public class FloatAtom
     FloatAtom obj = new FloatAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeFloatAtom(5);
+    obj.timeFloatAtom(2);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyFloatAtom()) {

@@ -462,7 +462,7 @@ public class Dhrystone {
     Dhrystone obj = new Dhrystone();
 
     long before = System.currentTimeMillis();
-    obj.timeDhrystone(1000000);
+    obj.timeDhrystone(500000);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/algorithm/Dhrystone: " + (after - before));

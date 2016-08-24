@@ -217,7 +217,7 @@ public final class nbody {
     nbody obj = new nbody();
 
     final long before = System.currentTimeMillis();
-    obj.timeNBody(5);
+    obj.timeNBody(1000);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyNBody()) {

@@ -95,7 +95,7 @@ public class MathSpectralNorm {
   public static void main(String[] argv) {
     MathSpectralNorm obj = new MathSpectralNorm();
     final long before = System.currentTimeMillis();
-    obj.timeMathSpectralNorm(180);
+    obj.timeMathSpectralNorm(360);
     final long after = System.currentTimeMillis();
     obj.verify();
     System.out.println("benchmarks/math/MathSpectralNorm: " + (after - before));

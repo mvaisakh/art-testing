@@ -334,11 +334,11 @@ public class BitfieldRotate {
   public static void main(String[] args) {
     BitfieldRotate br = new BitfieldRotate();
     long before = System.currentTimeMillis();
-    br.timeSHA1DigestProcessBlock(1000);
-    br.timeIntegerRotateRight(1000);
-    br.timeIntegerRotateLeft(1000);
-    br.timeLongRotateRight(1000);
-    br.timeLongRotateLeft(1000);
+    br.timeSHA1DigestProcessBlock(300000);
+    br.timeIntegerRotateRight(300000);
+    br.timeIntegerRotateLeft(300000);
+    br.timeLongRotateRight(300000);
+    br.timeLongRotateLeft(300000);
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/BitfieldRotate: " + (after - before));
   }

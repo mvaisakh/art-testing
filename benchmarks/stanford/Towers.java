@@ -133,7 +133,7 @@ void Towers ()    { /* Towers */
     Towers obj = new Towers();
 
     long before = System.currentTimeMillis();
-    obj.timeTowers(100);
+    obj.timeTowers(500);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Towers: " + (after - before));

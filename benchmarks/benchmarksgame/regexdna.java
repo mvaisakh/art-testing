@@ -148,7 +148,7 @@ public final class regexdna {
     regexdna obj = new regexdna();
 
     final long before = System.currentTimeMillis();
-    obj.timeRegexDna(15);
+    obj.timeRegexDna(10);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyRegexDna()) {

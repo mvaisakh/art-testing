@@ -710,7 +710,7 @@ matrix in column order. --dmd 3/3/97
     Linpack obj = new Linpack();
 
     long before = System.currentTimeMillis();
-    obj.timeLinpack(1);
+    obj.timeLinpack(200);
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Linpack: " + (after - before));
 

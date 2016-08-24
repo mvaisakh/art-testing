@@ -209,7 +209,7 @@ public class AccessNBody {
   public static void main(String[] argv) {
     AccessNBody obj = new AccessNBody();
     final long before = System.currentTimeMillis();
-    obj.timeAccessNBody(172);
+    obj.timeAccessNBody(200);
     final long after = System.currentTimeMillis();
     obj.verify();
     System.out.println("benchmarks/math/AccessNBody: " + (after - before));

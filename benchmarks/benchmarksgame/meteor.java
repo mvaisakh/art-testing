@@ -487,7 +487,7 @@ public class meteor
     meteor puzzle = new meteor();
 
     final long before = System.currentTimeMillis();
-    puzzle.timeMeteor(2);
+    puzzle.timeMeteor(1);
     final long after = System.currentTimeMillis();
 
     if (!puzzle.verifyMeteor()) {

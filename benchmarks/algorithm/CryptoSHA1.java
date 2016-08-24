@@ -221,7 +221,7 @@ public class CryptoSHA1 {
   public static void main(String[] argv) {
     CryptoSHA1 obj = new CryptoSHA1();
     final long before = System.currentTimeMillis();
-    obj.timeHexSHA1(1808);
+    obj.timeHexSHA1(1600);
     final long after = System.currentTimeMillis();
     obj.verify();
     System.out.println("benchmarks/algorithm/CryptoSHA1: " + (after - before));

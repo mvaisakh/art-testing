@@ -74,7 +74,7 @@ public class pidigits {
     pidigits obj = new pidigits();
 
     final long before = System.currentTimeMillis();
-    obj.timePidigits(8);
+    obj.timePidigits(100);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyPidigits()) {

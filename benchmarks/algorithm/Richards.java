@@ -653,7 +653,7 @@ public class Richards {
   public static void main(String[] args) {
     Richards obj = new Richards();
     long before = System.currentTimeMillis();
-    obj.timeRichards(2000);
+    obj.timeRichards(1200);
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Richards: " + (after - before));
   }

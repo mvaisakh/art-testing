@@ -154,7 +154,7 @@ public class StringAtom
     StringAtom obj = new StringAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeStringAtom(5);
+    obj.timeStringAtom(3);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyStringAtom()) {

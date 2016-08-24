@@ -106,7 +106,7 @@ public class binarytrees {
     int rc = 0;
     binarytrees obj = new binarytrees();
     final long before = System.currentTimeMillis();
-    obj.timeBinaryTrees(3);
+    obj.timeBinaryTrees(30);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyBinaryTrees()) {

@@ -68,8 +68,8 @@ public class StringEquals {
   public static void main(String[] args) {
     StringEquals eq = new StringEquals();
     long before = System.currentTimeMillis();
-    eq.timeEquals(1000);
-    eq.timeEquals(1000);
+    eq.timeEquals(1500);
+    eq.timeEquals(1500);
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/StringEquals: " + (after - before));
   }

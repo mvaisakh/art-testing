@@ -110,7 +110,7 @@ public class revcomp {
     revcomp obj = new revcomp();
 
     final long before = System.currentTimeMillis();
-    obj.timeRevComp(15);
+    obj.timeRevComp(350);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyRevComp()) {

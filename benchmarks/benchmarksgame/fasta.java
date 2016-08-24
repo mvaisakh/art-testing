@@ -202,7 +202,7 @@ public class fasta {
     fasta obj = new fasta();
 
     final long before = System.currentTimeMillis();
-    obj.timeFasta(5);
+    obj.timeFasta(1700);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyFasta()) {

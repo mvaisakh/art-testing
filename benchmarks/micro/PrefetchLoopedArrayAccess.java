@@ -74,7 +74,7 @@ public class PrefetchLoopedArrayAccess {
   public static void main(String[] args) {
     PrefetchLoopedArrayAccess obj = new PrefetchLoopedArrayAccess();
     long before = System.currentTimeMillis();
-    obj.timeRun(30000);
+    obj.timeRun(22000);
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/PrefetchLoopedArrayAccess: " + (after - before));
   }

@@ -263,7 +263,7 @@ public final class chameneosredux {
     chameneosredux obj = new chameneosredux();
 
     final long before = System.currentTimeMillis();
-    obj.timeChameneosRedux(5);
+    obj.timeChameneosRedux(40);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyChameneosRedux()) {

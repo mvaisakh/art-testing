@@ -316,7 +316,7 @@ outer:
     knucleotide obj = new knucleotide();
 
     final long before = System.currentTimeMillis();
-    obj.timeKnucleotide(15);
+    obj.timeKnucleotide(9);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyKnucleotide()) {

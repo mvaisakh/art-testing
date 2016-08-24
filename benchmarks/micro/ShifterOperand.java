@@ -742,72 +742,72 @@ public class ShifterOperand {
     // CHECKSTYLE.OFF: LineLength
     // CHECKSTYLE.OFF: OneStatementPerLine
     // CHECKSTYLE.OFF: LeftCurly
-    start = System.currentTimeMillis(); timeIntSingleUseLatency1(500000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeIntSingleUseLatency1(50000000); end = System.currentTimeMillis();
     if (!verifyIntSingleUseLatency1()) { rc++; }
     System.out.println(prefix + "IntSingleUseLatency1: " + (end - start));
-    start = System.currentTimeMillis(); timeIntSingleUseLatency1Thread2(300000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeIntSingleUseLatency1Thread2(30000000); end = System.currentTimeMillis();
     if (!verifyIntSingleUseLatency1Thread2()) { rc++; }
     System.out.println(prefix + "IntSingleUseLatency1Thread2: " + (end - start));
-    start = System.currentTimeMillis(); timeIntSingleUseLatency1Thread3(200000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeIntSingleUseLatency1Thread3(20000000); end = System.currentTimeMillis();
     if (!verifyIntSingleUseLatency1Thread3()) { rc++; }
     System.out.println(prefix + "IntSingleUseLatency1Thread3: " + (end - start));
-    start = System.currentTimeMillis(); timeIntSingleUseLatency1Thread4(150000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeIntSingleUseLatency1Thread4(15000000); end = System.currentTimeMillis();
     if (!verifyIntSingleUseLatency1Thread4()) { rc++; }
     System.out.println(prefix + "IntSingleUseLatency1Thread4: " + (end - start));
-    start = System.currentTimeMillis(); timeIntSingleUseLatency2(400000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeIntSingleUseLatency2(40000000); end = System.currentTimeMillis();
     if (!verifyIntSingleUseLatency2()) { rc++; }
     System.out.println(prefix + "IntSingleUseLatency2: " + (end - start));
-    start = System.currentTimeMillis(); timeIntSingleUseLatency3(500000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeIntSingleUseLatency3(50000000); end = System.currentTimeMillis();
     if (!verifyIntSingleUseLatency3()) { rc++; }
     System.out.println(prefix + "IntSingleUseLatency3: " + (end - start));
-    start = System.currentTimeMillis(); timeIntSingleUseLatencyLoop(700000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeIntSingleUseLatencyLoop(70000000); end = System.currentTimeMillis();
     if (!verifyIntSingleUseLatencyLoop()) { rc++; }
     System.out.println(prefix + "IntSingleUseLatencyLoop: " + (end - start));
 
     // The `long` versions use the same iteration counts as the `int` versions
     // above.
-    start = System.currentTimeMillis(); timeLongSingleUseLatency1(500000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeLongSingleUseLatency1(50000000); end = System.currentTimeMillis();
     if (!verifyLongSingleUseLatency1()) { rc++; }
     System.out.println(prefix + "LongSingleUseLatency1: " + (end - start));
-    start = System.currentTimeMillis(); timeLongSingleUseLatency1Thread2(300000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeLongSingleUseLatency1Thread2(30000000); end = System.currentTimeMillis();
     if (!verifyLongSingleUseLatency1Thread2()) { rc++; }
     System.out.println(prefix + "LongSingleUseLatency1Thread2: " + (end - start));
-    start = System.currentTimeMillis(); timeLongSingleUseLatency1Thread3(200000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeLongSingleUseLatency1Thread3(20000000); end = System.currentTimeMillis();
     if (!verifyLongSingleUseLatency1Thread3()) { rc++; }
     System.out.println(prefix + "LongSingleUseLatency1Thread3: " + (end - start));
-    start = System.currentTimeMillis(); timeLongSingleUseLatency1Thread4(150000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeLongSingleUseLatency1Thread4(15000000); end = System.currentTimeMillis();
     if (!verifyLongSingleUseLatency1Thread4()) { rc++; }
     System.out.println(prefix + "LongSingleUseLatency1Thread4: " + (end - start));
-    start = System.currentTimeMillis(); timeLongSingleUseLatency2(400000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeLongSingleUseLatency2(40000000); end = System.currentTimeMillis();
     if (!verifyLongSingleUseLatency2()) { rc++; }
     System.out.println(prefix + "LongSingleUseLatency2: " + (end - start));
-    start = System.currentTimeMillis(); timeLongSingleUseLatency3(500000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeLongSingleUseLatency3(50000000); end = System.currentTimeMillis();
     if (!verifyLongSingleUseLatency3()) { rc++; }
     System.out.println(prefix + "LongSingleUseLatency3: " + (end - start));
-    start = System.currentTimeMillis(); timeLongSingleUseLatencyLoop(700000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeLongSingleUseLatencyLoop(70000000); end = System.currentTimeMillis();
     if (!verifyLongSingleUseLatencyLoop()) { rc++; }
     System.out.println(prefix + "LongSingleUseLatencyLoop: " + (end - start));
 
 
-    start = System.currentTimeMillis(); timeMultipleUsesDifferentPathInt(500000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeMultipleUsesDifferentPathInt(50000000); end = System.currentTimeMillis();
     if (!verifyMultipleUsesDifferentPathInt()) { rc++; }
     System.out.println(prefix + "MultipleUsesDifferentPathInt: " + (end - start));
-    start = System.currentTimeMillis(); timeMultipleSuccessiveUsesSamePathInt(350000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeMultipleSuccessiveUsesSamePathInt(35000000); end = System.currentTimeMillis();
     if (!verifyMultipleSuccessiveUsesSamePathInt()) { rc++; }
     System.out.println(prefix + "MultipleSuccessiveUsesSamePathInt: " + (end - start));
-    start = System.currentTimeMillis(); timeMultipleSeparatedUsesSamePathInt(400000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeMultipleSeparatedUsesSamePathInt(40000000); end = System.currentTimeMillis();
     if (!verifyMultipleSeparatedUsesSamePathInt()) { rc++; }
     System.out.println(prefix + "MultipleSeparatedUsesSamePathInt: " + (end - start));
 
     // The `long` versions use the same iteration counts as the `int` versions
     // above.
-    start = System.currentTimeMillis(); timeMultipleUsesDifferentPathLong(500000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeMultipleUsesDifferentPathLong(50000000); end = System.currentTimeMillis();
     if (!verifyMultipleUsesDifferentPathLong()) { rc++; }
     System.out.println(prefix + "MultipleUsesDifferentPathLong: " + (end - start));
-    start = System.currentTimeMillis(); timeMultipleSuccessiveUsesSamePathLong(350000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeMultipleSuccessiveUsesSamePathLong(35000000); end = System.currentTimeMillis();
     if (!verifyMultipleSuccessiveUsesSamePathLong()) { rc++; }
     System.out.println(prefix + "MultipleSuccessiveUsesSamePathLong: " + (end - start));
-    start = System.currentTimeMillis(); timeMultipleSeparatedUsesSamePathLong(400000); end = System.currentTimeMillis();
+    start = System.currentTimeMillis(); timeMultipleSeparatedUsesSamePathLong(40000000); end = System.currentTimeMillis();
     if (!verifyMultipleSeparatedUsesSamePathLong()) { rc++; }
     System.out.println(prefix + "MultipleSeparatedUsesSamePathLong: " + (end - start));
     // CHECKSTYLE.ON: LineLength

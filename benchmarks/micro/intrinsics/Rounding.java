@@ -274,36 +274,43 @@ public class Rounding {
     res_double = res;
   }
 
+  private static final int ITER_COUNT = 100000;
+
   public static void main(String[] args) {
     Rounding obj = new Rounding();
     long before = System.currentTimeMillis();
 
-    obj.timeRoundPositiveFloat(100000);
-    obj.timeRoundNegativeFloat(100000);
-    obj.timeRoundFloat(100000);
+    obj.timeRoundPositiveFloat(ITER_COUNT);
+    obj.timeRoundNegativeFloat(ITER_COUNT);
+    obj.timeRoundFloat(ITER_COUNT);
 
-    obj.timeRoundPositiveDouble(100000);
-    obj.timeRoundNegativeDouble(100000);
-    obj.timeRoundDouble(100000);
+    obj.timeRoundPositiveDouble(ITER_COUNT);
+    obj.timeRoundNegativeDouble(ITER_COUNT);
+    obj.timeRoundDouble(ITER_COUNT);
 
-    obj.timeFloorPositiveFloat(100000);
-    obj.timeFloorNegativeFloat(100000);
-    obj.timeFloorFloat(100000);
+    obj.timeFloorPositiveFloat(ITER_COUNT);
+    obj.timeFloorNegativeFloat(ITER_COUNT);
+    obj.timeFloorFloat(ITER_COUNT);
 
-    obj.timeFloorPositiveDouble(100000);
-    obj.timeFloorNegativeDouble(100000);
-    obj.timeFloorDouble(100000);
+    obj.timeFloorPositiveDouble(ITER_COUNT);
+    obj.timeFloorNegativeDouble(ITER_COUNT);
+    obj.timeFloorDouble(ITER_COUNT);
 
-    obj.timeCeilPositiveFloat(100000);
-    obj.timeCeilNegativeFloat(100000);
-    obj.timeCeilFloat(100000);
+    obj.timeCeilPositiveFloat(ITER_COUNT);
+    obj.timeCeilNegativeFloat(ITER_COUNT);
+    obj.timeCeilFloat(ITER_COUNT);
 
-    obj.timeCeilPositiveDouble(100000);
-    obj.timeCeilNegativeDouble(100000);
-    obj.timeCeilDouble(100000);
+    obj.timeCeilPositiveDouble(ITER_COUNT);
+    obj.timeCeilNegativeDouble(ITER_COUNT);
+    obj.timeCeilDouble(ITER_COUNT);
+
+    obj.timeFloorFloat(ITER_COUNT);
+    obj.timeFloorDouble(ITER_COUNT);
+    obj.timeCeilFloat(ITER_COUNT);
+    obj.timeCeilDouble(ITER_COUNT);
 
     long after = System.currentTimeMillis();
 
-    System.out.println("benchmarks/micro/Rounding: " + (after - before));
+    System.out.println("benchmarks/micro/intrinsics/Rounding: " + (after - before));
   }
 }

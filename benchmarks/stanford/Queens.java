@@ -83,7 +83,7 @@ void Queens (int run) {
     Queens obj = new Queens();
 
     long before = System.currentTimeMillis();
-    obj.timeQueens(100);
+    obj.timeQueens(1000);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Queens: " + (after - before));

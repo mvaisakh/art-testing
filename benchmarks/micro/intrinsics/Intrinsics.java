@@ -327,6 +327,6 @@ public class Intrinsics {
     obj.timeBitCountLongRandom(100000);
 
     long after = System.currentTimeMillis();
-    System.out.println("benchmarks/micro/Intrinsics: " + (after - before));
+    System.out.println("benchmarks/micro/intrinsics/Intrinsics: " + (after - before));
   }
 }

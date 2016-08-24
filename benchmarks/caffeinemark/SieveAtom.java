@@ -160,7 +160,7 @@ public class SieveAtom
     SieveAtom obj = new SieveAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeSieveAtom(5);
+    obj.timeSieveAtom(4);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifySieveAtom()) {

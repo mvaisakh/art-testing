@@ -169,7 +169,7 @@ public class LoopAtom
     LoopAtom obj = new LoopAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeLoopAtom(5);
+    obj.timeLoopAtom(2);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyLoopAtom()) {

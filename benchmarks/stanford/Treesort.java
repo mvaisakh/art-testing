@@ -111,7 +111,7 @@ void Trees(int run) {
     Treesort obj = new Treesort();
 
     long before = System.currentTimeMillis();
-    obj.timeTreesort(100);
+    obj.timeTreesort(2500);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Treesort: " + (after - before));

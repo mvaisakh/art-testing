@@ -28,7 +28,7 @@ public class VectorCalc {
 
   public static final int ARRAY_SIZE = 500;
   public static final int COEFFICIENT = 2;
-  public static final int MAIN_ITERATIONS = 100000;
+  public static final int MAIN_ITERATIONS = 80000;
   public int[] array1 = new int[ARRAY_SIZE];
   public int[] array2 = new int[ARRAY_SIZE];
   public int[] array3 = new int[ARRAY_SIZE];
@@ -84,7 +84,7 @@ public class VectorCalc {
     long before = System.currentTimeMillis();
     obj.timeRun(MAIN_ITERATIONS);
     long after = System.currentTimeMillis();
-    System.out.println("benchmarks/micro/VectorCalculation: " + (after - before));
+    System.out.println("benchmarks/micro/VectorCalc: " + (after - before));
   }
 
 }

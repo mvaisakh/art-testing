@@ -172,7 +172,7 @@ public class MethodAtom
     MethodAtom obj = new MethodAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeMethodAtom(5);
+    obj.timeMethodAtom(3);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyMethodAtom()) {

@@ -85,7 +85,7 @@ void Bubble(int run) {
     Bubblesort obj = new Bubblesort();
 
     long before = System.currentTimeMillis();
-    obj.timeBubble(100);
+    obj.timeBubble(1000);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Bubblesort: " + (after - before));

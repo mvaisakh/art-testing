@@ -82,7 +82,7 @@ public class MathPartialSums {
   public static void main(String[] argv) {
     MathPartialSums obj = new MathPartialSums();
     final long before = System.currentTimeMillis();
-    obj.timeMathPartialSums(96);
+    obj.timeMathPartialSums(140);
     final long after = System.currentTimeMillis();
     obj.verify();
     System.out.println("benchmarks/math/MathPartial: " + (after - before));

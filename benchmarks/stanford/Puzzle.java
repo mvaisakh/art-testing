@@ -129,7 +129,7 @@ void Puzzle ()  {
     Puzzle obj = new Puzzle();
 
     long before = System.currentTimeMillis();
-    obj.timePuzzle(100);
+    obj.timePuzzle(125);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Puzzle: " + (after - before));

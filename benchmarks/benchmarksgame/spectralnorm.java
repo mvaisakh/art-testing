@@ -111,7 +111,7 @@ public class spectralnorm
     spectralnorm obj = new spectralnorm();
 
     final long before = System.currentTimeMillis();
-    obj.timeSpectralNorm(5);
+    obj.timeSpectralNorm(100);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifySpectralNorm()) {

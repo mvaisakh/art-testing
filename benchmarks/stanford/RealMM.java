@@ -73,7 +73,7 @@ void Mm (int run)    {
     RealMM obj = new RealMM();
 
     long before = System.currentTimeMillis();
-    obj.timeRealMM(10);
+    obj.timeRealMM(800);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/RealMM: " + (after - before));

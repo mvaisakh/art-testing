@@ -162,8 +162,8 @@ public class Base64 {
   public static void main(String[] args) {
     Base64 b = new Base64();
     long before = System.currentTimeMillis();
-    b.timeEncode(1000);
-    b.timeDecode(1000);
+    b.timeEncode(1300);
+    b.timeDecode(1300);
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/Base64: " + (after - before));
   }

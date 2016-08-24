@@ -71,7 +71,7 @@ void Perm ()    {   /* Perm */
     Perm obj = new Perm();
 
     long before = System.currentTimeMillis();
-    obj.timePerm(100);
+    obj.timePerm(500);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Perm: " + (after - before));

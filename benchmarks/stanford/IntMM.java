@@ -78,7 +78,7 @@ void Intmm (int run) {
     IntMM obj = new IntMM();
 
     long before = System.currentTimeMillis();
-    obj.timeIntmm(10);
+    obj.timeIntmm(120);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/IntMM: " + (after - before));

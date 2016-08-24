@@ -110,7 +110,7 @@ public class ControlFlowRecursive {
     ControlFlowRecursive obj = new ControlFlowRecursive();
 
     start = System.currentTimeMillis();
-    obj.timeControlFlowRecursive(1000);
+    obj.timeControlFlowRecursive(600);
     end = System.currentTimeMillis();
     System.out.println(
         "benchmarks/micro/ControlFlowRecursive.ControlFlowRecursive: " + (end - start));
@@ -121,7 +121,7 @@ public class ControlFlowRecursive {
     System.out.println("benchmarks/micro/ControlFlowRecursive.Tak: " + (end - start));
 
     start = System.currentTimeMillis();
-    obj.timeTarai(20);
+    obj.timeTarai(10);
     end = System.currentTimeMillis();
     System.out.println("benchmarks/micro/ControlFlowRecursive.Tarai: " + (end - start));
 

@@ -210,7 +210,7 @@ public class LogicAtom
     LogicAtom obj = new LogicAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeLogicAtom(5);
+    obj.timeLogicAtom(2);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyLogicAtom()) {

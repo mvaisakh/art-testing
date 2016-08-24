@@ -282,41 +282,41 @@ public class Sort {
 
     // CHECKSTYLE.OFF: LineLength
     // CHECKSTYLE.OFF: OneStatementPerLine
-    b = System.currentTimeMillis(); o.timeBubbleSort____16(15000); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeBubbleSort____16(700000); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.BubbleSort____16: " + (a - b));
-    b = System.currentTimeMillis(); o.timeBubbleSort___128(250); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeBubbleSort___128(15500); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.BubbleSort___128: " + (a - b));
-    b = System.currentTimeMillis(); o.timeBubbleSort__2048(1); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeBubbleSort__2048(60); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.BubbleSort__2048: " + (a - b));
     if (!o.verifyBubbleSort()) {
       rc++;
     }
 
-    b = System.currentTimeMillis(); o.timeInsertionSort____16(35000); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeInsertionSort____16(1450000); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.InsertionSort____16: " + (a - b));
-    b = System.currentTimeMillis(); o.timeInsertionSort___128(750); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeInsertionSort___128(40000); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.InsertionSort___128: " + (a - b));
-    b = System.currentTimeMillis(); o.timeInsertionSort__2048(3); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeInsertionSort__2048(170); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.InsertionSort__2048: " + (a - b));
     if (!o.verifyInsertionSort()) {
       rc++;
     }
 
-    b = System.currentTimeMillis(); o.timeMergeSort____16(10000); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeMergeSort____16(110000); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.MergeSort____16: " + (a - b));
-    b = System.currentTimeMillis(); o.timeMergeSort___128(1000); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeMergeSort___128(12000); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.MergeSort___128: " + (a - b));
-    b = System.currentTimeMillis(); o.timeMergeSort__2048(50); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeMergeSort__2048(600); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.MergeSort__2048: " + (a - b));
     if (!o.verifyMergeSort()) {
       rc++;
     }
 
-    b = System.currentTimeMillis(); o.timeSystemSort____16(35000); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeSystemSort____16(1200000); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.SystemSort____16: " + (a - b));
-    b = System.currentTimeMillis(); o.timeSystemSort___128(2500); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeSystemSort___128(100000); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.SystemSort___128: " + (a - b));
-    b = System.currentTimeMillis(); o.timeSystemSort__2048(125); a = System.currentTimeMillis();
+    b = System.currentTimeMillis(); o.timeSystemSort__2048(6250); a = System.currentTimeMillis();
     System.out.println("benchmarks/algorithm/Sort.SystemSort__2048: " + (a - b));
     if (!o.verifySystemSort()) {
       rc++;

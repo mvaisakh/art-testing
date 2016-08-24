@@ -221,7 +221,7 @@ public class fastaredux {
     fastaredux obj = new fastaredux();
 
     final long before = System.currentTimeMillis();
-    obj.timeFastaRedux(10);
+    obj.timeFastaRedux(1700);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyFastaRedux()) {

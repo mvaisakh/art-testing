@@ -138,18 +138,20 @@ public class SystemArrayCopy {
     }
   }
 
+  private static final int ITER_COUNT = 4000;
+
   public static void main(String[] args) {
     int result = 0;
     SystemArrayCopy obj = new SystemArrayCopy();
-    long before = System.currentTimeMillis();
+    final long before = System.currentTimeMillis();
     try {
-      obj.timeArrayCopySmall(30000);
-      obj.timeArrayCopyMedium(30000);
-      obj.timeArrayCopyLarge(30000);
+      obj.timeArrayCopySmall(ITER_COUNT);
+      obj.timeArrayCopyMedium(ITER_COUNT);
+      obj.timeArrayCopyLarge(ITER_COUNT);
 
-      obj.timeArrayCopyCharBufferedReadSmall(30000);
-      obj.timeArrayCopyCharBufferedReadMedium(30000);
-      obj.timeArrayCopyCharBufferedReadLarge(30000);
+      obj.timeArrayCopyCharBufferedReadSmall(ITER_COUNT);
+      obj.timeArrayCopyCharBufferedReadMedium(ITER_COUNT);
+      obj.timeArrayCopyCharBufferedReadLarge(ITER_COUNT);
       if (!obj.verify()) {
         result++;
         System.out.println("ERROR: verify() failed.");
@@ -157,7 +159,7 @@ public class SystemArrayCopy {
     } catch (IOException ex) {
       System.out.println("ERROR: benchmarks/micro/SystemArrayCopy: " + ex.getMessage());
     }
-    long after = System.currentTimeMillis();
+    final long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/SystemArrayCopy: " + (after - before));
     System.exit(result);
   }

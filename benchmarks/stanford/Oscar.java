@@ -177,7 +177,7 @@ void Oscar() { /* oscar */
     Oscar obj = new Oscar();
 
     long before = System.currentTimeMillis();
-    obj.timeOscar(10);
+    obj.timeOscar(600);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Oscar: " + (after - before));

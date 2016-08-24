@@ -88,7 +88,7 @@ void Quick (int run) {
     Quicksort obj = new Quicksort();
 
     long before = System.currentTimeMillis();
-    obj.timeQuicksort(100);
+    obj.timeQuicksort(1200);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/stanford/Quicksort: " + (after - before));

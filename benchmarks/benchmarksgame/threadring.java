@@ -131,7 +131,7 @@ public class threadring {
     threadring obj = new threadring();
 
     final long before = System.currentTimeMillis();
-    obj.timeThreadRing(3);
+    obj.timeThreadRing(2);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyThreadRing()) {

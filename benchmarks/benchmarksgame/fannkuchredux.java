@@ -102,7 +102,7 @@ public class fannkuchredux
     int rc = 0;
     fannkuchredux obj = new fannkuchredux();
     final long before = System.currentTimeMillis();
-    obj.timeFannkuchRedux(4);
+    obj.timeFannkuchRedux(1100);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyFannkuchRedux()) {
