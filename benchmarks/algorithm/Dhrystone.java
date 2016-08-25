@@ -47,6 +47,7 @@ public class Dhrystone {
   public static final int Ident_3 = 2;
   public static final int Ident_4 = 3;
   public static final int Ident_5 = 4;
+  private static final int loop_size = 500000;
 
   public Dhrystone() {
     ptrGlob = new Record();
@@ -65,7 +66,15 @@ public class Dhrystone {
     arr2Glob[8][7] = 10;
   }
 
+
+
   public void timeDhrystone(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      old_main();
+    }
+  }
+
+  public void old_main() {
     int runIndex;
     int int1Loc;
     int int2Loc;
@@ -85,9 +94,9 @@ public class Dhrystone {
     ptrGlob.strComp.setLength(0);
     ptrGlob.strComp.append("DHRYSTONE PROGRAM, SOME STRING");
     arr2Glob[8][7] = 10;
-    numOfRuns = iterations;
+    numOfRuns = loop_size;
 
-    for (runIndex = 1; runIndex <= iterations; runIndex++) {
+    for (runIndex = 1; runIndex <= loop_size; runIndex++) {
       proc5();
       proc4();
 
@@ -462,7 +471,7 @@ public class Dhrystone {
     Dhrystone obj = new Dhrystone();
 
     long before = System.currentTimeMillis();
-    obj.timeDhrystone(500000);
+    obj.timeDhrystone(1);
     long after = System.currentTimeMillis();
 
     System.out.println("benchmarks/algorithm/Dhrystone: " + (after - before));
