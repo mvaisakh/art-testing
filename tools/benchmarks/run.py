@@ -87,7 +87,7 @@ def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk,
     # Escaping through `adb shell` is fiddly, so we expand the path fully in
     # the environment configuration.
     environment_config = env + ' ANDROID_DATA={workdir} DEX_LOCATION={workdir}'
-    dalvikvm = path + 'dalvikvm%s' % mode
+    dalvikvm = utils.TargetPathJoin(path, 'dalvikvm%s' % mode)
     dalvikvm_options = ' '.join(runtime_param)
     apk_arguments = ''
 
