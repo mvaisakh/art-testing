@@ -28,6 +28,15 @@ import java.util.*;
 public final class regexdna {
 
    private static final Map<String, String> replacements = new HashMap<String, String>();
+   private InputStream stream;
+   private char[] cbuf;
+   private Reader r;
+
+   public regexdna() throws IOException {
+     stream = new ByteArrayInputStream(fastaStr.getBytes());
+     cbuf = new char[16384];
+     r = new InputStreamReader(stream, "ISO-8859-1");
+   }
 
    static {
 
@@ -74,12 +83,10 @@ public final class regexdna {
       }
    }
 
-
    public int old_main() throws IOException {
-      InputStream stream = new ByteArrayInputStream(fastaStr.getBytes());
-      Reader r = new InputStreamReader(stream, "ISO-8859-1");
+      stream.reset();
       StringBuilder sb = new StringBuilder(5100000);
-      char[] cbuf = new char[16384];
+
       int charsRead;
       while ((charsRead = r.read(cbuf)) != -1)
          sb.append(cbuf, 0, charsRead);

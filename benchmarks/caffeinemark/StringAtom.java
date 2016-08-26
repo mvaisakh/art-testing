@@ -86,7 +86,8 @@ public class StringAtom
 
     public int execute()
     {
-        StringBuffer stringbuffer = new StringBuffer("Test");
+        stringbuffer.setLength(0);
+        stringbuffer.append("Test");
         for(int j = 0; j < wIterationCount; j++)
             stringbuffer.append(sPattern1).append(sPattern2).append(sPattern3);
 
@@ -122,6 +123,7 @@ public class StringAtom
     {
     }
 
+    StringBuffer stringbuffer = new StringBuffer();
     public int wIterationCount;
     public String sPattern1;
     public String sPattern2;

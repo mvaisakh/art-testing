@@ -41,6 +41,7 @@ public class knucleotide {
   private byte[] buffer = null;
   private byte[] species = null;
   private ByteArrayInputStream stream = null;
+  private LineInputStream in;
 
     static Map<Key, Value> MAP;
     static final int[] SEQUENCES1 = {2, 1};
@@ -55,7 +56,7 @@ public class knucleotide {
             int n;
             int i;
 
-            try (LineInputStream in = new LineInputStream(stream)) {
+            try {
 outer:
                 for (;;) {
                     n = in.readLine(temp);
@@ -285,11 +286,14 @@ outer:
     species = ">TH".getBytes();
   }
 
-  public void timeKnucleotide(int iters) {
+  public knucleotide() {
     temp = new byte[LINE_LENGTH];
     buffer = new byte[125_000_000];
     stream = new ByteArrayInputStream(fastaStr.getBytes());
+    in = new LineInputStream(stream);
+  }
 
+  public void timeKnucleotide(int iters) {
     for (int count = 0; count < iters; count++) {
       reinitBuffers();
       old_main();

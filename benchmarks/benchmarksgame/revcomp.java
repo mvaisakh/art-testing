@@ -25,7 +25,8 @@ import java.io.*;
 
 // CHECKSTYLE.OFF: .*
 public class revcomp {
-   private ReversibleByteArray buf;
+   private ReversibleByteArray buf = new ReversibleByteArray();
+   InputStream stream = new ByteArrayInputStream(fastaStr.getBytes());
    static final byte[] cmp = new byte[128];
    static {
       for (int i = 0; i < cmp.length; i++) cmp[i] = (byte) i;
@@ -65,8 +66,8 @@ public class revcomp {
    public void old_main() throws Exception {
       byte[] line = new byte[82];
       int read;
-      buf = new ReversibleByteArray();
-      InputStream stream = new ByteArrayInputStream(fastaStr.getBytes());
+      buf.reset();
+      stream.reset();
 
       while ((read = stream.read(line)) != -1) {
          int i = 0, last = 0;
@@ -110,7 +111,7 @@ public class revcomp {
     revcomp obj = new revcomp();
 
     final long before = System.currentTimeMillis();
-    obj.timeRevComp(350);
+    obj.timeRevComp(400);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyRevComp()) {
