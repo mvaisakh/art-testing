@@ -16,6 +16,7 @@
 
 import argparse
 import json
+import math
 
 from collections import OrderedDict
 
@@ -100,7 +101,10 @@ def FilterSignificantChanges(data_1, data_2,
         return False
 
 def OrderByDiff(entries):
-    return sorted(entries, key = lambda values : values[3])
+    sortable_entries = [e for e in entries if not math.isnan(e[3])]
+    unsortable_entries = [e for e in entries if math.isnan(e[3])]
+    return sorted(sortable_entries, key = lambda values : values[3]) + \
+            unsortable_entries
 
 print_extended_mean_data = 1
 print_extended_raw_data = 2
@@ -156,8 +160,8 @@ def PrintDiff(data_1, data_2,
             median_diff = utils_stats.GetRelativeDiff(med1, med2)
             mean_diff = utils_stats.GetRelativeDiff(ave1, ave2)
         else:
-            median_diff = ''
-            mean_diff = ''
+            median_diff = float('nan')
+            mean_diff = float('nan')
         res = [key, wilcoxon_p, ttest_p, median_diff, madp1, madp2]
         if print_extended >= print_extended_mean_data:
             res.extend([mean_diff, dp1, dp2])
