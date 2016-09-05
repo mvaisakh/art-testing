@@ -76,15 +76,17 @@ public class LoadCheck {
     }
   }
 
+  private static final int loop_size = 10000;
+
   public void timeRandomSumInvokeStaticMethod(int iters) {
     for (int i = 0; i < iters; i++) {
-      randomSumInvokeStaticMethod(iters);
+      randomSumInvokeStaticMethod(loop_size);
     }
   }
 
   public void timeRandomSumInvokeUserClass(int iters) {
     for (int i = 0; i < iters; i++) {
-      randomSumInvokeUserClass(iters);
+      randomSumInvokeUserClass(loop_size);
     }
   }
 

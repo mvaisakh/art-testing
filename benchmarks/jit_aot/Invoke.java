@@ -61,27 +61,29 @@ public class Invoke {
     }
   }
 
+  private static final int recursion_depth = 1000;
+
   public void timeRecursionInvokeVirtual(int iters) {
     for (int i = 0; i < iters; i++) {
-      recursionInvokeVirtual(i);
+      recursionInvokeVirtual(recursion_depth);
     }
   }
 
   public void timeRecursionInvokeStatic(int iters) {
     for (int i = 0; i < iters; i++) {
-      recursionInvokeStatic(i);
+      recursionInvokeStatic(recursion_depth);
     }
   }
 
   public void timeRecursionInvokeFinal(int iters) {
     for (int i = 0; i < iters; i++) {
-      recursionInvokeFinal(i);
+      recursionInvokeFinal(recursion_depth);
     }
   }
 
   public void timeRecursionInvokePrivate(int iters) {
     for (int i = 0; i < iters; i++) {
-      recursionInvokePrivate(i);
+      recursionInvokePrivate(recursion_depth);
     }
   }
 
