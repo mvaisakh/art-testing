@@ -37,6 +37,10 @@ public class StringOps {
   private static int RANDOM_STRING_512 = 4;
   private static int NUM_LENGTH_TESTS = 5;
 
+  private static char MIN_RANDOM_CHAR = 65;
+  private static char MAX_RANDOM_CHAR = 123;
+  private static char searchChar;
+
   /* Intentionally use the same seed each time for consistency across benchmark runs. */
   private static int SAME_SEED = 0;
 
@@ -66,11 +70,12 @@ public class StringOps {
 
   private static String generateRandomString(int len, Random rnd) {
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < len - 1; i++) {
       /* Compose random string data from upper and lower case english alphabet entries plus a few
        * harmless characters in-between. */
-      sb.append(Character.valueOf((char)(65 + rnd.nextInt(58))));
+      sb.append(Character.valueOf((char)(MIN_RANDOM_CHAR + rnd.nextInt(MAX_RANDOM_CHAR - MIN_RANDOM_CHAR))));
     }
+    sb.append(Character.valueOf(MAX_RANDOM_CHAR));
     return sb.toString();
   }
 
@@ -83,6 +88,7 @@ public class StringOps {
   }
 
   static {
+    searchChar = MAX_RANDOM_CHAR;
     generateRandomStrings(rnd, stringData);
     generateRandomStrings(rndAlt, stringDataAlt);
   }
@@ -401,10 +407,33 @@ public class StringOps {
    * String.indexOf
    */
 
-  public void timeStringIndexOf(int iterations) {
-    char c = stringData[RANDOM_STRING_512].charAt(511);
+  public void timeStringIndexOf008(int iterations) {
     for (int i = 0; i < iterations; i++) {
-      stringIndexOfResult += stringData[RANDOM_STRING_512].indexOf(c);
+      stringIndexOfResult += stringData[RANDOM_STRING_8].indexOf(searchChar);
+    }
+  }
+
+  public void timeStringIndexOf016(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfResult += stringData[RANDOM_STRING_16].indexOf(searchChar);
+    }
+  }
+
+  public void timeStringIndexOf032(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfResult += stringData[RANDOM_STRING_32].indexOf(searchChar);
+    }
+  }
+
+  public void timeStringIndexOf128(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfResult += stringData[RANDOM_STRING_128].indexOf(searchChar);
+    }
+  }
+
+  public void timeStringIndexOf512(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfResult += stringData[RANDOM_STRING_512].indexOf(searchChar);
     }
   }
 
@@ -412,10 +441,33 @@ public class StringOps {
    * String.indexOfAfter
    */
 
-  public void timeStringIndexOfAfter(int iterations) {
-    char c = stringData[RANDOM_STRING_512].charAt(511);
+  public void timeStringIndexOfAfter008(int iterations) {
     for (int i = 0; i < iterations; i++) {
-      stringIndexOfAfterResult += stringData[RANDOM_STRING_512].indexOf(c, 1);
+      stringIndexOfAfterResult += stringData[RANDOM_STRING_8].indexOf(searchChar, 1);
+    }
+  }
+
+  public void timeStringIndexOfAfter016(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfAfterResult += stringData[RANDOM_STRING_16].indexOf(searchChar, 1);
+    }
+  }
+
+  public void timeStringIndexOfAfter032(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfAfterResult += stringData[RANDOM_STRING_32].indexOf(searchChar, 1);
+    }
+  }
+
+  public void timeStringIndexOfAfter128(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfAfterResult += stringData[RANDOM_STRING_128].indexOf(searchChar, 1);
+    }
+  }
+
+  public void timeStringIndexOfAfter512(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      stringIndexOfAfterResult += stringData[RANDOM_STRING_512].indexOf(searchChar, 1);
     }
   }
 
@@ -627,8 +679,16 @@ public class StringOps {
     obj.timeStringRegionMatchesIgnoreCase128(ITER_COUNT);
     obj.timeStringRegionMatchesIgnoreCase512(ITER_COUNT);
     obj.timeStringCharAt(ITER_COUNT);
-    obj.timeStringIndexOf(ITER_COUNT);
-    obj.timeStringIndexOfAfter(ITER_COUNT);
+    obj.timeStringIndexOf008(ITER_COUNT);
+    obj.timeStringIndexOf016(ITER_COUNT);
+    obj.timeStringIndexOf032(ITER_COUNT);
+    obj.timeStringIndexOf128(ITER_COUNT);
+    obj.timeStringIndexOf512(ITER_COUNT);
+    obj.timeStringIndexOfAfter008(ITER_COUNT);
+    obj.timeStringIndexOfAfter016(ITER_COUNT);
+    obj.timeStringIndexOfAfter032(ITER_COUNT);
+    obj.timeStringIndexOfAfter128(ITER_COUNT);
+    obj.timeStringIndexOfAfter512(ITER_COUNT);
     obj.timeStringNewStringFromBytes008(ITER_COUNT);
     obj.timeStringNewStringFromBytes016(ITER_COUNT);
     obj.timeStringNewStringFromBytes032(ITER_COUNT);
