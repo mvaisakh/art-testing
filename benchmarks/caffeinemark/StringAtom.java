@@ -130,7 +130,7 @@ public class StringAtom
     public String sPattern3;
     // CHECKSTYLE.ON: .*
 
-  private static int PREDEFINED_ITER_COUNT = 3000;
+  private static int PREDEFINED_ITER_COUNT = 500;
 
   public void timeStringAtom(int iters) {
     initialize(PREDEFINED_ITER_COUNT);
@@ -141,7 +141,7 @@ public class StringAtom
 
   public boolean verifyStringAtom() {
     initialize(PREDEFINED_ITER_COUNT);
-    int expected = 42008;
+    int expected = 7008;
     int found = execute();
 
     if (found != expected) {
@@ -156,7 +156,7 @@ public class StringAtom
     StringAtom obj = new StringAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeStringAtom(3);
+    obj.timeStringAtom(50);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyStringAtom()) {

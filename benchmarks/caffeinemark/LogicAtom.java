@@ -184,7 +184,7 @@ public class LogicAtom
     public int wIterationCount;
     // CHECKSTYLE.ON: .*
 
-  private static int PREDEFINED_ITERATION_COUNT = 50000000;
+  private static int PREDEFINED_ITERATION_COUNT = 500000;
 
   public void timeLogicAtom(int iters) {
     initialize(PREDEFINED_ITERATION_COUNT);
@@ -210,7 +210,7 @@ public class LogicAtom
     LogicAtom obj = new LogicAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeLogicAtom(2);
+    obj.timeLogicAtom(80);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyLogicAtom()) {

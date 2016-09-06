@@ -134,7 +134,7 @@ public class SieveAtom
     public int wMaxCandidate;
     // CHECKSTYLE.ON: .*
 
-  private static int PREDEFINED_MAX_CANDIDATE = 80000;
+  private static int PREDEFINED_MAX_CANDIDATE = 10000;
 
   public void timeSieveAtom(int iters) {
     initialize(PREDEFINED_MAX_CANDIDATE);
@@ -145,7 +145,7 @@ public class SieveAtom
 
   public boolean verifySieveAtom() {
     initialize(PREDEFINED_MAX_CANDIDATE);
-    int expected = 7838;
+    int expected = 1230;
     int found = execute();
 
     if (found != expected) {
@@ -160,7 +160,7 @@ public class SieveAtom
     SieveAtom obj = new SieveAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeSieveAtom(4);
+    obj.timeSieveAtom(90);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifySieveAtom()) {

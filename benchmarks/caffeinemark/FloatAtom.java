@@ -165,7 +165,7 @@ public class FloatAtom
     public final int POINTCOUNT = 20;
     // CHECKSTYLE.ON: .*
 
-  private static int PREDEFINED_MAX_DEGREES = 1000000;
+  private static int PREDEFINED_MAX_DEGREES = 10000;
 
   public void timeFloatAtom(int iters) {
     initialize(PREDEFINED_MAX_DEGREES);
@@ -197,7 +197,7 @@ public class FloatAtom
     FloatAtom obj = new FloatAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeFloatAtom(2);
+    obj.timeFloatAtom(100);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyFloatAtom()) {

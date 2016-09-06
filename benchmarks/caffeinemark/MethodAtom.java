@@ -146,7 +146,7 @@ public class MethodAtom
     public int wIterationCount;
     // CHECKSTYLE.ON: .*
 
-  private static int PREDEFINED_ITER_COUNT = 4000;
+  private static int PREDEFINED_ITER_COUNT = 2000;
 
   public void timeMethodAtom(int iters) {
     initialize(PREDEFINED_ITER_COUNT);
@@ -157,7 +157,7 @@ public class MethodAtom
 
   public boolean verifyMethodAtom() {
     initialize(PREDEFINED_ITER_COUNT);
-    int expected = 2076731408;
+    int expected = 1333333000;
     int found = execute();
 
     if (found != expected) {
@@ -172,7 +172,7 @@ public class MethodAtom
     MethodAtom obj = new MethodAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeMethodAtom(3);
+    obj.timeMethodAtom(9);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyMethodAtom()) {
