@@ -73,7 +73,8 @@ public class StringOps {
     for (int i = 0; i < len - 1; i++) {
       /* Compose random string data from upper and lower case english alphabet entries plus a few
        * harmless characters in-between. */
-      sb.append(Character.valueOf((char)(MIN_RANDOM_CHAR + rnd.nextInt(MAX_RANDOM_CHAR - MIN_RANDOM_CHAR))));
+      sb.append(Character.valueOf((char)(MIN_RANDOM_CHAR +
+                                         rnd.nextInt(MAX_RANDOM_CHAR - MIN_RANDOM_CHAR))));
     }
     sb.append(Character.valueOf(MAX_RANDOM_CHAR));
     return sb.toString();
