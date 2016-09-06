@@ -416,7 +416,17 @@ def Flatten(data, key=''):
 
     return res
 
-
+def KeepSameKeys(data_1, data_2):
+    for stats_type in data_1:
+        keys_1, keys_2 = data_1[stats_type].keys(), data_2[stats_type].keys()
+        diff_keys = keys_1 ^ keys_2
+        for k in list(keys_1):
+            if k in diff_keys:
+                del data_1[stats_type][k]
+        for k in list(keys_2):
+            if k in diff_keys:
+                del data_2[stats_type][k]
+    return data_1, data_2
 
 def HaveSameKeys(data_1, data_2):
     if IsDictionary(data_1) and IsDictionary(data_2):

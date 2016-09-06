@@ -194,11 +194,12 @@ if __name__ == "__main__":
               print_extended=args.print_extended,
               order_by_diff=args.order_by_diff,
               filter_stats_warnings=args.output_for_linaro_automation)
-    if utils.HaveSameKeys(res_1, res_2):
-        utils_stats.ComputeAndPrintRelationGeomean(
-            utils.Unflatten(res_1),
-            utils.Unflatten(res_2),
-            args.print_extended >= print_extended_raw_data)
-    else:
-        utils.Info("Not comparing the geomeans because the two result sets "
-                   "have different keys.")
+
+    if not utils.HaveSameKeys(res_1, res_2):
+        utils.Warning("Computing geomean on a subset of statistics which only " \
+                      "includes keys common to both datasets.")
+        res_1, res_2 = utils.KeepSameKeys(res_1, res_2)
+    utils_stats.ComputeAndPrintRelationGeomean(
+        utils.Unflatten(res_1),
+        utils.Unflatten(res_2),
+        args.print_extended >= print_extended_raw_data)
