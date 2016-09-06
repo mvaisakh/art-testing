@@ -58,17 +58,10 @@ public class SystemArrayCopy {
     return sb.toString();
   }
 
-  private static void generateRandomStrings() {
+  static {
     for (int i = 0; i < ARRAY_LENGTH; i++) {
-      stringArray[i] = generateRandomString(MAX_BUFFER_BYTES);
-      stringArraySmall[i] = generateRandomString(MAX_BUFFER_BYTES);
-      stringArrayMedium[i] = generateRandomString(MAX_BUFFER_BYTES);
-      stringArrayLarge[i] = generateRandomString(MAX_BUFFER_BYTES);
+      stringArray[i] = String.valueOf(i);
     }
-  }
-
-  static  {
-    generateRandomStrings();
   }
 
   private void bufferedReadLoop(char[] cbuf, int copyLength) throws IOException {
@@ -81,14 +74,20 @@ public class SystemArrayCopy {
     }
   }
 
-  public boolean verify() {
+  public boolean verify() throws IOException {
     boolean result = true;
+
+    timeArrayCopySmall(1);
     for (int i = 0; i < ARRAY_COPY_SMALL; i++) {
       result &= stringArray[i].equals(stringArraySmall[i]);
     }
+
+    timeArrayCopyMedium(1);
     for (int i = 0; i < ARRAY_COPY_MEDIUM; i++) {
       result &= stringArray[i].equals(stringArrayMedium[i]);
     }
+
+    timeArrayCopyLarge(1);
     for (int i = 0; i < ARRAY_COPY_LARGE; i++) {
       result &= stringArray[i].equals(stringArrayLarge[i]);
     }
