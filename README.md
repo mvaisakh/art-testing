@@ -162,6 +162,8 @@ existing benchmark. Besides, developers should also notice:
    methods and run them.
 2. Verify methods start with "verify" -- all boolean verifyXXX() methods will
    be run to check the benchmark is working correctly.
+   `verify` methods should *not* depend on the benchmark having run before it is
+   called.
 3. Leave iterations as parameter -- Test launcher will fill it with a value
    to make sure it runs in a reasonable duration.
 4. Without auto-calibration benchmarks should run for a reasonable amount of
@@ -190,14 +192,18 @@ existing benchmark. Besides, developers should also notice:
                   int result = 0;
                   for (int i = 0; i < iters; i++) {
                       // test code
-                      testAddResults[i] = i + i;
+                      result += i;
+                      testAddResults[i] = result;
                   }
                   return result;
            }
 
-           public boolean verifyTestAdd() {
-                  boolean result = // test contents of testAddResults[]
-                  return result;
+           public static boolean verifyTestAdd() {
+                  return timeTestAdd(0) == 0 &&
+                         timeTestAdd(1) == 1 &&
+                         timeTestAdd(2) == 3 &&
+                         timeTestAdd(100) == 5050 &&
+                         timeTestAdd(123) == 7626;
            }
 
     // If you want to fill iterations with your own value. Write a method like:
