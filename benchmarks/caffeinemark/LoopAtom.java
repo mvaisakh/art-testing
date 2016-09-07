@@ -143,7 +143,7 @@ public class LoopAtom
     public int fibs[];
     // CHECKSTYLE.ON: .*
 
-  private static int PREDEFINED_FIB_COUNT = 10000;
+  private static int PREDEFINED_FIB_COUNT = 1000;
 
   public void timeLoopAtom(int iters) {
     initialize(PREDEFINED_FIB_COUNT);
@@ -154,7 +154,7 @@ public class LoopAtom
 
   public boolean verifyLoopAtom() {
     initialize(PREDEFINED_FIB_COUNT);
-    int expected = 49995001;
+    int expected = 499501;
     int found = execute();
 
     if (found != expected) {
@@ -169,7 +169,7 @@ public class LoopAtom
     LoopAtom obj = new LoopAtom();
 
     final long before = System.currentTimeMillis();
-    obj.timeLoopAtom(2);
+    obj.timeLoopAtom(120);
     final long after = System.currentTimeMillis();
 
     if (!obj.verifyLoopAtom()) {
