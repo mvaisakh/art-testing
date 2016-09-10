@@ -32,7 +32,7 @@ public class RunBench {
       TimeUnit.NANOSECONDS.convert(50, TimeUnit.MILLISECONDS);
   // The target benchmark running time.
   public static final long DEFAULT_BENCH_TARGET_RUN_TIME_NS =
-      TimeUnit.NANOSECONDS.convert(200, TimeUnit.MILLISECONDS);
+      TimeUnit.NANOSECONDS.convert(400, TimeUnit.MILLISECONDS);
   public static final int ITERATIONS_LIMIT = 0x400000;
 
   // A method with this name will be executed as a microbenchmark.
