@@ -64,7 +64,6 @@ def Warning(message, exc=None):
     if exc != None:
         traceback.print_exception(type(exc), exc, None)
     print(utils_print.NO_COLOUR)
-    traceback.print_stack()
 
 def Error(message, rc=1):
     print(utils_print.COLOUR_RED + 'ERROR: ' + message + utils_print.NO_COLOUR,
@@ -416,17 +415,20 @@ def Flatten(data, key=''):
 
     return res
 
+# TODO: Refactor function to handle arbitrary data structures (see HaveSameKeys)
 def KeepSameKeys(data_1, data_2):
+    diff_keys_dict = dict()
     for stats_type in data_1:
         keys_1, keys_2 = data_1[stats_type].keys(), data_2[stats_type].keys()
         diff_keys = keys_1 ^ keys_2
+        diff_keys_dict[stats_type] = diff_keys
         for k in list(keys_1):
             if k in diff_keys:
                 del data_1[stats_type][k]
         for k in list(keys_2):
             if k in diff_keys:
                 del data_2[stats_type][k]
-    return data_1, data_2
+    return data_1, data_2, diff_keys_dict
 
 def HaveSameKeys(data_1, data_2):
     if IsDictionary(data_1) and IsDictionary(data_2):
