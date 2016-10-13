@@ -124,7 +124,9 @@ def PrintDiff(data_1, data_2,
         headers.extend(['median1', 'median2', 'mean1', 'mean2'])
 
     if not data_1 and not data_2:
-        # There is nothing to compare or print.
+        # There is nothing to compare or print (filter may have removed values)
+        print(indentation + key + ': No data',
+                '- or insignificant values were filtered')
         return
 
     if utils.IsDictionaryOrNone(data_1) and utils.IsDictionaryOrNone(data_2):
