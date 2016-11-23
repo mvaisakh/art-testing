@@ -142,14 +142,23 @@ def GetStats(apk,
                   ' --dex-file=' + apk_path + ' --oat-file=' + oat
         command += ' --instruction-set=' + isa + ') | head -n1'
 
+    linux_target = os.getenv('ART_TARGET_LINUX', 'false') == 'true'
+    dex2oat_time_regex = '.*?took (?P<value>.*?)(?P<unit>[mnu]{,1})s.*?\)'
     compilation_times = []
     for i in range(iterations):
         rc, out = utils_adb.shell(command, target)
-        # To simplify parsing, assume that PID values are rarely recycled by the system.
-        stats_command = 'logcat -dsv process dex2oat | grep "^I([[:space:]]*' + \
-                        out.rstrip() + ').*took" | tail -n1'
-        rc, out = utils_adb.shell(stats_command, target)
-        compile_time = re.match('.*?took (?P<value>.*?)(?P<unit>[mnu]{,1})s.*?\)', out)
+        if linux_target:
+            # On Linux, dex2oat writes to stdout, and output of compilation time is likely last
+            for line in reversed(out.splitlines()):
+                compile_time = re.match(dex2oat_time_regex, line)
+                if compile_time:
+                    break
+        else:
+            # To simplify parsing, assume that PID values are rarely recycled by the system.
+            stats_command = 'logcat -dsv process dex2oat | grep "^I([[:space:]]*' + \
+                            out.rstrip() + ').*took" | tail -n1'
+            rc, out = utils_adb.shell(stats_command, target)
+            compile_time = re.match(dex2oat_time_regex, out)
 
         if not compile_time:
             utils.Error('dex2oat failed; check adb logcat.')
