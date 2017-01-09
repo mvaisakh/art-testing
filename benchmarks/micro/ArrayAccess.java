@@ -27,14 +27,14 @@ public class ArrayAccess {
 
   private static final int ITER_COUNT = 1000;
 
-  public static void AccessArrayConstants(int[] array) {
+  public static void accessArrayConstants(int[] array) {
     for (int j = 0; j < 100000; j++) {
       array[4]++;
       array[5]++;
     }
   }
 
-  public static void AccessArrayVariables(int[] array, int i) {
+  public static void accessArrayVariables(int[] array, int i) {
     for (int j = 0; j < 100000; j++) {
       array[i]++;
       array[i + 1]++;
@@ -48,7 +48,7 @@ public class ArrayAccess {
     int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
     for (int i = 0; i < iters; i++) {
-      AccessArrayConstants(array);
+      accessArrayConstants(array);
     }
   }
 
@@ -56,7 +56,7 @@ public class ArrayAccess {
     int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
     for (int i = 0; i < iters; i++) {
-      AccessArrayVariables(array, 5);
+      accessArrayVariables(array, 5);
     }
   }
 
