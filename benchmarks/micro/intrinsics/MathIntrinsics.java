@@ -16,8 +16,8 @@
  */
 
 /*
- * Description:     Simple loops around rounding-related intrinsics.
- * Main Focus:      Rounding-related intrinsics.
+ * Description:     Simple loops around math-related intrinsics: rounding, min/max, etc.
+ * Main Focus:      Math-related intrinsics.
  */
 
 package benchmarks.micro.intrinsics;
@@ -25,7 +25,7 @@ package benchmarks.micro.intrinsics;
 import java.lang.System;
 import java.util.Random;
 
-public class Rounding {
+public class MathIntrinsics {
   // The java.util.Random only generates random float/double numbers between 0 and 1.
   // So we implement our own random floating point numbers here,
   // based on a well known quick and dirty approach.
@@ -65,6 +65,9 @@ public class Rounding {
   private static final float[] rand_neg_float = new float[NUM_RANDS];
   private static final double[] rand_neg_double = new double[NUM_RANDS];
 
+  private static final int[] rand_int = new int[NUM_RANDS];
+  private static final long[] rand_long = new long[NUM_RANDS];
+
   // These are written but not read. The computation routines below store their
   // result to these static variables to ensure the computation code is not
   // removed by DCE.
@@ -77,6 +80,9 @@ public class Rounding {
     MyRandom rand = new MyRandom();
 
     for (int i = 0; i < NUM_RANDS; i++) {
+      rand_int[i] = rand.nextInt();
+      rand_long[i] = rand.nextLong();
+
       rand_pos_float[i] = rand.nextFloat();
       rand_pos_double[i] = rand.nextDouble();
 
@@ -274,10 +280,116 @@ public class Rounding {
     res_double = res;
   }
 
+  public void timeRint(int iterations) {
+    double res = 0.0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        res += Math.rint(rand_double[i % NUM_RANDS]);
+      }
+    }
+    res_double = res;
+  }
+
+  public void timeMinDouble(int iterations) {
+    double res = 0.0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        double a = rand_double[i % NUM_RANDS];
+        double b = rand_double[(i + 1) % NUM_RANDS];
+        res += Math.min(a, b);
+      }
+    }
+    res_double = res;
+  }
+
+  public void timeMaxDouble(int iterations) {
+    double res = 0.0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        double a = rand_double[i % NUM_RANDS];
+        double b = rand_double[(i + 1) % NUM_RANDS];
+        res += Math.max(a, b);
+      }
+    }
+    res_double = res;
+  }
+
+  public void timeMinFloat(int iterations) {
+    float res = 0.0f;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        float a = rand_float[i % NUM_RANDS];
+        float b = rand_float[(i + 1) % NUM_RANDS];
+        res += Math.min(a, b);
+      }
+    }
+    res_float = res;
+  }
+
+  public void timeMaxFloat(int iterations) {
+    float res = 0.0f;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        float a = rand_float[i % NUM_RANDS];
+        float b = rand_float[(i + 1) % NUM_RANDS];
+        res += Math.max(a, b);
+      }
+    }
+    res_float = res;
+  }
+
+  public void timeMinLong(int iterations) {
+    long res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        long a = rand_long[i % NUM_RANDS];
+        long b = rand_long[(i + 1) % NUM_RANDS];
+        res += Math.min(a, b);
+      }
+    }
+    res_long = res;
+  }
+
+  public void timeMaxLong(int iterations) {
+    long res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        long a = rand_long[i % NUM_RANDS];
+        long b = rand_long[(i + 1) % NUM_RANDS];
+        res += Math.max(a, b);
+      }
+    }
+    res_long = res;
+  }
+
+  public void timeMinInt(int iterations) {
+    int res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        int a = rand_int[i % NUM_RANDS];
+        int b = rand_int[(i + 1) % NUM_RANDS];
+        res += Math.min(a, b);
+      }
+    }
+    res_int = res;
+  }
+
+  public void timeMaxInt(int iterations) {
+    int res = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        int a = rand_int[i % NUM_RANDS];
+        int b = rand_int[(i + 1) % NUM_RANDS];
+        res += Math.max(a, b);
+      }
+    }
+    res_int = res;
+  }
+
   private static final int ITER_COUNT = 100000;
 
   public static void main(String[] args) {
-    Rounding obj = new Rounding();
+    MathIntrinsics obj = new MathIntrinsics();
     long before = System.currentTimeMillis();
 
     obj.timeRoundPositiveFloat(ITER_COUNT);
@@ -309,8 +421,22 @@ public class Rounding {
     obj.timeCeilFloat(ITER_COUNT);
     obj.timeCeilDouble(ITER_COUNT);
 
+    obj.timeRint(ITER_COUNT);
+
     long after = System.currentTimeMillis();
 
-    System.out.println("benchmarks/micro/intrinsics/Rounding: " + (after - before));
+    System.out.println("benchmarks/micro/intrinsics/MathIntrinsics/Rounding: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeMinDouble(ITER_COUNT);
+    obj.timeMaxDouble(ITER_COUNT);
+    obj.timeMinFloat(ITER_COUNT);
+    obj.timeMaxFloat(ITER_COUNT);
+    obj.timeMinLong(ITER_COUNT);
+    obj.timeMaxLong(ITER_COUNT);
+    obj.timeMinInt(ITER_COUNT);
+    obj.timeMaxInt(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/micro/intrinsics/MathIntrinsics/MinMax: " + (after - before));
   }
 }
