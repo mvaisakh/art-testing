@@ -146,17 +146,17 @@ def GetStats(apk,
     dex2oat_time_regex = '.*?took (?P<value>.*?)(?P<unit>[mnu]{,1})s.*?\)'
     compilation_times = []
     for i in range(iterations):
-        rc, out = utils_adb.shell(command, target)
+        rc, stdout = utils_adb.shell(command, target)
         if linux_target:
             # On Linux, dex2oat writes to stdout, and output of compilation time is likely last
-            for line in reversed(out.splitlines()):
-                compile_time = re.match(dex2oat_time_regex, line)
+            for out in reversed(stdout.splitlines()):
+                compile_time = re.match(dex2oat_time_regex, out)
                 if compile_time:
                     break
         else:
             # To simplify parsing, assume that PID values are rarely recycled by the system.
             stats_command = 'logcat -dsv process dex2oat | grep "^I([[:space:]]*' + \
-                            out.rstrip() + ').*took" | tail -n1'
+                            stdout.rstrip() + ').*took" | tail -n1'
             rc, out = utils_adb.shell(stats_command, target)
             compile_time = re.match(dex2oat_time_regex, out)
 
@@ -170,6 +170,8 @@ def GetStats(apk,
     # The rest of the statistics are deterministic, so there is no need to run several
     # iterations; just get the values from the last run.
     out = out[compile_time.end():]
+    # Newer versions of dex2oat also have number of threads output, that we need to get rid of
+    out = re.sub('\(threads:\s+[0-9]+\) ', '', out)
     memory_stats = OrderedDict()
     byte_size = True
 
