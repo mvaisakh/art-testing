@@ -121,6 +121,7 @@ public class RunBench {
 
     log.info(benchmarkIdentifier(method) + ": "
         + duration + " ns for " + iterations + " iterations");
+    // The runner expects each output line to end with "per iteration"
     System.out.printf("%-40s%.2f ns per iteration\n",
         benchmarkIdentifier(method) + ":", iterationTime);
   }

@@ -162,13 +162,13 @@ def RunBench(apk, classname,
 
         try:
             for line in outerr.rstrip().split("\n"):
+                if not line.endswith('per iteration'):
+                    continue
                 name = line.split(":")[0].rstrip()
-                # Ignore any java logging from --debug
-                if name not in ['INFO', 'DEBUG', 'ERROR']:
-                    score = float(line.split(":")[1].strip().split(" ")[0].strip())
-                    if name not in result:
-                        result[name] = list()
-                    result[name].append(score)
+                score = float(line.split(":")[1].strip().split(" ")[0].strip())
+                if name not in result:
+                    result[name] = list()
+                result[name].append(score)
         except Exception as e:
             utils.Warning(str(e) + "\n  \-> Error parsing output from %s", e)
             rc += 1
