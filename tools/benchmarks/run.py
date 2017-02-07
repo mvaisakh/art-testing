@@ -161,7 +161,7 @@ def RunBench(apk, classname,
             continue
 
         try:
-            for line in outerr.rstrip().split("\n"):
+            for line in outerr.rstrip().splitlines():
                 if not line.endswith('per iteration'):
                     continue
                 name = line.split(":")[0].rstrip()
@@ -206,7 +206,7 @@ def ListAllBenchmarks():
         ['java', 'org.linaro.bench.RunBench', '--list_benchmarks'],
         cwd=utils.dir_build_java_classes)
     out = out.rstrip()
-    benchs = out.split('\n')
+    benchs = out.splitlines()
     return benchs
 
 

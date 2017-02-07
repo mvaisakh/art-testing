@@ -230,7 +230,7 @@ def GetCompilationStatisticsResults(args):
             find_command = 'find / -type d \( -name proc -o -name sys \) -prune -o ' \
                            '-name "*boot.oat" -print 2>/dev/null'
             rc, out = utils_adb.shell(find_command, args.target)
-            boot_oat_files = out.split('\n')[:-1]
+            boot_oat_files = out.splitlines()[:-1]
 
             if len(boot_oat_files) != len(isa_list):
                 utils.Error("Number of architectures different from number of boot.oat files. " \
