@@ -23,23 +23,253 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
 
-package com.luugiathuy.games.reversi;
+/*
+* The original file is available at:
+* https://github.com/luugiathuy/ReversiGame
+*
+* Modifications:
+* (1) Squashed java files into a single java file.
+* (2) Modify the Man-machine war to Machine to war. Delete flag "mIsCompTurn".
+* (3) Modify some flags, such as "mIsBlackTurn = false" to "mIsBlackTurn = true.
+*     - The ruler says the black is first. so modify the "mIsBlackTurn = true".
+*     - Because both sides have no pieces to end the game. Add the flag "mNoMove"
+*       to record whether the other party can not move pieces.
+*       If the second party can't move pieces, end the game.
+* (4) Add test function "timeReversi", "verifyReversi" for test.
+*/
+package benchmarks.reversigame;
 
 import java.util.ArrayList;
-import java.util.Observable;
+import java.util.PriorityQueue;
 import java.util.Vector;
 
-import com.luugiathuy.games.reversi.Agent.MoveCoord;
+import benchmarks.reversigame.Agent.MoveCoord;
+import benchmarks.reversigame.Agent.MoveScore;
+
+// CHECKSTYLE.OFF: .*
+class Evaluation {
+	
+	private static final int sBOARD_SIZE = Reversi.sBOARD_SIZE;
+	
+	private static int[][] sBOARD_VALUE = {
+		{100, -1, 5, 2, 2, 5, -1, 100},
+		{-1, -10,1, 1, 1, 1,-10, -1},
+		{5 , 1,  1, 1, 1, 1,  1,  5},
+		{2 , 1,  1, 0, 0, 1,  1,  2},
+		{2 , 1,  1, 0, 0, 1,  1,  2},
+		{5 , 1,  1, 1, 1, 1,  1,  5},
+		{-1,-10, 1, 1, 1, 1,-10, -1},
+		{100, -1, 5, 2, 2, 5, -1, 100}};
+	
+	public static int evaluateBoard(char[][] board, char piece, char oppPiece) {
+		int score = 0;
+		for (int r = 0; r < sBOARD_SIZE; ++r) {
+			for (int c = 0; c < sBOARD_SIZE; ++c) {
+				if (board[r][c] == piece)
+					score += sBOARD_VALUE[r][c];
+				else if (board[r][c] == oppPiece)
+					score -= sBOARD_VALUE[r][c];
+			}
+		}
+		return score;
+	}
+	
+	public static ArrayList<MoveCoord> genPriorityMoves(char[][] board, char piece) {
+		ArrayList<MoveCoord> moveList = Reversi.findValidMove(board, piece, false);
+		PriorityQueue<MoveScore> moveQueue = new PriorityQueue<MoveScore>();
+		
+		for (int i=0; i < moveList.size(); ++i) {
+			MoveCoord move = moveList.get(i);
+			MoveScore moveScore = new MoveScore(move, sBOARD_VALUE[move.getRow()][move.getCol()]);
+			moveQueue.add(moveScore);
+		}
+		
+		moveList = new ArrayList<MoveCoord>();
+		while (!moveQueue.isEmpty()) {
+			moveList.add(moveQueue.poll().getMove());
+		}
+		
+		return moveList;
+	}
+	
+	
+}
+
+/**
+ * This is an interface for ReversiAgents to work with the GUI interface.
+ */
+interface Agent {
+
+	/**
+	 * Method to make a move. game state is stored in the class variables
+	 *
+	 * Method for you to implement. You want to make your modifications here.
+	 *
+	 * @return Returns a move.
+	 */
+	MoveCoord findMove(char[][] board, char piece);
+
+	/**
+	 * class that implements a pair of integer coordinates
+	 */
+	public class MoveCoord {
+		private int row;
+
+		private int col;
+
+		/**
+		 * constructor for a Pair of coordinates
+		 */
+		public MoveCoord(int row, int col) {
+			this.row = row;
+			this.col = col;
+		}
+
+		/** accessor methods */
+		public int getRow() {
+			return this.row;
+		}
+
+		public int getCol() {
+			return this.col;
+		}
+
+		/** mutation methods */
+		public void setRow(int row) {
+			this.row = row;
+		}
+
+		public void setCol(int col) {
+			this.col = col;
+		}
+
+
+		/** takes a pair of x,y coordinates, converts to standard board notation */
+		public static String encode(int row, int col) {
+			return ("" + new Character((char) ('A' + col)) + (row + 1));
+		}
+	}
+	
+	/**
+	* Class for presenting the move and the score together
+	*/
+	public class MoveScore implements Comparable<MoveScore>{
+		private MoveCoord move ;
+	    private int score ;
+	    
+	    public MoveScore(MoveCoord move, int score){
+	        this.move = move;
+	        this.score = score;
+	    }
+	    
+	    public int getScore(){ 
+	    	return score ;
+	    }
+	    
+	    public MoveCoord getMove(){ 
+		  	return move ;
+	   }
+
+		@Override
+		public int compareTo(MoveScore o) {
+			if(o.score > this.score)
+				return 1;
+			else if (o.score < this.score)
+				return -1;
+			else
+				return 0;
+		}
+	}
+}
+
+class NegaScoutAgent implements Agent{
+        
+    static final int INFINITY = 1000000;
+    
+    private int mMaxPly = 5;
+	
+	@Override
+	public MoveCoord findMove(char[][] board, char piece) {
+		return abNegascoutDecision(board, piece);
+	}
+	
+	public MoveCoord abNegascoutDecision(char[][] board, char piece){
+    	MoveScore moveScore = abNegascout(board,0,-INFINITY,INFINITY,piece);
+    	return moveScore.getMove();
+    }
+    
+    /**
+     * Searching the move using NegaScout
+     * @param board the state of game
+     * @param ply the depth of searching
+     * @param alpha the boundary
+     * @param beta the boundary
+     * @param player the player will find the move
+     * @return the pair of move and score
+     */
+    public MoveScore abNegascout(char[][] board, int ply, int alpha, int beta, char piece){
+    	char oppPiece = (piece == Reversi.sBLACK_PIECE) ? Reversi.sWHITE_PIECE : Reversi.sBLACK_PIECE;
+    	
+    	// Check if we have done recursing
+    	if (ply==mMaxPly){
+            return new MoveScore(null, Evaluation.evaluateBoard(board, piece, oppPiece));
+        }
+    		
+    	int currentScore;
+    	int bestScore = -INFINITY;
+    	MoveCoord bestMove = null;
+    	int adaptiveBeta = beta; 	// Keep track the test window value
+    	
+    	// Generates all possible moves
+    	ArrayList<MoveCoord> moveList = Evaluation.genPriorityMoves(board, piece);
+    	if (moveList.isEmpty())
+    		return new MoveScore(null, bestScore);
+    	bestMove = moveList.get(0);
+    	
+    	// Go through each move
+    	for(int i=0;i<moveList.size();i++){
+    		MoveCoord move = moveList.get(i);
+    		char[][] newBoard = new char[8][8];
+    		for (int r = 0; r < 8; ++r)
+    			for (int c=0; c < 8; ++c)
+    				newBoard[r][c] = board[r][c];
+    		
+    		// Recurse
+    		MoveScore current = abNegascout(newBoard, ply+1, -adaptiveBeta, - Math.max(alpha,bestScore), oppPiece);
+    		
+    		currentScore = - current.getScore();
+    		
+    		// Update bestScore
+    		if (currentScore>bestScore){
+    			// if in 'narrow-mode' then widen and do a regular AB negamax search
+    			if (adaptiveBeta == beta || ply>=(mMaxPly-2)){
+    				bestScore = currentScore;
+					bestMove = move;
+    			}else{ // otherwise, we can do a Test
+    				current = abNegascout(newBoard, ply+1, -beta, -currentScore, oppPiece);
+    				bestScore = - current.getScore();
+    				bestMove = move;
+    			}
+    			
+    			// If we are outside the bounds, the prune: exit immediately
+        		if(bestScore>=beta){
+        			return new MoveScore(bestMove,bestScore);
+        		}
+        		
+        		// Otherwise, update the window location
+        		adaptiveBeta = Math.max(alpha, bestScore) + 1;
+    		}
+    	}
+    	return new MoveScore(bestMove,bestScore);
+    }
+}
 
 /**
  * Game logic
  * @author luugiathuy
  *
  */
-public class Reversi extends Observable{
-	
-	/** The unique instance of this class */
-	private static Reversi sInstance;
+public class Reversi {
 	
 	/** Game State */
 	public static final int PLAYING = 0;
@@ -83,8 +313,8 @@ public class Reversi extends Observable{
 	/** whether it is black's turn to move */
 	private boolean mIsBlackTurn = false;
 	
-	/** whether it is computer's turn to move */
-	private boolean mIsCompTurn = true;
+	/** whether player move */
+	private boolean mNoMove = false;
 	
 	/** the board */
 	private char[][] mBoard;
@@ -111,15 +341,8 @@ public class Reversi extends Observable{
 	private Vector<String> mMoveList;
 	
 	/** Private constructor */
-	private Reversi() {
+	public Reversi() {
 		init();
-	}
-	
-	public static Reversi getInstance() {
-		if (sInstance == null)
-			sInstance = new Reversi();
-		
-		return sInstance;
 	}
 	
 	/** Initialize the board */
@@ -136,8 +359,8 @@ public class Reversi extends Observable{
 		// set up AI agent
 		mAIAgent = new NegaScoutAgent();
 		
-		// computer plays second for default
-		mIsCompTurn = false;
+		// set default
+		mNoMove = false;
 	}
     
     public char[][] getBoard() {
@@ -152,16 +375,6 @@ public class Reversi extends Observable{
     /** Sets game state */
     public void setGameState(int state) {
     	mState = state;
-    }
-    
-    /** Set whether computer moves first */
-    public void setIsCompTurn(boolean value) {
-    	mIsCompTurn = value;
-    }
-    
-    /** Get whether computer moves first */
-    public boolean getIsCompTurn() {
-    	return mIsCompTurn;
     }
     
     /** Get white's score */
@@ -188,14 +401,16 @@ public class Reversi extends Observable{
 		resetBoard();		
 		// reset effected pieces
 		resetEffectedPieces();
-		// white piece starts first
-		mIsBlackTurn = false;
+		// black piece starts first for ruler
+		mIsBlackTurn = true;
 		// set state
 		mState = PLAYING;
+                // Because both sides have no pieces to end the game.
+                // "mNoMove" is used to record whether the other party can not
+                // move pieces. If the second party can't move pieces, end the game.
+                mNoMove = false;
 		stateChange();
 		
-		// get next move
-		getNextMove();
 	}
     
     /** Reset the board */
@@ -229,21 +444,6 @@ public class Reversi extends Observable{
 	
 	/** Get next move */
 	private void getNextMove() {
-		if (!mIsCompTurn) {
-			char piece = (mIsBlackTurn) ? sBLACK_PIECE : sWHITE_PIECE;
-			if ((findValidMove(mBoard, piece, true)).isEmpty()) {
-				char opPiece = (piece == sBLACK_PIECE) ? sWHITE_PIECE : sBLACK_PIECE;
-				if ((findValidMove(mBoard, opPiece, false)).isEmpty())
-				{
-					mState = ENDED;
-					stateChange();	
-					return;
-				}
-				changeTurn();
-				getNextMove();
-			}	
-		}
-		else {
 			char piece = (mIsBlackTurn) ? sBLACK_PIECE : sWHITE_PIECE;
 			
 			// clear all suggested pieces
@@ -262,18 +462,22 @@ public class Reversi extends Observable{
 			MoveCoord move = mAIAgent.findMove(tempBoard, piece);
 			if (move != null)
 			{
-				//System.out.println(move.getRow() + " " + move.getCol());
+                                mNoMove = false;
 				effectMove(mBoard, piece, move.getRow(), move.getCol());
 				addToMoveList(piece, move.getRow(), move.getCol());
 				mNewPieceRow = move.getRow();
 				mNewPieceCol = move.getCol();
 				stateChange();
-			}
+			} else {
+                                if (mNoMove) {
+                                        mState = ENDED;
+                                } else {
+                                        mNoMove = true;
+                                }
+                        }
 			
 			// next move
 			changeTurn();
-			getNextMove();
-		}
 	}
 	
 	/** add a move to move list */
@@ -285,7 +489,6 @@ public class Reversi extends Observable{
 	/** change turn of playing */
 	private void changeTurn() {
 		mIsBlackTurn = !mIsBlackTurn;
-		mIsCompTurn = !mIsCompTurn;
 	}
 	
 	/** Calculate score */
@@ -300,6 +503,9 @@ public class Reversi extends Observable{
 				else if (mBoard[i][j] == sWHITE_PIECE)
 					++mWhiteScore;
 			}
+                if (mBlackScore + mWhiteScore >= sBOARD_SIZE*sBOARD_SIZE) {
+                        mState = ENDED;
+                }
 	}
 	
 	/**
@@ -383,10 +589,10 @@ public class Reversi extends Observable{
 	 * @param col column of the move
 	 * @return the new board after the move is affected
 	 */
-	public static char[][] effectMove(char[][] board, char piece, int row, int col) {
+	public char[][] effectMove(char[][] board, char piece, int row, int col) {
 		board[row][col] = piece;
 		
-		Reversi.getInstance().resetEffectedPieces();
+		resetEffectedPieces();
 		
 		// check 8 directions
 		for (int i = 0; i < 8; ++i) {
@@ -407,7 +613,7 @@ public class Reversi extends Observable{
 					int effectPieceCol = col + sOFFSET_MOVE_COL[i];
 					while (effectPieceRow != curRow || effectPieceCol != curCol)
 					{
-						Reversi.getInstance().setEffectedPiece(effectPieceRow, effectPieceCol);
+						setEffectedPiece(effectPieceRow, effectPieceCol);
 						board[effectPieceRow][effectPieceCol] = piece;
 						effectPieceRow += sOFFSET_MOVE_ROW[i];
 						effectPieceCol += sOFFSET_MOVE_COL[i];
@@ -451,8 +657,54 @@ public class Reversi extends Observable{
     
 	private void stateChange() {
 		calScore();
-		setChanged();
-		notifyObservers();
 	}
+// CHECKSTYLE.ON: .*
 
+  public void timeReversi(int iterations) {
+    for (int iter = 0; iter < iterations; iter++) {
+      newGame();
+      while (getGameState() == PLAYING) {
+        getNextMove();
+      }
+    }
+  }
+
+  public boolean verifyReversi() {
+    newGame();
+    while (getGameState() == PLAYING) {
+      getNextMove();
+    }
+
+    int blackScore = getBlackScore();
+    int whiteScore = getWhiteScore();
+
+    if (blackScore != 15) {
+      System.out.println("ERROR: blackScore should be 15");
+      return false;
+    }
+
+    if (whiteScore != 49) {
+      System.out.println("ERROR: whiteScore should be 49");
+      return false;
+    }
+
+    return true;
+  }
+
+  public static void main(String []argv) {
+    int rc = 0;
+    Reversi obj = new Reversi();
+
+    long before = System.currentTimeMillis();
+    obj.timeReversi(3);
+    long after = System.currentTimeMillis();
+
+    System.out.println("benchmarks/algorithm/Reversi: " + (after - before));
+
+    if (!obj.verifyReversi()) {
+      rc++;
+    }
+
+    System.exit(rc);
+  }
 }

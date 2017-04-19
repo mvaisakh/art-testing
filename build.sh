@@ -129,12 +129,7 @@ set -f
 # Find what Java files we need to compile.
 
 if [[ -z $JAVA_BENCHMARK_FILES ]]; then
-  JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java \
-! -name Agent.java                                               \
-! -name Evaluation.java                                            \
-! -name NegaScoutAgent.java                                              \
-! -name Reversi.java                                             \
-)"
+  JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
 
 fi
 
