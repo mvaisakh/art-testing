@@ -61,6 +61,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -----
 
+* For files in benchmarks/reversigame/*
+  under the MIT License (MIT). See file benchmarks/reversigame/LICENSE
+  [from https://github.com/luugiathuy/ReversiGame]
+
+-----
+
 * For benchmarks/algorithm/CryptoMD5.java:
       benchmarks/algorithm/CryptoSHA1.java:
   BSD 3-clause License

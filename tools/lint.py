@@ -41,6 +41,19 @@ def GetJavaFiles():
             files = map(lambda x : os.path.join(root, x), files)
             java_files += [f for f in files if f.endswith('.java')]
     java_files.sort()
+
+    def exclude(f):
+        excluded_files = ['Agent.java',
+                          'Evaluation.java',
+                          'LoopAtom.java',
+                          'Reversi.java']
+        for e in excluded_files:
+            if f.endswith(e):
+                return True
+        return False
+
+    java_files = [f for f in java_files if not exclude(f)]
+
     return java_files
 
 
