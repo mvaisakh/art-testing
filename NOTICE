@@ -139,6 +139,11 @@ SOFTWARE.
 
 ---
 
+* For files in benchmarks/testsimd/*
+  Apache License, Version 2.0.
+
+---
+
 * we use the tool checkstyle
 it is downloaded automatically from http://sourceforge.net/projects/checkstyle
 but not redistributed here
