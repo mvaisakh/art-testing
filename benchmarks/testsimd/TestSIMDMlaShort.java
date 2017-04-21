@@ -14,15 +14,10 @@
  * limitations under the License.
  *
  */
-package org.linaro.benchmarks;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
+package benchmarks.testsimd;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestSIMDMlaShort {
   static final int LENGTH = 256 * 1024;
   static short [] a = new short[LENGTH];
@@ -107,42 +102,108 @@ public class TestSIMDMlaShort {
     }
   }
 
-  @Setup
-  public void setup()
-  {
+  public void timeVectSumOfMulAdd1(int iters) {
+    int sum = 0;
     TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      sum = vectSumOfMulAdd1(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectSumOfMulAdd1() {
+  public void timeVectSumOfMulAdd2(int iters) {
     int sum = 0;
-    sum = vectSumOfMulAdd1(a, b, c, d);
+    TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      sum = vectSumOfMulAdd2(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectSumOfMulAdd2() {
+  public void timeVectSumOfMulAdd3(int iters) {
     int sum = 0;
-    sum = vectSumOfMulAdd2(a, b, c, d);
+    TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      sum = vectSumOfMulAdd3(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectSumOfMulAdd3() {
-    int sum = 0;
-    sum = vectSumOfMulAdd3(a, b, c, d);
-  }
-  @Benchmark
-  public void testVectMulAdd1() {
-    vectMulAdd1(a, b, c, d);
+  public void timeVectMulAdd1(int iters) {
+    TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      vectMulAdd1(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectMulAdd2() {
-    vectMulAdd2(a, b, c, d);
+  public void timeVectMulAdd2(int iters) {
+    TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      vectMulAdd2(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectMulAdd3() {
-    vectMulAdd3(a, b, c, d);
+  public void timeVectMulAdd3(int iters) {
+    TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      vectMulAdd3(a, b, c, d);
+    }
+  }
+
+  public boolean verifySIMDMlaShort() {
+    int expected = 7077888;
+    int found = 0;
+    TestSIMDMlaInit();
+    found += vectSumOfMulAdd1(a, b, c, d);
+    found += vectSumOfMulAdd2(a, b, c, d);
+    found += vectSumOfMulAdd3(a, b, c, d);
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
+  }
+  // CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 200;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestSIMDMlaShort obj = new TestSIMDMlaShort();
+
+    long before = System.currentTimeMillis();
+    obj.timeVectSumOfMulAdd1(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaShort1: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectSumOfMulAdd2(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaShort2: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectSumOfMulAdd3(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaShort3: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectMulAdd1(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaShortSimple1: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectMulAdd2(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaShortSimple2: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectMulAdd3(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaShortSimple3: " + (after - before));
+
+    if (!obj.verifySIMDMlaShort()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }

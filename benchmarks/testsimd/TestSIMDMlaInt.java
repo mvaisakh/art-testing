@@ -14,15 +14,10 @@
  * limitations under the License.
  *
  */
-package org.linaro.benchmarks;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
+package benchmarks.testsimd;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestSIMDMlaInt {
   static final int LENGTH = 256 * 1024;
   static int [] a = new int[LENGTH];
@@ -77,28 +72,72 @@ public class TestSIMDMlaInt {
     return total;
   }
 
-  @Setup
-  public void setup()
-  {
+  public void timeVectSumOfMulAdd1(int iters) {
+    int sum = 0;
     TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      sum = vectSumOfMulAdd1(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectSumOfMulAdd1() {
+  public void timeVectSumOfMulAdd2(int iters) {
     int sum = 0;
-    sum = vectSumOfMulAdd1(a, b, c, d);
+    TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      sum = vectSumOfMulAdd2(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectSumOfMulAdd2() {
+  public void timeVectSumOfMulAdd3(int iters) {
     int sum = 0;
-    sum = vectSumOfMulAdd2(a, b, c, d);
+    TestSIMDMlaInit();
+    for (int i = 0; i < iters; i++) {
+      sum = vectSumOfMulAdd3(a, b, c, d);
+    }
   }
 
-  @Benchmark
-  public void testVectSumOfMulAdd3() {
-    int sum = 0;
-    sum = vectSumOfMulAdd3(a, b, c, d);
+  public boolean verifySIMDMlaInt() {
+    int expected = 7077888;
+    int found = 0;
+    TestSIMDMlaInit();
+    found += vectSumOfMulAdd1(a, b, c, d);
+    found += vectSumOfMulAdd2(a, b, c, d);
+    found += vectSumOfMulAdd3(a, b, c, d);
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
+  }
+  // CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 200;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestSIMDMlaInt obj = new TestSIMDMlaInt();
+
+    long before = System.currentTimeMillis();
+    obj.timeVectSumOfMulAdd1(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaInt1: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectSumOfMulAdd2(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaInt2: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectSumOfMulAdd3(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMlaInt3: " + (after - before));
+
+    if (!obj.verifySIMDMlaInt()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }

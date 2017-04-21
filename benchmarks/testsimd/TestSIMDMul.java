@@ -14,15 +14,10 @@
  * limitations under the License.
  *
  */
-package org.linaro.benchmarks;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
+package benchmarks.testsimd;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestSIMDMul {
   static final int LENGTH = 1024 * 256;
   static int [] a = new int[LENGTH];
@@ -67,25 +62,73 @@ public class TestSIMDMul {
     }
   }
 
-  @Setup
-  public void setup()
-  {
+  public void timeVectMulByte(int iters) {
     TestSIMDMulInit();
+    for (int i = 0; i < iters; i++) {
+      vectMulByte();
+    }
   }
 
-  @Benchmark
-  public void testVectMulByte() {
+  public void timeVectMulShort(int iters) {
+    TestSIMDMulInit();
+    for (int i = 0; i < iters; i++) {
+      vectMulShort();
+    }
+  }
+
+  public void timeVectMulInt(int iters) {
+    TestSIMDMulInit();
+    for (int i = 0; i < iters; i++) {
+      vectMulInt();
+    }
+  }
+
+  public boolean verifySIMDMul() {
+    TestSIMDMulInit();
     vectMulByte();
-  }
-
-  @Benchmark
-  public void testVectMulShort() {
     vectMulShort();
-  }
-
-  @Benchmark
-  public void tesVectMulInt() {
     vectMulInt();
+
+    int expected = 1432616960;
+    int found = 0;
+    for (int i = 0; i < LENGTH; i++) {
+      found += a[i] + b[i] + c[i] + sa[i] + sb[i] + sc[i] + ba[i] + bb[i] + bc[i];
+    }
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
+  }
+  // CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 300;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestSIMDMul obj = new TestSIMDMul();
+
+    long before = System.currentTimeMillis();
+    obj.timeVectMulByte(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMulByte: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectMulShort(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMulShort: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectMulInt(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDMulInt: " + (after - before));
+
+    if (!obj.verifySIMDMul()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }

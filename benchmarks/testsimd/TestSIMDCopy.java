@@ -14,15 +14,10 @@
  * limitations under the License.
  *
  */
-package org.linaro.benchmarks;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
+package benchmarks.testsimd;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestSIMDCopy {
   static final int LENGTH = 1024 * 256;
   static int [] a = new int[LENGTH];
@@ -61,25 +56,72 @@ public class TestSIMDCopy {
     }
   }
 
-  @Setup
-  public void setup()
-  {
+  public void timeVectCopyByte(int iters) {
     TestSIMDCopyInit();
+    for (int i = 0; i < iters; i++) {
+      vectCopyByte();
+    }
   }
 
-  @Benchmark
-  public void testVectCopyByte() {
+  public void timeVectCopyShort(int iters) {
+    TestSIMDCopyInit();
+    for (int i = 0; i < iters; i++) {
+      vectCopyShort();
+    }
+  }
+
+  public void timeVectCopyInt(int iters) {
+    TestSIMDCopyInit();
+    for (int i = 0; i < iters; i++) {
+      vectCopyInt();
+    }
+  }
+
+  public boolean verifySIMDCopy() {
+    TestSIMDCopyInit();
     vectCopyByte();
-  }
-
-  @Benchmark
-  public void testVectCopyShort() {
     vectCopyShort();
-  }
-
-  @Benchmark
-  public void testVectCopyInt() {
     vectCopyInt();
+
+    int expected = 786432;
+    int found = 0;
+    for (int i = 0; i < LENGTH; i++) {
+      found += a[i] + c[i] + sa[i] + sc[i] + ba[i] + bc[i];
+    }
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
+  }
+  // CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 600;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestSIMDCopy obj = new TestSIMDCopy();
+
+    long before = System.currentTimeMillis();
+    obj.timeVectCopyByte(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDCopyByte: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectCopyShort(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDCopyShort: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectCopyInt(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDCopyInt: " + (after - before));
+
+    if (!obj.verifySIMDCopy()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }

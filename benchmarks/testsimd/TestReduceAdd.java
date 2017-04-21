@@ -14,15 +14,10 @@
  * limitations under the License.
  *
  */
-package org.linaro.benchmarks;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
+package benchmarks.testsimd;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestReduceAdd {
   static final int LENGTH = 256 * 1024;
   static int [] a = new int[LENGTH];
@@ -94,27 +89,65 @@ public class TestReduceAdd {
     }
     return total;
   }
+  // CHECKSTYLE.ON: .*
 
-  @Setup
-  public void setup()
-  {
+  public void timeReduceAddInt(int iters) {
+    int sum;
     TestReduceAddInit();
+    for (int i = 0; i < iters; i++) {
+      sum = reduceAddInt(a, b);
+      sum = reduceAddSumofSubInt(a, b);
+      sum = reduceAddSumofMulInt(a, b);
+    }
   }
 
-  @Benchmark
-  public void testReduceAddInt() {
+  public void timeReduceAddShort(int iters) {
     int sum;
-    sum = reduceAddInt(a, b);
-    sum = reduceAddSumofSubInt(a, b);
-    sum = reduceAddSumofMulInt(a, b);
+    TestReduceAddInit();
+    for (int i = 0; i < iters; i++) {
+      sum = reduceAddShort(sa, sb);
+      sum = reduceAddSumofSubShort(sa, sb);
+      sum = reduceAddSumofMulShort(sa, sb);
+    }
   }
 
-  @Benchmark
-  public void testReduceAddShort() {
-    int sum;
-    sum = reduceAddShort(sa, sb);
-    sum = reduceAddSumofSubShort(sa, sb);
-    sum = reduceAddSumofMulShort(sa, sb);
+  public boolean verifyReduceAdd() {
+    TestReduceAddInit();
+
+    int expected = 1310720;
+    int found = 0;
+    found += reduceAddShort(sa, sb);
+    found += reduceAddSumofSubShort(sa, sb);
+    found += reduceAddSumofMulShort(sa, sb);
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
+  }
+
+  public static final int ITER_COUNT = 150;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestReduceAdd obj = new TestReduceAdd();
+
+    long before = System.currentTimeMillis();
+    obj.timeReduceAddInt(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestReduceAddInt: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeReduceAddShort(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestReduceAddShort: " + (after - before));
+
+    if (!obj.verifyReduceAdd()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }

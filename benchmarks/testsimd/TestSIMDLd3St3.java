@@ -14,15 +14,10 @@
  * limitations under the License.
  *
  */
-package org.linaro.benchmarks;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
+package benchmarks.testsimd;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestSIMDLd3St3 {
   static final int VECT_LENGTH = 256 * 1024;
   static final int DIM = 3;
@@ -102,18 +97,51 @@ public class TestSIMDLd3St3 {
     }
   }
 
-  @Setup
-  public void setup()
-  {
+  public void timeVect3D(int iters) {
     vect3DInit();
+    for (int i = 0; i < iters; i++) {
+      vect3DAddInt(out, in, c);
+      vect3DMulInt(out, in, c);
+      vect3DAddShort(sout, sin, sc);
+      vect3DMulShort(sout, sin, sc);
+    }
   }
 
-  @Benchmark
-  public void testVect3D() {
+  public boolean verifySIMDLd3St3() {
+    vect3DInit();
     vect3DAddInt(out, in, c);
     vect3DMulInt(out, in, c);
     vect3DAddShort(sout, sin, sc);
     vect3DMulShort(sout, sin, sc);
+
+    int expected = 786432;
+    int found = 0;
+    for (int i = 0; i < LENGTH; i++) {
+      found += in[i] + out[i] + sin[i] + sout[i];
+    }
+    for (int i = 0; i < DIM; i++) {
+      found += c[i] + sc[i];
+    }
+
+    return true;
+  }
+  // CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 40;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestSIMDLd3St3 obj = new TestSIMDLd3St3();
+
+    long before = System.currentTimeMillis();
+    obj.timeVect3D(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDLd3St3: " + (after - before));
+
+    if (!obj.verifySIMDLd3St3()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }

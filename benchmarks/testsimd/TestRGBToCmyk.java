@@ -15,15 +15,9 @@
  *
  */
 
-package org.linaro.benchmarks;
+package benchmarks.testsimd;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
-
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestRGBToCmyk
 {
   static final int LENGTH = 256 * 1024;
@@ -56,15 +50,49 @@ public class TestRGBToCmyk
     }
   }
 
-  @Setup
-  public void setup()
-  {
+  public void timeRGBToCmyk(int iters) {
     TestRGBToCmykInit();
+    for (int i = 0; i < iters; i++) {
+      RGBToCmyk(input, output, LENGTH);
+    }
   }
 
-  @Benchmark
-  public void testRGBToCmyk() {
+  public boolean verifyRGBToCmyk() {
+    TestRGBToCmykInit();
     RGBToCmyk(input, output, LENGTH);
+
+    int expected = -268288;
+    int found = 0;
+    for (int i = 0; i < LENGTH * 3; i++) {
+      found += input[i];
+    }
+    for (int i = 0; i < LENGTH * 4; i++) {
+      found += output[i];
+    }
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
+  }
+  // CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 150;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestRGBToCmyk obj = new TestRGBToCmyk();
+
+    long before = System.currentTimeMillis();
+    obj.timeRGBToCmyk(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestRGBToCmyk: " + (after - before));
+
+    if (!obj.verifyRGBToCmyk()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }

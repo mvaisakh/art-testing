@@ -14,15 +14,10 @@
  * limitations under the License.
  *
  */
-package org.linaro.benchmarks;
 
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.TimeUnit;
+package benchmarks.testsimd;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Benchmark)
-
+// CHECKSTYLE.OFF: .*
 public class TestSIMDAdd {
   static final int LENGTH = 1024 * 256;
   static int [] a = new int[LENGTH];
@@ -67,25 +62,73 @@ public class TestSIMDAdd {
     }
   }
 
-  @Setup
-  public void setup()
-  {
+  public void timeVectAddByte(int iters) {
     TestSIMDAddInit();
+    for (int i = 0; i < iters; i++) {
+      vectAddByte();
+    }
   }
 
-  @Benchmark
-  public void testVectAddByte() {
+  public void timeVectAddShort(int iters) {
+    TestSIMDAddInit();
+    for (int i = 0; i < iters; i++) {
+      vectAddShort();
+    }
+  }
+
+  public void timeVectAddInt(int iters) {
+    TestSIMDAddInit();
+    for (int i = 0; i < iters; i++) {
+      vectAddInt();
+    }
+  }
+
+  public boolean verifySIMDAdd() {
+    TestSIMDAddInit();
     vectAddByte();
-  }
-
-  @Benchmark
-  public void testVectAddShort() {
     vectAddShort();
-  }
-
-  @Benchmark
-  public void testVectAddInt() {
     vectAddInt();
+
+    int expected = 1572864;
+    int found = 0;
+    for (int i = 0; i < LENGTH; i++) {
+      found += a[i] + b[i] + c[i] + sa[i] + sb[i] + sc[i] + ba[i] + bb[i] + bc[i];
+    }
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+
+    return true;
+  }
+  // CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 300;
+
+  public static void main(String[] argv) {
+    int rc = 0;
+    TestSIMDAdd obj = new TestSIMDAdd();
+
+    long before = System.currentTimeMillis();
+    obj.timeVectAddByte(ITER_COUNT);
+    long after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDAddByte: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectAddShort(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDAddShort: " + (after - before));
+
+    before = System.currentTimeMillis();
+    obj.timeVectAddInt(ITER_COUNT);
+    after = System.currentTimeMillis();
+    System.out.println("benchmarks/testsimd/TestSIMDAddInt: " + (after - before));
+
+    if (!obj.verifySIMDAdd()) {
+      rc++;
+    }
+    System.exit(rc);
   }
 
 }
