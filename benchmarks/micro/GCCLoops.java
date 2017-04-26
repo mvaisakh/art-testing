@@ -1,54 +1,59 @@
-#include <sys/time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <iostream>
-#include <vector>
-#include <numeric>
-
 /// This test contains some of the loops from the GCC vectrorizer example page [1].
 /// Dorit Nuzman who developed the gcc vectorizer said that we can use them in our test suite.
 ///
 /// [1] - http://gcc.gnu.org/projects/tree-ssa/vectorization.html
 
-#define N 1024
-#define M 32
-#define K 4
-#define ALIGNED16 __attribute__((aligned(16)))
+package benchmarks.micro;
 
-unsigned short usa[N];
-short sa[N];
-short sb[N];
-short sc[N];
-unsigned int   ua[N];
-int   ia[N] ALIGNED16;
-int   ib[N] ALIGNED16;
-int   ic[N] ALIGNED16;
-unsigned int ub[N];
-unsigned int uc[N];
-float fa[N], fb[N];
-float da[N], db[N], dc[N], dd[N];
-int dj[N];
+// CHECKSTYLE.OFF: .*
+public class GCCLoops {
+private static final int N = 1024;
+private static final int M = 32;
+private static final int K = 4;
 
-struct A {
-  int ca[N];
-} s;
+char[] usa = new char[N];
+short[] sa = new short[N];
+short[] sb = new short[N];
+short[] sc = new short[N];
+int[]   ua = new int[N];
+int[]   ia = new int[N];
+int[]   ib = new int[N];
+int[]   ic = new int[N];
+int[] ub = new int[N];
+int[] uc = new int[N];
+float[] fa = new float[N];
+float[] fb = new float[N];
+float[] da = new float[N];
+float[] db = new float[N];
+float[] dc = new float[N];
+float[] dd = new float[N];
+int[] dj = new int[N];
 
-int a[N*2] ALIGNED16;
-int b[N*2] ALIGNED16;
-int c[N*2] ALIGNED16;
-int d[N*2] ALIGNED16;
+public class StructAType {
+  public int[] ca = new int[N];
+}
 
-__attribute__((noinline))
+StructAType s = new StructAType();
+
+int[] a = new int[N*2];
+int[] b = new int[N*2];
+int[] c = new int[N*2];
+int[] d = new int[N*2];
+
+int[][] matrixA_m_n = new int[M*2][N*2];
+int[][] matrixB_m_n = new int[M*2][N*2];
+int[][] matrixA_n_m = new int[N*2][M*2];
+int[][] matrixB_n_m = new int[N*2][M*2];
+int[][] G = new int[M][N];
+
 void example1 () {
   int i;
 
-  for (i=0; i<256; i++){
+  for (i=0; i<N; i++){
     a[i] = b[i] + c[i];
   }
 }
 
-__attribute__((noinline))
 void example2a (int n, int x) {
    int i;
 
@@ -59,38 +64,39 @@ void example2a (int n, int x) {
    }
 }
 
-__attribute__((noinline))
-void example2b (int n, int x) {
+void example2b (int n) {
   int i = 0;
+  int k = n;
    /* feature: general loop exit condition  */
    /* feature: support for bitwise operations  */
-   while (n--){
+   while (k-- > 0){
       a[i] = b[i]&c[i]; i++;
    }
 }
 
 
-typedef int aint __attribute__ ((__aligned__(16)));
-__attribute__((noinline))
-void example3 (int n, aint * __restrict__ p, aint * __restrict q) {
-
+void example3 (int n) {
+  int i = 0;
+  int k = n;
    /* feature: support for (aligned) pointer accesses.  */
-   while (n--){
-      *p++ = *q++;
+   while (k-- > 0){
+      ia[i] = ib[i];
+      i++;
    }
 }
 
-__attribute__((noinline))
-void example4a (int n, aint * __restrict__ p, aint * __restrict__ q) {
+void example4a (int n) {
+  int i = 0;
+  int k = n;
    /* feature: support for (aligned) pointer accesses  */
    /* feature: support for constants  */
-   while (n--){
-      *p++ = *q++ + 5;
+   while (k-- > 0){
+      ia[i] = ib[i] + 5;
+      i++;
    }
 }
 
-__attribute__((noinline))
-void example4b (int n, aint * __restrict__ p, aint * __restrict__ q) {
+void example4b (int n) {
    int i;
 
    /* feature: support for read accesses with a compile time known misalignment  */
@@ -99,10 +105,9 @@ void example4b (int n, aint * __restrict__ p, aint * __restrict__ q) {
    }
 }
 
-__attribute__((noinline))
-void example4c (int n, aint * __restrict__ p, aint * __restrict__ q) {
+void example4c (int n) {
    int i;
-    const int MAX = 4;
+    final int MAX = 4;
    /* feature: support for if-conversion  */
    for (i=0; i<n; i++){
       int j = a[i];
@@ -110,16 +115,14 @@ void example4c (int n, aint * __restrict__ p, aint * __restrict__ q) {
    }
 }
 
-__attribute__((noinline))
-void  example5 (int n, struct A *s) {
+void  example5 (int n, StructAType s) {
   int i;
   for (i = 0; i < n; i++) {
     /* feature: support for alignable struct access  */
-    s->ca[i] = 5;
+    s.ca[i] = 5;
   }
 }
 
-__attribute__((noinline))
 void  example7 (int x) {
    int i;
 
@@ -129,8 +132,6 @@ void  example7 (int x) {
    }
 }
 
-int G[M][N];
-__attribute__((noinline))
 void example8 (int x) {
    int i,j;
 
@@ -143,18 +144,19 @@ void example8 (int x) {
 }
 
 
-__attribute__((noinline))
-void example9 (unsigned *ret) {
+int example9 () {
   int i;
 
   /* feature: support summation reduction.
      note: in case of floats use -funsafe-math-optimizations  */
-  unsigned int diff = 0;
+  int diff = 0;
   for (i = 0; i < N; i++) {
     diff += (ub[i] - uc[i]);
   }
 
-  *ret = diff;
+  // Inserted to avoid DCE removing the whole loop.
+  ub[0] = diff;
+  return diff;
 }
 
 
@@ -165,17 +167,15 @@ void example9 (unsigned *ret) {
    A combination of data-types of different sizes in the same loop 
    requires special handling. This support is now present in mainline,
    and also includes support for type conversions.  */
-__attribute__((noinline))
-void example10a(short *__restrict__ sa, short *__restrict__ sb, short *__restrict__ sc, int* __restrict__ ia, int* __restrict__ ib, int* __restrict__ ic) {
+void example10a(short[] sa, short[] sb, short[] sc, int[] ia, int[] ib, int[] ic) {
   int i;
   for (i = 0; i < N; i++) {
     ia[i] = ib[i] + ic[i];
-    sa[i] = sb[i] + sc[i];
+    sa[i] = (short)(sb[i] + sc[i]);
   }
 }
 
-__attribute__((noinline))
-void example10b(short *__restrict__ sa, short *__restrict__ sb, short *__restrict__ sc, int* __restrict__ ia, int* __restrict__ ib, int* __restrict__ ic) {
+void example10b(short[] sb, int[] ia) {
   int i;
   for (i = 0; i < N; i++) {
     ia[i] = (int) sb[i];
@@ -185,7 +185,6 @@ void example10b(short *__restrict__ sa, short *__restrict__ sb, short *__restric
 /* feature: support strided accesses - the data elements
    that are to be operated upon in parallel are not consecutive - they
    are accessed with a stride > 1 (in the example, the stride is 2):  */
-__attribute__((noinline))
 void example11() {
    int i;
   for (i = 0; i < N/2; i++){
@@ -195,15 +194,13 @@ void example11() {
 }
 
 
-__attribute__((noinline))
 void example12() {
   for (int i = 0; i < N; i++) {
     a[i] = i;
   }
 }
 
-__attribute__((noinline))
-void example13(int **A, int **B, int *out) {
+void example13(int[][] A, int[][] B, int[] out) {
   int i,j;
   for (i = 0; i < M; i++) {
     int diff = 0;
@@ -214,8 +211,7 @@ void example13(int **A, int **B, int *out) {
   }
 }
 
-__attribute__((noinline))
-void example14(int **in, int **coeff, int *out) {
+void example14(int[][] in, int[][] coeff, int[] out) {
   int k,j,i=0;
   for (k = 0; k < K; k++) {
     int sum = 0;
@@ -229,8 +225,7 @@ void example14(int **in, int **coeff, int *out) {
 }
 
 
-__attribute__((noinline))
-void example21(int *b, int n) {
+void example21(int[] b, int n) {
   int i, a = 0;
 
   for (i = n-1; i >= 0; i--)
@@ -239,17 +234,18 @@ void example21(int *b, int n) {
   b[0] = a;
 }
 
-__attribute__((noinline))
-void example23 (unsigned short *src, unsigned int *dst)
+void example23 (char[] src, int[] dst)
 {
   int i;
+  int k = 0;
 
-  for (i = 0; i < 256; i++)
-    *dst++ = *src++ << 7;
+  for (i = 0; i < 256; i++) {
+    dst[k] = src[k] << 7;
+    k++;
+  }
 }
 
 
-__attribute__((noinline))
 void example24 (short x, short y)
 {
   int i;
@@ -258,139 +254,312 @@ void example24 (short x, short y)
 }
 
 
-__attribute__((noinline))
-void example25 (void)
+void example25 ()
 {
   int i;
   char x, y;
   for (i = 0; i < N; i++)
     {
-      x = (da[i] < db[i]);
-      y = (dc[i] < dd[i]);
+      x = (char)(da[i] < db[i] ? 1 : 0);
+      y = (char)(dc[i] < dd[i] ? 1 : 0);
       dj[i] = x & y;
     }
 }
+// CHECKSTYLE.ON: .*
 
-void init_memory(void *start, void* end) {
-  unsigned char state = 1;
-  while (start != end) {
-    state *= 7; state ^= 0x27; state += 1;
-    *((unsigned char*)start) = state;
-    start = ((char*)start) + 1;
-  }
-}
-
-void init_memory_float(float *start, float* end) {
-  float state = 1.0;
-  while (start != end) {
-    state *= 1.1;
-    *start = state;
-    start++;
-  }
-}
-
-unsigned digest_memory(void *start, void* end) {
-  unsigned state = 1;
-  while (start != end) {
-    state *= 3;
-    state ^= *((unsigned char*)start);
-    state = (state >> 8  ^ state << 8);
-    start = ((char*)start) + 1;
-  }
-  return state;
-}
-
-class Timer {
-
-public:
-  Timer(const char* title, bool print) {
-    Title = title;
-    Print = print;
-    gettimeofday(&Start, 0);
+  public void timeExample1(int iters) {
+    initArrayI(a);
+    initArrayI(b);
+    initArrayI(c);
+    for (int i = 0; i < iters; i++) {
+      example1();
+    }
   }
 
-  ~Timer() {
-    gettimeofday(&End, 0);
-    long mtime, s,us;
-    s = End.tv_sec  - Start.tv_sec;
-    us = End.tv_usec - Start.tv_usec;
-    mtime = (s*1000 + us/1000.0)+0.5;
-    if (Print)
-      std::cout<<Title<<", "<<mtime<<", msec\n";
+  public void timeExample2a(int iters) {
+    initArrayI(b);
+    for (int i = 0; i < iters; i++) {
+      example2a(N, M);
+    }
   }
 
-private:
-  const char* Title;
-  bool Print;
-  struct timeval Start, End;
-};
-
-
-// Warmup and then measure.
-#define BENCH(NAME, RUN_LINE, ITER, DIGEST_LINE) {\
-  RUN_LINE;\
-  Timer atimer(NAME, print_times);\
-  for (int i=0; i < (ITER); ++i) RUN_LINE;\
-  unsigned r = DIGEST_LINE;\
-  results.push_back(r);\
- }
-
-int main(int argc,char* argv[]){
-
-  bool print_times = argc > 1;
-
-  std::vector<unsigned> results;
-  unsigned dummy = 0;
-#ifdef SMALL_PROBLEM_SIZE
-  const int Mi = 1<<10;
-#else
-  const int Mi = 1<<18;
-#endif
-  init_memory(&ia[0], &ia[N]);
-  init_memory(&ib[0], &ib[N]);
-  init_memory(&ic[0], &ic[N]);
-  init_memory(&sa[0], &sa[N]);
-  init_memory(&sb[0], &sb[N]);
-  init_memory(&sc[0], &sc[N]);
-  init_memory(&a[0], &a[N*2]);
-  init_memory(&b[0], &b[N*2]);
-  init_memory(&c[0], &c[N*2]);
-  init_memory(&ua[0], &ua[N]);
-  init_memory(&ub[0], &ub[N]);
-  init_memory(&uc[0], &uc[N]);
-  init_memory(&G[0][0], &G[0][N]);
-  init_memory_float(&fa[0], &fa[N]);
-  init_memory_float(&fb[0], &fb[N]);
-  init_memory_float(&da[0], &da[N]);
-  init_memory_float(&db[0], &db[N]);
-  init_memory_float(&dc[0], &dc[N]);
-  init_memory_float(&dd[0], &dd[N]);
-
-  BENCH("Example1",   example1(), Mi*10, digest_memory(&a[0], &a[256]));
-  BENCH("Example2a",  example2a(N, 2), Mi*4, digest_memory(&b[0], &b[N]));
-  BENCH("Example2b",  example2b(N, 2), Mi*2, digest_memory(&a[0], &a[N]));
-  BENCH("Example3",   example3(N, ia, ib), Mi*2, digest_memory(&ia[0], &ia[N]));
-  BENCH("Example4a",  example4a(N, ia, ib), Mi*2, digest_memory(&ia[0], &ia[N]));
-  BENCH("Example4b",  example4b(N-10, ia, ib), Mi*2, digest_memory(&ia[0], &ia[N]));
-  BENCH("Example4c",  example4c(N, ia, ib), Mi*2, digest_memory(&ib[0], &ib[N]));
-  BENCH("Example7",   example7(4), Mi*4, digest_memory(&a[0], &a[N]));
-  BENCH("Example8",   example8(8), Mi/4, digest_memory(&G[0][0], &G[0][N]));
-  BENCH("Example9",   example9(&dummy), Mi*2, dummy);
-  BENCH("Example10a", example10a(sa,sb,sc,ia,ib,ic), Mi*2, digest_memory(&ia[0], &ia[N]) + digest_memory(&sa[0], &sa[N]));
-  BENCH("Example10b", example10b(sa,sb,sc,ia,ib,ic), Mi*4, digest_memory(&ia[0], &ia[N]));
-  BENCH("Example11",  example11(), Mi*2, digest_memory(&d[0], &d[N]));
-  BENCH("Example12",  example12(), Mi*4, digest_memory(&a[0], &a[N]));
-  //BENCH("Example21",  example21(ia, N), Mi*4, digest_memory(&ia[0], &ia[N]));
-  BENCH("Example23",  example23(usa,ua), Mi*8, digest_memory(&usa[0], &usa[256]));
-  BENCH("Example24",  example24(2,4), Mi*2, 0);
-  BENCH("Example25",  example25(), Mi*2, digest_memory(&dj[0], &dj[N]));
-
-  std::cout<<std::hex;
-  std::cout<<"Results: ("<<std::accumulate(results.begin(), results.end(), 0)<<"):";
-  for (unsigned i=0; i < results.size(); ++i) {
-    std::cout<<" "<<results[i];
+  public void timeExample2b(int iters) {
+    initArrayI(a);
+    initArrayI(b);
+    initArrayI(c);
+    for (int i = 0; i < iters; i++) {
+      example2b(N);
+    }
   }
-  std::cout<<"\n";
 
-  return 0;
+  public void timeExample3(int iters) {
+    initArrayI(ia);
+    initArrayI(ib);
+    for (int i = 0; i < iters; i++) {
+      example3(N);
+    }
+  }
+
+  public void timeExample4a(int iters) {
+    initArrayI(ia);
+    initArrayI(ib);
+    for (int i = 0; i < iters; i++) {
+      example4a(N);
+    }
+  }
+
+  public void timeExample4b(int iters) {
+    initArrayI(a);
+    initArrayI(b);
+    initArrayI(c);
+    for (int i = 0; i < iters; i++) {
+      example4b(N);
+    }
+  }
+
+  public void timeExample4c(int iters) {
+    initArrayI(a);
+    initArrayI(b);
+    for (int i = 0; i < iters; i++) {
+      example4c(N);
+    }
+  }
+
+  public void timeExample5(int iters) {
+    initArrayI(s.ca);
+    for (int i = 0; i < iters; i++) {
+      example5(N, s);
+    }
+  }
+
+  public void timeExample7(int iters) {
+    initArrayI(a);
+    initArrayI(b);
+    for (int i = 0; i < iters; i++) {
+      example7(M);
+    }
+  }
+
+  public void timeExample8(int iters) {
+    initMatrixI(G);
+    for (int i = 0; i < iters; i++) {
+      example8(M);
+    }
+  }
+
+  public void timeExample9(int iters) {
+    initArrayI(ub);
+    initArrayI(uc);
+    for (int i = 0; i < iters; i++) {
+      example9();
+    }
+  }
+
+  public void timeExample10a(int iters) {
+    initArrayS(sa);
+    initArrayS(sb);
+    initArrayS(sc);
+    initArrayI(ia);
+    initArrayI(ib);
+    initArrayI(ic);
+    for (int i = 0; i < iters; i++) {
+      example10a(sa, sb, sc, ia, ib, ic);
+    }
+  }
+
+  public void timeExample10b(int iters) {
+    initArrayS(sb);
+    initArrayI(ia);
+    for (int i = 0; i < iters; i++) {
+      example10b(sb, ia);
+    }
+  }
+
+  public void timeExample11(int iters) {
+    initArrayI(a);
+    initArrayI(b);
+    initArrayI(c);
+    initArrayI(d);
+    for (int i = 0; i < iters; i++) {
+      example11();
+    }
+  }
+
+  public void timeExample12(int iters) {
+    initArrayI(a);
+    for (int i = 0; i < iters; i++) {
+      example12();
+    }
+  }
+
+  public void timeExample13(int iters) {
+    initMatrixI(matrixA_m_n);
+    initMatrixI(matrixA_m_n);
+    initArrayI(a);
+    for (int i = 0; i < iters; i++) {
+      example13(matrixA_m_n, matrixB_m_n, a);
+    }
+  }
+
+  public void timeExample14(int iters) {
+    initMatrixI(matrixA_n_m);
+    initMatrixI(matrixA_n_m);
+    initArrayI(a);
+    for (int i = 0; i < iters; i++) {
+      example14(matrixA_n_m, matrixB_n_m, a);
+    }
+  }
+
+  public void timeExample21(int iters) {
+    initArrayI(b);
+    for (int i = 0; i < iters; i++) {
+      example21(b, N);
+    }
+  }
+
+  public void timeExample23(int iters) {
+    initArrayC(usa);
+    initArrayI(b);
+    for (int i = 0; i < iters; i++) {
+      example23(usa, b);
+    }
+  }
+
+  public void timeExample24(int iters) {
+    initArrayI(ic);
+    initArrayF(fa);
+    initArrayF(fb);
+    for (int i = 0; i < iters; i++) {
+      example24((short)N, (short)M);
+    }
+  }
+
+  public void timeExample25(int iters) {
+    initArrayF(da);
+    initArrayF(db);
+    initArrayF(dc);
+    initArrayF(dd);
+    initArrayI(dj);
+    for (int i = 0; i < iters; i++) {
+      example25();
+    }
+  }
+
+  public static final int INIT_CONSTANT = 13;
+
+  public static void initArrayI(int[] array) {
+    for (int i = 0; i < array.length; i++) {
+      array[i] = (i % INIT_CONSTANT);
+    }
+  }
+
+  public static void initArrayF(float[] array) {
+    for (int i = 0; i < array.length; i++) {
+      array[i] = (float)(i % INIT_CONSTANT);
+    }
+  }
+
+  public static void initArrayS(short[] array) {
+    for (int i = 0; i < array.length; i++) {
+      array[i] = (short)(i % INIT_CONSTANT);
+    }
+  }
+
+  public static void initArrayC(char[] array) {
+    for (int i = 0; i < array.length; i++) {
+      array[i] = (char)(i % INIT_CONSTANT);
+    }
+  }
+
+  public static void initMatrixI(int[][] matrix) {
+    for (int i = 0; i < matrix.length; i++) {
+      for (int j = 0; j < matrix[i].length; j++) {
+        matrix[i][j] = ((i + j) % INIT_CONSTANT);
+      }
+    }
+  }
+
+// CHECKSTYLE.OFF: .*
+  public boolean verifyGCCLoops() {
+    int expected = 1825677;
+
+    timeExample1(1);
+    timeExample2a(1);
+    timeExample2b(1);
+    timeExample3(1);
+    timeExample4a(1);
+    timeExample4b(1);
+    timeExample4c(1);
+    timeExample5(1);
+    timeExample7(1);
+    timeExample8(1);
+    timeExample9(1);
+    timeExample10a(1);
+    timeExample10b(1);
+    timeExample11(1);
+    timeExample12(1);
+    timeExample13(1);
+    timeExample14(1);
+    timeExample21(1);
+    timeExample23(1);
+    timeExample24(1);
+    timeExample25(1);
+    int found = 0;
+
+    for (int i = 0; i < N; i++) {
+      found += usa[i] + sa[i] + sb[i] + sc[i] + ua[i] + ia[i] + ib[i] + ic[i] + ub[i] + uc[i]
+            + (int)fa[i] + (int)fb[i] + (int)da[i] + (int)db[i] + (int)dc[i] + (int)dd[i]
+            + (int)dj[i] + a[i] + b[i] + c[i] + d[i];
+    }
+
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < M; j++) {
+        found += G[j][i] + matrixA_m_n[j][i] + matrixA_n_m[i][j];
+      }
+    }
+
+    if (found != expected) {
+      System.out.println("ERROR: Expected " + expected + " but found " + found);
+      return false;
+    }
+    return true;
+  }
+// CHECKSTYLE.ON: .*
+
+  public static final int ITER_COUNT = 1000;
+
+  public static void main(String[] args) {
+    int rc = 0;
+    GCCLoops obj = new GCCLoops();
+
+    long before = System.currentTimeMillis();
+    obj.timeExample1(ITER_COUNT);
+    obj.timeExample2a(ITER_COUNT);
+    obj.timeExample2b(ITER_COUNT);
+    obj.timeExample3(ITER_COUNT);
+    obj.timeExample4a(ITER_COUNT);
+    obj.timeExample4b(ITER_COUNT);
+    obj.timeExample4c(ITER_COUNT);
+    obj.timeExample5(ITER_COUNT);
+    obj.timeExample7(ITER_COUNT);
+    obj.timeExample8(ITER_COUNT);
+    obj.timeExample9(ITER_COUNT);
+    obj.timeExample10a(ITER_COUNT);
+    obj.timeExample10b(ITER_COUNT);
+    obj.timeExample11(ITER_COUNT);
+    obj.timeExample12(ITER_COUNT);
+    obj.timeExample13(ITER_COUNT);
+    obj.timeExample14(ITER_COUNT);
+    obj.timeExample21(ITER_COUNT);
+    obj.timeExample23(ITER_COUNT);
+    obj.timeExample24(ITER_COUNT);
+    obj.timeExample25(ITER_COUNT);
+    long after = System.currentTimeMillis();
+
+    if (!obj.verifyGCCLoops()) {
+      rc++;
+    }
+
+    System.out.println("benchmarks/micro/GCCLoops: " + (after - before));
+  }
 }
