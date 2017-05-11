@@ -130,6 +130,7 @@ set -f
 
 if [[ -z $JAVA_BENCHMARK_FILES ]]; then
   JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
+
 fi
 
 # Reenable wildcard expansion.
