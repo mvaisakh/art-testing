@@ -64,8 +64,8 @@ def BuildOptions():
 
     return args
 
-def host_java(command):
-    return utils.Command(command, cwd=utils.dir_build_java_classes)
+def host_java(command, command_string=None):
+    return utils.Command(command, command_string, cwd=utils.dir_build_java_classes)
 
 def DeleteAppInDalvikCache(target_copy_path, target):
     # We delete the entire dalvik-cache in the test path.
@@ -80,8 +80,7 @@ def BuildBenchmarks(build_for_target):
         command += ['-t']
     utils.Command(command)
 
-def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk,
-                 classname, target):
+def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk, classname, target, cpuset):
     format_data = {'workdir': os.path.dirname(apk)}
     path, env, runtime_param = utils.GetAndroidRootConfiguration(android_root, mode == '64')
     # Escaping through `adb shell` is fiddly, so we expand the path fully in
@@ -110,9 +109,14 @@ def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk,
         # - Performance critical funtions are JIT compiled as soon as possible.
         dalvikvm_options += ' -Xusejit:true -Xnodex2oat -Xjitthreshold:100'
 
-    command = 'cd {workdir} && ' + \
-        ' '.join([environment_config, dalvikvm,
-                  dalvikvm_options, '-cp', apk, apk_arguments])
+    command = 'cd {workdir} && '
+
+    if cpuset:
+        command += 'echo $BASHPID > /dev/cpuset/' + cpuset + '/tasks && '
+        dalvikvm = 'exec ' + dalvikvm
+
+    command += ' '.join([environment_config, dalvikvm,
+                        dalvikvm_options, '-cp', apk, apk_arguments])
     command = command.format(**format_data)
 
     return utils_adb.shell(command, target, exit_on_error=False)
@@ -123,12 +127,22 @@ def RunBenchHost(ignored_mode,
                  auto_calibrate,
                  ignored_apk,
                  classname,
-                 ignored_target):
+                 ignored_target,
+                 cpuset):
+    command_string = None
+
     if auto_calibrate:
         command = ['java', bench_runner_main, classname]
     else:
         command = ['java', classname]
-    return host_java(command)
+
+    if cpuset:
+      command_string = 'echo $BASHPID > /dev/cpuset/' + cpuset + '/tasks && '
+      command_last = command_string + 'exec ' + ' '.join(command)
+      command_string += ' '.join(command)
+      command = ['bash', '-c', command_last]
+
+    return host_java(command, command_string)
 
 
 # TODO: Avoid using global variables.
@@ -141,7 +155,8 @@ def RunBench(apk, classname,
              mode = utils.default_mode,
              compiler_mode = utils.default_compiler_mode,
              android_root = utils.default_android_root,
-             target = None):
+             target = None,
+             cpuset = None):
     rc = 0
     for iteration in range(iterations):
         try:
@@ -151,7 +166,8 @@ def RunBench(apk, classname,
                                           auto_calibrate,
                                           apk,
                                           classname,
-                                          target)
+                                          target,
+                                          cpuset)
             rc += local_rc
             outerr = outerr.rstrip('\r\n')
             utils_print.VerbosePrint(outerr)
@@ -184,7 +200,8 @@ def RunBenchs(apk, bench_names,
               iterations=utils.default_n_iterations,
               mode=utils.default_mode,
               compiler_mode=utils.default_compiler_mode,
-              android_root=utils.default_android_root):
+              android_root=utils.default_android_root,
+              cpuset=None):
     rc = 0
     utils_print.VerbosePrint('\n# Running benchmarks: ' + ' '.join(bench_names))
     run_helper = RunBenchADB if target else RunBenchHost
@@ -197,7 +214,8 @@ def RunBenchs(apk, bench_names,
                        mode = mode,
                        compiler_mode = compiler_mode,
                        android_root = android_root,
-                       target = target)
+                       target = target,
+                       cpuset = cpuset)
     return rc
 
 
@@ -250,7 +268,8 @@ def GetBenchmarkResults(args):
                    args.iterations,
                    args.mode,
                    args.compiler_mode,
-                   args.android_root)
+                   args.android_root,
+                   args.cpuset)
 
     if rc:
         utils.Error("The benchmarks did *not* run successfully. (rc = %d)" % rc, rc)
