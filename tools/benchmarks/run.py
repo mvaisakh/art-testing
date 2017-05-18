@@ -70,8 +70,11 @@ def host_java(command):
 def DeleteAppInDalvikCache(target_copy_path, target):
     # We delete the entire dalvik-cache in the test path.
     # Delete any cached version of the benchmark app.
-    # With the current defaults, the pattern is "data@local@tmp@java-benchs.apk*"
+    # The oat files location can be:
+    #     - in dalvik-cache: referred as the OAT location.
+    #     - in dex_parent_dir/oat/ISA/: referred as the ODEX location.
     utils_adb.shell('rm -rf ' + utils.TargetPathJoin(target_copy_path, 'dalvik-cache'), target)
+    utils_adb.shell('rm -rf ' + utils.TargetPathJoin(target_copy_path, 'oat'), target)
 
 def BuildBenchmarks(build_for_target):
     # Call the build script.
