@@ -74,6 +74,7 @@ def GetStats(apk,
              android_root,
              target_copy_path,
              iterations,
+             cpuset,
              work_dir,
              boot_oat_file):
     path, env, runtime_param = utils.GetAndroidRootConfiguration(android_root, isa.endswith('64'))
@@ -124,7 +125,12 @@ def GetStats(apk,
         command = re.sub(" -j\d+ ", " -j1 ", command)
         # Remove newline at end.
         command = re.sub("\n$", "", command)
-        command = '(echo $BASHPID && ' + env + ' exec ' + command + ') | head -n1'
+        command = '(echo $BASHPID && '
+
+        if cpuset:
+            command += 'echo $BASHPID > /dev/cpuset/' + cpuset + '/tasks && '
+
+        command += env + ' exec ' + command + ') | head -n1'
     else:
         runtime_arguments = ' --runtime-arg -Xnorelocate '
 
@@ -137,9 +143,14 @@ def GetStats(apk,
         # Only the output of the first command is necessary; execute in a subshell
         # to guarantee PID value; only one thread is used for compilation to reduce
         # measurement noise.
-        command = '(echo $BASHPID && ' + env + ' exec ' + dex2oat + \
-                  ' -j1' + runtime_arguments + ' '.join(dex2oat_options) + \
-                  ' --dex-file=' + apk_path + ' --oat-file=' + oat
+        command = '(echo $BASHPID && '
+
+        if cpuset:
+            command += 'echo $BASHPID > /dev/cpuset/' + cpuset + '/tasks && '
+
+        command += env + ' exec ' + dex2oat + \
+                   ' -j1' + runtime_arguments + ' '.join(dex2oat_options) + \
+                   ' --dex-file=' + apk_path + ' --oat-file=' + oat
         command += ' --instruction-set=' + isa + ') | head -n1'
 
     linux_target = os.getenv('ART_TARGET_LINUX', 'false') == 'true'
@@ -258,13 +269,14 @@ def GetCompilationStatisticsResults(args):
     for apk in sorted(apk_list):
         if apk[:8] == "boot.oat":
             res[apk] = GetStats(apk, args.target, isa, args.compiler_mode, args.android_root,
-                                args.target_copy_path, args.iterations, work_dir, boot_oat_file)
+                                args.target_copy_path, args.iterations, args.cpuset, work_dir,
+                                boot_oat_file)
         else:
             utils_adb.push(apk, args.target_copy_path, args.target)
             apk_name = os.path.basename(apk)
             res[apk_name] = GetStats(apk_name, args.target, isa, args.compiler_mode,
                                      args.android_root, args.target_copy_path,
-                                     args.iterations, work_dir, None)
+                                     args.iterations, args.cpuset, work_dir, None)
 
     shutil.rmtree(work_dir)
     return res

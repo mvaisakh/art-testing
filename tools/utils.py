@@ -174,6 +174,9 @@ def AddCommonRunOptions(parser):
     opts.add_argument('--android-root',
                       default = default_android_root,
                       help='Set root for android.')
+    opts.add_argument('--cpuset',
+                      default = None,
+                      help = 'Cpuset to use when running on target.')
 
 def ValidateCommonRunOptions(args):
     options_requiring_target_mode = ['mode', 'compiler-mode']
