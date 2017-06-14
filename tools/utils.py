@@ -191,7 +191,7 @@ def ValidateCommonRunOptions(args):
 # Returns a list of `dex2oat` options for the compiler.
 def GetDex2oatOptions(compiler_mode):
     if compiler_mode is None:
-        return []
+        return ['--compiler-filter=speed']
 
     options = []
     pic = False
@@ -203,8 +203,10 @@ def GetDex2oatOptions(compiler_mode):
 
     if compiler_mode == 'optimizing':
         options.append('--compiler-backend=Optimizing')
+        options.append('--compiler-filter=speed')
     elif compiler_mode == 'quick':
         options.append('--compiler-backend=Quick')
+        options.append('--compiler-filter=speed')
     elif compiler_mode == 'interpreter':
         options.append('--compiler-filter=interpret-only')
     elif compiler_mode == 'jit':
