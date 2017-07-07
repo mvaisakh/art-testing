@@ -222,6 +222,30 @@ existing benchmark. Besides, developers should also notice:
 
     // Please refer to existing benchmarks for further examples.
 
+## Performance History Tracking
+
+### ART Reports
+
+The performance history of AOSP ART Tip running this benchmark suite is tracked on
+website: https://art-reports.linaro.org/.
+
+### Stable Benchmark Suites
+
+To maintain the performance history data and allow the team to track the performance
+of ART easily, the following existing benchmarks should have no new changes:
+
+1. algorithm
+2. benchmarksgame
+3. caffeinemark
+4. math
+5. reversigame
+6. stanford
+
+The following benchmarks are allowed to have new changes (e.g. new cases introduced):
+
+1. micro
+2. testsimd
+3. jit_aot
 
 ## Test Suite Details
 
