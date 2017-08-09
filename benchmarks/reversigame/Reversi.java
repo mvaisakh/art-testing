@@ -37,6 +37,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 *       If the second party can't move pieces, end the game.
 * (4) Add test function "timeReversi", "verifyReversi" for test.
 */
+
 package benchmarks.reversigame;
 
 import java.util.ArrayList;
