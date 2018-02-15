@@ -21,7 +21,7 @@ DIR_ROOT=$SCRIPT_PATH
 DIR_BUILD=$DIR_ROOT/out/build
 DIR_BENCHMARKS=$DIR_ROOT/benchmarks
 DIR_FRAMEWORK=$DIR_ROOT/framework
-JAVA_VERSION=1.7
+JAVA_VERSION=1.8
 
 
 # Set to true to build for the target.
@@ -164,7 +164,15 @@ JAVA_FRAMEWORK_FILES="$(find $DIR_FRAMEWORK -type f -name '*'.java)"
 
 verbose_safe rm -rf $DIR_BUILD
 verbose_safe mkdir -p $DIR_BUILD/classes/
-verbose_safe javac -encoding UTF-8 -target $JAVA_VERSION -source $JAVA_VERSION -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
+
+JAVAC_RUNTIME_VERSION=$(javac -version 2>&1)
+if [[ $JAVAC_RUNTIME_VERSION =~ "javac 9" ]]; then
+  CROSS_COMPILE_FLAGS="--release 8"
+else
+  CROSS_COMPILE_FLAGS="-target $JAVA_VERSION -source $JAVA_VERSION"
+fi
+
+verbose_safe javac -encoding UTF-8 $CROSS_COMPILE_FLAGS -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
 verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
 DX=$(which dx)
 if [ $TARGET_BUILD = "true" ] || [ -n "$DX" ]; then
