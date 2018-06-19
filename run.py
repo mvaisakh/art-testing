@@ -37,7 +37,8 @@ def BuildOptions():
     if args.mode and not args.target:
         utils.Error('The `--mode` option is only valid when `--target` is specified.')
 
-    setattr(args, 'pathnames', [os.path.join(utils.dir_build, 'bench.apk')])
+    added_pathnames = [] if args.add_pathname is None else args.add_pathname
+    setattr(args, 'pathnames', [os.path.join(utils.dir_build, 'bench.apk')] + added_pathnames)
     return args
 
 if __name__ == "__main__":

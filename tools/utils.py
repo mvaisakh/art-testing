@@ -177,6 +177,10 @@ def AddCommonRunOptions(parser):
     opts.add_argument('--cpuset',
                       default = None,
                       help = 'Cpuset to use when running on target.')
+    opts.add_argument('--add-pathname',
+                      nargs='+',
+                      default = None,
+                      help = 'Add pathnames to be considered for compilation statistics.')
 
 def ValidateCommonRunOptions(args):
     options_requiring_target_mode = ['mode', 'compiler-mode']

@@ -267,10 +267,14 @@ def GetCompilationStatisticsResults(args):
                 apk_list.add(d)
 
     for apk in sorted(apk_list):
+        # pathname just contains boot.oat.
         if apk[:8] == "boot.oat":
             res[apk] = GetStats(apk, args.target, isa, args.compiler_mode, args.android_root,
                                 args.target_copy_path, args.iterations, args.cpuset, work_dir,
                                 boot_oat_file)
+        # This is a local path for boot.oat. We get stats locally without compiling on target.
+        elif apk[-8:] == "boot.oat":
+            res["boot.oat"] = GetLocalOatSizeStats(apk)
         else:
             utils_adb.push(apk, args.target_copy_path, args.target)
             apk_name = os.path.basename(apk)
@@ -286,6 +290,18 @@ def GetAndPrintCompilationStatisticsResults(args):
     utils.PrintData(results)
     print('')
     return results
+
+def GetLocalOatSizeStats(oat_path):
+    command = ['size', '-A', '-d', oat_path]
+    rc, outerr = utils.Command(command)
+    section_sizes = OrderedDict((s[0], [int(s[1])]) for s
+                                in re.findall('(\S+)\s+([0-9]+).*', outerr)
+                                if s[0] in sections)
+    # Add total file size in bytes.
+    command = ['stat', '-c', '%s', oat_path]
+    rc, outerr = utils.Command(command)
+    section_sizes['FileSize'] = int(outerr)
+    return OrderedDict([(utils.oat_size_label, section_sizes)])
 
 if __name__ == "__main__":
     # TODO: Mac OS support
