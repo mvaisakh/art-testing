@@ -300,7 +300,7 @@ def GetLocalOatSizeStats(oat_path):
     # Add total file size in bytes.
     command = ['stat', '-c', '%s', oat_path]
     rc, outerr = utils.Command(command)
-    section_sizes['FileSize'] = int(outerr)
+    section_sizes['FileSize'] = [int(outerr)]
     return OrderedDict([(utils.oat_size_label, section_sizes)])
 
 if __name__ == "__main__":
