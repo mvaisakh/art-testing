@@ -84,15 +84,7 @@ def BuildBenchmarks(build_for_target):
     utils.Command(command)
 
 def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk, classname, target, cpuset):
-    format_data = {'workdir': os.path.dirname(apk)}
-    path, env, runtime_param = utils.GetAndroidRootConfiguration(android_root, mode == '64')
-    # Escaping through `adb shell` is fiddly, so we expand the path fully in
-    # the environment configuration.
-    environment_config = env + ' ANDROID_DATA={workdir} DEX_LOCATION={workdir}'
-    dalvikvm = utils.TargetPathJoin(path, 'dalvikvm%s' % mode)
-    dalvikvm_options = ' '.join(runtime_param)
     apk_arguments = ''
-
     if auto_calibrate:
         # Run the benchmark's time* method(s) via bench_runner_main
         apk_arguments += " %s %s" % (bench_runner_main, classname)
@@ -100,26 +92,17 @@ def RunBenchADB(mode, compiler_mode, android_root, auto_calibrate, apk, classnam
         # Run the benchmark as a main class directly
         apk_arguments += " %s" % (classname)
 
-    dex2oat_options = utils.GetDex2oatOptions(compiler_mode)
-    for opt in dex2oat_options:
-        dalvikvm_options += ' -Xcompiler-option %s' % opt
-        # We want the compiler options to be used both for the APK and the
-        # boot-image.
-        dalvikvm_options += ' -Ximage-compiler-option %s' % opt
-    if compiler_mode == 'jit':
-        # For JIT mode benchmarking, enable following options to make sure:
-        # - No dex2oat compilation triggered.
-        # - Performance critical funtions are JIT compiled as soon as possible.
-        dalvikvm_options += ' -Xusejit:true -Xnodex2oat -Xjitthreshold:100'
+    command = ''
+    # TODO: The command to run benchmarks depends on an approach used by
+    # art/tools. ART_COMMAND is a temporary workaround to allow to use a command
+    # constructed by someone knowing how to run applications with dalvikvm.
+    if 'ART_COMMAND' in os.environ:
+        command = os.getenv('ART_COMMAND')
+    else:
+        utils.Error("ART_COMMAND is not set.")
 
-    command = 'cd {workdir} && '
-
-    if cpuset:
-        command += 'echo $BASHPID > /dev/cpuset/' + cpuset + '/tasks && '
-        dalvikvm = 'exec ' + dalvikvm
-
-    command += ' '.join([environment_config, dalvikvm,
-                        dalvikvm_options, '-cp', apk, apk_arguments])
+    command += ' '.join([apk_arguments])
+    format_data = {'workdir': os.path.dirname(apk)}
     command = command.format(**format_data)
 
     return utils_adb.shell(command, target, exit_on_error=False)
