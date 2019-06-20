@@ -158,35 +158,66 @@ existing benchmark. Besides, developers should also notice:
 
 ### Rules
 
-1. Test method names start with "time" -- Test launcher will find all timeXXX()
+1. Init/setup method names start with 'setup' -- All found methods will be
+   used to initialize data needed for benchmarks. As the data is initialized once
+   it must not be changed in "time"/"verify" methods.
+2. Test method names start with "time" -- Test launcher will find all timeXXX()
    methods and run them.
-2. Verify methods start with "verify" -- all boolean verifyXXX() methods will
+3. Verify methods start with "verify" -- all boolean verifyXXX() methods will
    be run to check the benchmark is working correctly.
    `verify` methods should *not* depend on the benchmark having run before it is
    called.
-3. Leave iterations as parameter -- Test launcher will fill it with a value
+4. Leave iterations as parameter -- Test launcher will fill it with a value
    to make sure it runs in a reasonable duration.
-4. Without auto-calibration benchmarks should run for a reasonable amount of
+5. Without auto-calibration benchmarks should run for a reasonable amount of
    time on target. Between 1 and 10 seconds is acceptable.
    (`tools/benchmarks/run.py --target --dont-auto-calibrate`)
 
 ### Example
 
     public class MyBenchmark {
+           private final static int N = 1000;
+           private int[] a;
            public static void main(String [] args) {
                   MyBenchmark b = new MyBenchmark();
+                  b.setupArray();
                   long before = System.currentTimeMillis();
-                  b.timeMethod0(1000);
-                  b.timeMethod1(1000);
+                  b.timeSumArray(1000);
+                  b.timeTestAdd(1000);
+                  b.timeSfib(600);
                   long after = System.currentTimeMillis();
                   System.out.println("MyBenchmark: " + (after - before));
+           }
+
+           public void setupArray() {
+             a = new int[N];
+             for (int i = 0; i < N; ++i) {
+               a[i] = i;
+             }
+           }
+
+           private int sumArray(int[] a) {
+             int n = a.length;
+             int result = 0;
+             for (int i = 0; i < n; ++i) {
+               result += a[i];
+             }
+             return result;
+           }
+
+           public int timeSumArray(int iters) {
+             int result = 0;
+             for (int i = 0; i < iters; ++i) {
+               result += sumArray(a);
+             }
+             return result;
            }
 
     //                  +----> test method prefix should be "time..."
     //                  |
     // ignored <---+    |              +-------> No need to set iterations. Test
-                   |    |              |         framework will try to fill a
-                   |    |              |         reasonable value automatically.
+    //             |    |              |         framework will try to fill a
+    //             |    |              |         reasonable value automatically.
     //             |    |              |
            public int timeTestAdd(int iters) {
                   int result = 0;
