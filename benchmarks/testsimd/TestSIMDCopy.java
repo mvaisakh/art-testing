@@ -19,89 +19,97 @@ package benchmarks.testsimd;
 
 // CHECKSTYLE.OFF: .*
 public class TestSIMDCopy {
-  static final int LENGTH = 1024 * 256;
-  static int [] a = new int[LENGTH];
-  static int [] c = new int[LENGTH];
-  static short [] sa = new short[LENGTH];
-  static short [] sc = new short[LENGTH];
-  static byte [] ba = new byte[LENGTH];
-  static byte [] bc = new byte[LENGTH];
+  static final int INT_ARR_LENGTH = 4 * 1024;
+  static final int SHORT_ARR_LENGTH = 8 * 1024;
+  static final int BYTE_ARR_LENGTH = 16 * 1024;
+  int[] intInput;
+  int[] intOutput;
+  short[] shortInput;
+  short[] shortOutput;
+  byte[] byteInput;
+  byte[] byteOutput;
 
-  public static void TestSIMDCopyInit() {
-    for (int i = 0; i < LENGTH; i++) {
-       a[i] = i + 3;
-       c[i] = i + 1;
-       sa[i] = (short)(i + 3);
-       sc[i] = (short)(i + 1);
-       ba[i] = (byte)(i + 3);
-       bc[i] = (byte)(i + 1);
+  public void setupArrays() {
+    intInput = new int[INT_ARR_LENGTH];
+    intOutput = new int[INT_ARR_LENGTH];
+    shortInput = new short[SHORT_ARR_LENGTH];
+    shortOutput = new short[SHORT_ARR_LENGTH];
+    byteInput = new byte[BYTE_ARR_LENGTH];
+    byteOutput = new byte[BYTE_ARR_LENGTH];
+
+    for (int i = 0; i < INT_ARR_LENGTH; i++) {
+       intInput[i] = i + 3;
+    }
+    for (int i = 0; i < SHORT_ARR_LENGTH; i++) {
+       shortInput[i] = (short)(i + 3);
+    }
+    for (int i = 0; i < BYTE_ARR_LENGTH; i++) {
+       byteInput[i] = (byte)(i + 3);
     }
   }
 
-  public static void vectCopyInt() {
-    for (int i = 0; i < LENGTH; i++) {
-      c[i] = a[i];
+  public static void vectCopyInt(int[] in, int[] out) {
+    for (int i = 0; i < INT_ARR_LENGTH; i++) {
+      out[i] = in[i];
     }
   }
 
-  public static void vectCopyShort() {
-    for (int i = 0; i < LENGTH; i++) {
-      sc[i] = sa[i];
+  public static void vectCopyShort(short[] in, short[] out) {
+    for (int i = 0; i < SHORT_ARR_LENGTH; i++) {
+      out[i] = in[i];
     }
   }
 
-  public static void vectCopyByte() {
-    for (int i = 0; i < LENGTH; i++) {
-      bc[i] = ba[i];
+  public static void vectCopyByte(byte[] in, byte[] out) {
+    for (int i = 0; i < BYTE_ARR_LENGTH; i++) {
+      out[i] = in[i];
     }
   }
 
   public void timeVectCopyByte(int iters) {
-    TestSIMDCopyInit();
     for (int i = 0; i < iters; i++) {
-      vectCopyByte();
+      vectCopyByte(byteInput, byteOutput);
     }
   }
 
   public void timeVectCopyShort(int iters) {
-    TestSIMDCopyInit();
     for (int i = 0; i < iters; i++) {
-      vectCopyShort();
+      vectCopyShort(shortInput, shortOutput);
     }
   }
 
   public void timeVectCopyInt(int iters) {
-    TestSIMDCopyInit();
     for (int i = 0; i < iters; i++) {
-      vectCopyInt();
+      vectCopyInt(intInput, intOutput);
     }
   }
 
   public boolean verifySIMDCopy() {
-    TestSIMDCopyInit();
-    vectCopyByte();
-    vectCopyShort();
-    vectCopyInt();
+    vectCopyByte(byteInput, byteOutput);
+    vectCopyShort(shortInput, shortOutput);
+    vectCopyInt(intInput, intOutput);
 
-    int expected = 786432;
+    int expected = 41965568;
     int found = 0;
-    for (int i = 0; i < LENGTH; i++) {
-      found += a[i] + c[i] + sa[i] + sc[i] + ba[i] + bc[i];
+    for (int v : intOutput) {
+      found += v;
+    }
+    for (short v : shortOutput) {
+      found += v;
+    }
+    for (byte v : byteOutput) {
+      found += v;
     }
 
-    if (found != expected) {
-      System.out.println("ERROR: Expected " + expected + " but found " + found);
-      return false;
-    }
-    return true;
+    return found == expected;
   }
   // CHECKSTYLE.ON: .*
 
   public static final int ITER_COUNT = 600;
 
   public static void main(String[] argv) {
-    int rc = 0;
     TestSIMDCopy obj = new TestSIMDCopy();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeVectCopyByte(ITER_COUNT);
@@ -119,9 +127,8 @@ public class TestSIMDCopy {
     System.out.println("benchmarks/testsimd/TestSIMDCopyInt: " + (after - before));
 
     if (!obj.verifySIMDCopy()) {
-      rc++;
+      System.out.println("ERROR: verifySIMDCopy failed.");
+      System.exit(1);
     }
-    System.exit(rc);
   }
-
 }

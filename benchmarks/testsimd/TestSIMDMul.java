@@ -17,98 +17,116 @@
 
 package benchmarks.testsimd;
 
+import java.util.Arrays;
+
 // CHECKSTYLE.OFF: .*
 public class TestSIMDMul {
-  static final int LENGTH = 1024 * 256;
-  static int [] a = new int[LENGTH];
-  static int [] b = new int[LENGTH];
-  static int [] c = new int[LENGTH];
-  static short [] sa = new short[LENGTH];
-  static short [] sb = new short[LENGTH];
-  static short [] sc = new short[LENGTH];
-  static byte [] ba = new byte[LENGTH];
-  static byte [] bb = new byte[LENGTH];
-  static byte [] bc = new byte[LENGTH];
+  static final int BYTE_ARR_LENGTH = 16 * 1024;
+  static final int INT_ARR_LENGTH = 4 * 1024;
+  static final int SHORT_ARR_LENGTH = 8 * 1024;
+  private int[] intInputA;
+  private int[] intInputB;
+  private int[] intOutput;
+  private short[] shortInputA;
+  private short[] shortInputB;
+  private short[] shortOutput;
+  private byte[] byteInputA;
+  private byte[] byteInputB;
+  private byte[] byteOutput;
 
-  public static void TestSIMDMulInit() {
-    for (int i = 0; i < LENGTH; i++) {
-       a[i] = i + 3;
-       b[i] = i + 2;
-       c[i] = i + 1;
-       sa[i] = (short)(i + 3);
-       sb[i] = (short)(i + 2);
-       sc[i] = (short)(i + 1);
-       ba[i] = (byte)(i + 3);
-       bb[i] = (byte)(i + 2);
-       bc[i] = (byte)(i + 1);
+  public void setupArrays() {
+    intInputA = new int[INT_ARR_LENGTH];
+    intInputB = new int[INT_ARR_LENGTH];
+    intOutput = new int[INT_ARR_LENGTH];
+    shortInputA = new short[SHORT_ARR_LENGTH];
+    shortInputB = new short[SHORT_ARR_LENGTH];
+    shortOutput = new short[SHORT_ARR_LENGTH];
+    byteInputA = new byte[BYTE_ARR_LENGTH];
+    byteInputB = new byte[BYTE_ARR_LENGTH];
+    byteOutput = new byte[BYTE_ARR_LENGTH];
+    for (int i = 0; i < INT_ARR_LENGTH; i++) {
+       intInputA[i] = i + 3;
+       intInputB[i] = i + 2;
+    }
+
+    for (int i = 0; i < SHORT_ARR_LENGTH; i++) {
+       shortInputA[i] = (short)(i + 3);
+       shortInputB[i] = (short)(i + 2);
+    }
+
+    for (int i = 0; i < BYTE_ARR_LENGTH; i++) {
+       byteInputA[i] = (byte)(i + 3);
+       byteInputB[i] = (byte)(i + 2);
     }
   }
 
-  public static void vectMulInt() {
-    for (int i = 0; i < LENGTH; i++) {
-      c[i] = a[i] * b[i];
+  public void vectMulInt(int[] inA, int[] inB, int[] out) {
+    for (int i = 0; i < INT_ARR_LENGTH; i++) {
+      out[i] = inA[i] * inB[i];
     }
   }
 
-  public static void vectMulShort() {
-    for (int i = 0; i < LENGTH; i++) {
-      sc[i] = (short)(sa[i] * sb[i]);
+  public void vectMulShort(short[] inA, short[] inB, short[] out) {
+    for (int i = 0; i < SHORT_ARR_LENGTH; i++) {
+      out[i] = (short)(inA[i] * inB[i]);
     }
   }
 
-  public static void vectMulByte() {
-    for (int i = 0; i < LENGTH; i++) {
-      bc[i] = (byte)(ba[i] * bb[i]);
+  public void vectMulByte(byte[] inA, byte[] inB, byte[] out) {
+    for (int i = 0; i < BYTE_ARR_LENGTH; i++) {
+      out[i] = (byte)(inA[i] * inB[i]);
     }
   }
 
   public void timeVectMulByte(int iters) {
-    TestSIMDMulInit();
     for (int i = 0; i < iters; i++) {
-      vectMulByte();
+      vectMulByte(byteInputA, byteInputB, byteOutput);
     }
+  }
+
+  public boolean verifyVectMulByte() {
+    Arrays.fill(byteOutput, (byte)0);
+    timeVectMulByte(1);
+    final int hashCode = Arrays.hashCode(byteOutput);
+    final int expectedHashCode = -230948863;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectMulShort(int iters) {
-    TestSIMDMulInit();
     for (int i = 0; i < iters; i++) {
-      vectMulShort();
+      vectMulShort(shortInputA, shortInputB, shortOutput);
     }
+  }
+
+  public boolean verifyVectMulShort() {
+    Arrays.fill(shortOutput, (short)0);
+    timeVectMulShort(1);
+    final int hashCode = Arrays.hashCode(shortOutput);
+    final int expectedHashCode = -1719910399;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectMulInt(int iters) {
-    TestSIMDMulInit();
     for (int i = 0; i < iters; i++) {
-      vectMulInt();
+      vectMulInt(intInputA, intInputB, intOutput);
     }
   }
 
-  public boolean verifySIMDMul() {
-    TestSIMDMulInit();
-    vectMulByte();
-    vectMulShort();
-    vectMulInt();
-
-    int expected = 1432616960;
-    int found = 0;
-    for (int i = 0; i < LENGTH; i++) {
-      found += a[i] + b[i] + c[i] + sa[i] + sb[i] + sc[i] + ba[i] + bb[i] + bc[i];
-    }
-
-    if (found != expected) {
-      System.out.println("ERROR: Expected " + expected + " but found " + found);
-      return false;
-    }
-
-    return true;
+  public boolean verifyVectMulInt() {
+    Arrays.fill(intOutput, 0);
+    timeVectMulInt(1);
+    final int hashCode = Arrays.hashCode(intOutput);
+    final int expectedHashCode = 1287856129;
+    return hashCode == expectedHashCode;
   }
+
   // CHECKSTYLE.ON: .*
 
   public static final int ITER_COUNT = 300;
 
   public static void main(String[] argv) {
-    int rc = 0;
     TestSIMDMul obj = new TestSIMDMul();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeVectMulByte(ITER_COUNT);
@@ -125,10 +143,22 @@ public class TestSIMDMul {
     after = System.currentTimeMillis();
     System.out.println("benchmarks/testsimd/TestSIMDMulInt: " + (after - before));
 
-    if (!obj.verifySIMDMul()) {
+    int rc = 0;
+    if (!obj.verifyVectMulByte()) {
       rc++;
     }
-    System.exit(rc);
-  }
 
+    if (!obj.verifyVectMulShort()) {
+      rc++;
+    }
+
+    if (!obj.verifyVectMulInt()) {
+      rc++;
+    }
+
+    if (rc != 0) {
+      System.out.println("ERROR: verification failed.");
+      System.exit(rc);
+    }
+  }
 }

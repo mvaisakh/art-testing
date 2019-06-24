@@ -17,27 +17,30 @@
 
 package benchmarks.testsimd;
 
-// CHECKSTYLE.OFF: .*
 public class TestReduceAdd {
-  static final int LENGTH = 256 * 1024;
-  static int [] a = new int[LENGTH];
-  static int [] b = new int[LENGTH];
-  static short [] sa = new short[LENGTH];
-  static short [] sb = new short[LENGTH];
+  static final int LENGTH = 8 * 1024;
+  int[] a;
+  int[] b;
+  short[] sa;
+  short[] sb;
 
-  public static void TestReduceAddInit() {
+  public void setupArrays() {
+    a = new int[LENGTH];
+    b = new int[LENGTH];
+    sa = new short[LENGTH];
+    sb = new short[LENGTH];
     for (int i = 0; i < LENGTH; i++) {
-       a[i] = 2;
-       b[i] = 1;
-       sa[i] = 2;
-       sb[i] = 1;
+      a[i] = 2;
+      b[i] = 1;
+      sa[i] = 2;
+      sb[i] = 1;
     }
   }
 
   // In this case, addv sn vm.4s can't be generated in current jdk (OpenJDK9).
   // hotspot version: changeset 12033:d5d5cd1adeaa
   // The same with following test cases.
-  public static int reduceAddInt(int[] a, int[] b) {
+  public static int reduceAddInt(int[] a) {
     int total = 0;
     for (int i = 0; i < LENGTH; i++) {
       total += a[i];
@@ -66,7 +69,7 @@ public class TestReduceAdd {
 
 
   // In the following three cases, addv hn vm.4h can't be generated.
-  public static int reduceAddShort(short[] a, short[] b) {
+  public static int reduceAddShort(short[] a) {
     int total = 0;
     for (int i = 0; i < LENGTH; i++) {
       total += a[i];
@@ -89,50 +92,47 @@ public class TestReduceAdd {
     }
     return total;
   }
-  // CHECKSTYLE.ON: .*
+
+  int sum;
 
   public void timeReduceAddInt(int iters) {
-    int sum;
-    TestReduceAddInit();
+    int sum = 0;
     for (int i = 0; i < iters; i++) {
-      sum = reduceAddInt(a, b);
-      sum = reduceAddSumofSubInt(a, b);
-      sum = reduceAddSumofMulInt(a, b);
+      sum = reduceAddInt(a);
+      sum += reduceAddSumofSubInt(a, b);
+      sum += reduceAddSumofMulInt(a, b);
     }
+    this.sum = sum;
   }
 
   public void timeReduceAddShort(int iters) {
-    int sum;
-    TestReduceAddInit();
+    int sum = 0;
     for (int i = 0; i < iters; i++) {
-      sum = reduceAddShort(sa, sb);
-      sum = reduceAddSumofSubShort(sa, sb);
-      sum = reduceAddSumofMulShort(sa, sb);
+      sum = reduceAddShort(sa);
+      sum += reduceAddSumofSubShort(sa, sb);
+      sum += reduceAddSumofMulShort(sa, sb);
     }
+    this.sum = sum;
   }
 
   public boolean verifyReduceAdd() {
-    TestReduceAddInit();
-
-    int expected = 1310720;
+    int expected = 81920;
     int found = 0;
-    found += reduceAddShort(sa, sb);
+    found  = reduceAddInt(a);
+    found += reduceAddSumofSubInt(a, b);
+    found += reduceAddSumofMulInt(a, b);
+    found += reduceAddShort(sa);
     found += reduceAddSumofSubShort(sa, sb);
     found += reduceAddSumofMulShort(sa, sb);
 
-    if (found != expected) {
-      System.out.println("ERROR: Expected " + expected + " but found " + found);
-      return false;
-    }
-
-    return true;
+    return found == expected;
   }
 
   public static final int ITER_COUNT = 150;
 
   public static void main(String[] argv) {
-    int rc = 0;
     TestReduceAdd obj = new TestReduceAdd();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeReduceAddInt(ITER_COUNT);
@@ -145,9 +145,8 @@ public class TestReduceAdd {
     System.out.println("benchmarks/testsimd/TestReduceAddShort: " + (after - before));
 
     if (!obj.verifyReduceAdd()) {
-      rc++;
+      System.out.println("ERROR: verifyReduceAdd failed.");
+      System.exit(1);
     }
-    System.exit(rc);
   }
-
 }

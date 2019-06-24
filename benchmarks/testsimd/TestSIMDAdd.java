@@ -17,98 +17,132 @@
 
 package benchmarks.testsimd;
 
+import java.util.Arrays;
+
 // CHECKSTYLE.OFF: .*
 public class TestSIMDAdd {
-  static final int LENGTH = 1024 * 256;
-  static int [] a = new int[LENGTH];
-  static int [] b = new int[LENGTH];
-  static int [] c = new int[LENGTH];
-  static short [] sa = new short[LENGTH];
-  static short [] sb = new short[LENGTH];
-  static short [] sc = new short[LENGTH];
-  static byte [] ba = new byte[LENGTH];
-  static byte [] bb = new byte[LENGTH];
-  static byte [] bc = new byte[LENGTH];
+  static final int INT_ARR_LENGTH = 4 * 1024;
+  static final int SHORT_ARR_LENGTH = 8 * 1024;
+  static final int BYTE_ARR_LENGTH = 16 * 1024;
+  int[] intInputA;
+  int[] intInputB;
+  int[] intOutput;
+  short[] shortInputA;
+  short[] shortInputB;
+  short[] shortOutput;
+  byte[] byteInputA;
+  byte[] byteInputB;
+  byte[] byteOutput;
 
-  public static void TestSIMDAddInit() {
-    for (int i = 0; i < LENGTH; i++) {
-       a[i] = i + 3;
-       b[i] = i + 2;
-       c[i] = i + 1;
-       sa[i] = (short)(i + 3);
-       sb[i] = (short)(i + 2);
-       sc[i] = (short)(i + 1);
-       ba[i] = (byte)(i + 3);
-       bb[i] = (byte)(i + 2);
-       bc[i] = (byte)(i + 1);
+  public void setupArrays() {
+    intInputA = new int[INT_ARR_LENGTH];
+    intInputB = new int[INT_ARR_LENGTH];
+    intOutput = new int[INT_ARR_LENGTH];
+    shortInputA = new short[SHORT_ARR_LENGTH];
+    shortInputB = new short[SHORT_ARR_LENGTH];
+    shortOutput = new short[SHORT_ARR_LENGTH];
+    byteInputA = new byte[BYTE_ARR_LENGTH];
+    byteInputB = new byte[BYTE_ARR_LENGTH];
+    byteOutput = new byte[BYTE_ARR_LENGTH];
+
+    for (int i = 0; i < INT_ARR_LENGTH; i++) {
+       intInputA[i] = i + 3;
+       intInputB[i] = i + 2;
+    }
+
+    for (int i = 0; i < SHORT_ARR_LENGTH; i++) {
+       shortInputA[i] = (short)(i + 3);
+       shortInputB[i] = (short)(i + 2);
+    }
+    for (int i = 0; i < BYTE_ARR_LENGTH; i++) {
+       byteInputA[i] = (byte)(i + 3);
+       byteInputB[i] = (byte)(i + 2);
     }
   }
 
-  public static void vectAddInt() {
-    for (int i = 0; i < LENGTH; i++) {
-      c[i] = a[i] + b[i];
+  public static void vectAddInt(int[] inA, int[] inB, int[] out) {
+    for (int i = 0; i < INT_ARR_LENGTH; i++) {
+      out[i] = inA[i] + inB[i];
     }
   }
 
-  public static void vectAddShort() {
-    for (int i = 0; i < LENGTH; i++) {
-      sc[i] = (short)(sa[i] + sb[i]);
+  public static void vectAddShort(short[] inA, short[] inB, short[] out) {
+    for (int i = 0; i < SHORT_ARR_LENGTH; i++) {
+      out[i] = (short)(inA[i] + inB[i]);
     }
   }
 
-  public static void vectAddByte() {
-    for (int i = 0; i < LENGTH; i++) {
-      bc[i] = (byte)(ba[i] + bb[i]);
+  public static void vectAddByte(byte[] inA, byte[] inB, byte[] out) {
+    for (int i = 0; i < BYTE_ARR_LENGTH; i++) {
+      out[i] = (byte)(inA[i] + inB[i]);
     }
   }
 
   public void timeVectAddByte(int iters) {
-    TestSIMDAddInit();
     for (int i = 0; i < iters; i++) {
-      vectAddByte();
+      vectAddByte(byteInputA, byteInputB, byteOutput);
     }
+  }
+
+  public boolean verifyVectAddByte() {
+    Arrays.fill(byteOutput, (byte)0);
+    timeVectAddByte(1);
+    final int hashCode = Arrays.hashCode(byteOutput);
+    final int expectedHashCode = 2038185985;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectAddShort(int iters) {
-    TestSIMDAddInit();
     for (int i = 0; i < iters; i++) {
-      vectAddShort();
+      vectAddShort(shortInputA, shortInputB, shortOutput);
     }
+  }
+
+  public boolean verifyVectAddShort() {
+    Arrays.fill(shortOutput, (short)0);
+    timeVectAddShort(1);
+    final int hashCode = Arrays.hashCode(shortOutput);
+    final int expectedHashCode = 1019617281;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectAddInt(int iters) {
-    TestSIMDAddInit();
     for (int i = 0; i < iters; i++) {
-      vectAddInt();
+      vectAddInt(intInputA, intInputB, intOutput);
     }
   }
 
-  public boolean verifySIMDAdd() {
-    TestSIMDAddInit();
-    vectAddByte();
-    vectAddShort();
-    vectAddInt();
+  public boolean verifyVectAddInt() {
+    Arrays.fill(intOutput, 0);
+    timeVectAddInt(1);
+    final int hashCode = Arrays.hashCode(intOutput);
+    final int expectedHashCode = 509808641;
+    return hashCode == expectedHashCode;
+  }
 
-    int expected = 1572864;
-    int found = 0;
-    for (int i = 0; i < LENGTH; i++) {
-      found += a[i] + b[i] + c[i] + sa[i] + sb[i] + sc[i] + ba[i] + bb[i] + bc[i];
+  public int verifySIMDAdd() {
+    int rc = 0;
+    if (!verifyVectAddByte()) {
+      ++rc;
     }
 
-    if (found != expected) {
-      System.out.println("ERROR: Expected " + expected + " but found " + found);
-      return false;
+    if (!verifyVectAddShort()) {
+      ++rc;
     }
 
-    return true;
+    if (!verifyVectAddInt()) {
+      ++rc;
+    }
+
+    return rc;
   }
   // CHECKSTYLE.ON: .*
 
   public static final int ITER_COUNT = 300;
 
   public static void main(String[] argv) {
-    int rc = 0;
     TestSIMDAdd obj = new TestSIMDAdd();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeVectAddByte(ITER_COUNT);
@@ -125,10 +159,10 @@ public class TestSIMDAdd {
     after = System.currentTimeMillis();
     System.out.println("benchmarks/testsimd/TestSIMDAddInt: " + (after - before));
 
-    if (!obj.verifySIMDAdd()) {
-      rc++;
+    int rc = obj.verifySIMDAdd();
+    if (rc != 0) {
+      System.out.println("ERROR: verifySIMDAdd failed.");
+      System.exit(rc);
     }
-    System.exit(rc);
   }
-
 }

@@ -20,15 +20,19 @@ package benchmarks.testsimd;
 // CHECKSTYLE.OFF: .*
 public class TestRGBToCmyk
 {
-  static final int LENGTH = 256 * 1024;
-  static byte input[] = new byte[LENGTH*3];
-  static byte output[] = new byte[LENGTH*4];
+  static final int LENGTH = 8 * 1024;
+  static final int INPUT_LENGTH = 3 * LENGTH;
+  static final int OUTPUT_LENGTH = 4 * LENGTH;
+  byte input[];
+  byte output[];
 
-  public static void TestRGBToCmykInit()
+  public void setupArrays()
   {
-    for (int i = 0; i < LENGTH*3; i++) {
+    input = new byte[INPUT_LENGTH];
+    for (int i = 0; i < input.length; i++) {
       input[i] = (byte)i;
     }
+    output = new byte[OUTPUT_LENGTH];
   }
 
   public static void RGBToCmyk(byte[] rgb, byte[] cmyk, int cnt)
@@ -51,38 +55,32 @@ public class TestRGBToCmyk
   }
 
   public void timeRGBToCmyk(int iters) {
-    TestRGBToCmykInit();
     for (int i = 0; i < iters; i++) {
       RGBToCmyk(input, output, LENGTH);
     }
   }
 
   public boolean verifyRGBToCmyk() {
-    TestRGBToCmykInit();
     RGBToCmyk(input, output, LENGTH);
 
-    int expected = -268288;
+    int expected = -8384;
     int found = 0;
-    for (int i = 0; i < LENGTH * 3; i++) {
+    for (int i = 0; i < input.length; i++) {
       found += input[i];
     }
-    for (int i = 0; i < LENGTH * 4; i++) {
+    for (int i = 0; i < output.length; i++) {
       found += output[i];
     }
 
-    if (found != expected) {
-      System.out.println("ERROR: Expected " + expected + " but found " + found);
-      return false;
-    }
-    return true;
+    return found == expected;
   }
   // CHECKSTYLE.ON: .*
 
   public static final int ITER_COUNT = 150;
 
   public static void main(String[] argv) {
-    int rc = 0;
     TestRGBToCmyk obj = new TestRGBToCmyk();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeRGBToCmyk(ITER_COUNT);
@@ -90,9 +88,8 @@ public class TestRGBToCmyk
     System.out.println("benchmarks/testsimd/TestRGBToCmyk: " + (after - before));
 
     if (!obj.verifyRGBToCmyk()) {
-      rc++;
+      System.out.println("ERROR: verifyRGBToCmyk failed.");
+      System.exit(1);
     }
-    System.exit(rc);
   }
-
 }

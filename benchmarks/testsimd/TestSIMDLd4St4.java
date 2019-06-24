@@ -19,23 +19,28 @@ package benchmarks.testsimd;
 
 // CHECKSTYLE.OFF: .*
 public class TestSIMDLd4St4 {
-  static final int VECT_LENGTH = 256 * 1024;
+  static final int VECT_LENGTH = 4 * 1024;
   static final int DIM = 4;
   static final int LENGTH = VECT_LENGTH * DIM;
-  static int [] in = new int[LENGTH];
-  static int [] out = new int[LENGTH];
-  static int [] c = new int[DIM];
-  static short [] sin = new short[LENGTH];
-  static short [] sout = new short[LENGTH];
-  static short [] sc = new short[DIM];
+  int[] in;
+  int[] out;
+  int[] c;
+  short[] sin;
+  short[] sout;
+  short[] sc;
 
-  public static void vect4DInit() {
-    int i;
-    for (i = 0; i < LENGTH; i++) {
+  public void setupArrays() {
+    in = new int[LENGTH];
+    out = new int[LENGTH];
+    c = new int[DIM];
+    sin = new short[LENGTH];
+    sout = new short[LENGTH];
+    sc = new short[DIM];
+    for (int i = 0; i < LENGTH; i++) {
       in[i] = i + 3;
       sin[i] = (short)(i + 3);
     }
-    for (i = 0; i < DIM; i++) {
+    for (int i = 0; i < DIM; i++) {
       c[i] = i + 1;
       sc[i] = (short)(i + 1);
     }
@@ -105,13 +110,7 @@ public class TestSIMDLd4St4 {
     }
   }
 
-  public void setup()
-  {
-    vect4DInit();
-  }
-
   public void timeVect4D(int iters) {
-    vect4DInit();
     for (int i = 0; i < iters; i++) {
       vect4DAddInt(out, in, c);
       vect4DMulInt(out, in, c);
@@ -121,30 +120,26 @@ public class TestSIMDLd4St4 {
   }
 
   public boolean verifySIMDLd4St4() {
-    vect4DInit();
     vect4DAddInt(out, in, c);
     vect4DMulInt(out, in, c);
     vect4DAddShort(sout, sin, sc);
     vect4DMulShort(sout, sin, sc);
 
-    int expected = 786432;
+    int expected = 447463424;
     int found = 0;
     for (int i = 0; i < LENGTH; i++) {
-      found += in[i] + out[i] + sin[i] + sout[i];
-    }
-    for (int i = 0; i < DIM; i++) {
-      found += c[i] + sc[i];
+      found += out[i] + sout[i];
     }
 
-    return true;
+    return expected == found;
   }
   // CHECKSTYLE.ON: .*
 
   public static final int ITER_COUNT = 40;
 
   public static void main(String[] argv) {
-    int rc = 0;
     TestSIMDLd4St4 obj = new TestSIMDLd4St4();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeVect4D(ITER_COUNT);
@@ -152,9 +147,8 @@ public class TestSIMDLd4St4 {
     System.out.println("benchmarks/testsimd/TestSIMDLd4St4: " + (after - before));
 
     if (!obj.verifySIMDLd4St4()) {
-      rc++;
+      System.out.println("ERROR: verifySIMDLd4St4 failed.");
+      System.exit(1);
     }
-    System.exit(rc);
   }
-
 }

@@ -17,15 +17,21 @@
 
 package benchmarks.testsimd;
 
+import java.util.Arrays;
+
 // CHECKSTYLE.OFF: .*
 public class TestSIMDMlaShort {
-  static final int LENGTH = 256 * 1024;
-  static short [] a = new short[LENGTH];
-  static short [] b = new short[LENGTH];
-  static short [] c = new short[LENGTH];
-  static short [] d = new short[LENGTH];
+  static final int LENGTH = 8 * 1024;
+  private short[] a;
+  private short[] b;
+  private short[] c;
+  private short[] output;
 
-  public static void TestSIMDMlaInit() {
+  public void setupArrays() {
+    a = new short[LENGTH];
+    b = new short[LENGTH];
+    c = new short[LENGTH];
+    output = new short[LENGTH];
     for (int i = 0; i < LENGTH; i++) {
        a[i] = 3;
        b[i] = 2;
@@ -37,11 +43,11 @@ public class TestSIMDMlaShort {
           short[] a,
           short[] b,
           short[] c,
-          short[] d) {
+          short[] output) {
     int total = 0;
     for (int i = 0; i < LENGTH; i++) {
-      d[i] = (short)(a[i] * b[i] + c[i]);
-      total += d[i];
+      output[i] = (short)(a[i] * b[i] + c[i]);
+      total += output[i];
     }
     return total;
   }
@@ -50,11 +56,11 @@ public class TestSIMDMlaShort {
           short[] a,
           short[] b,
           short[] c,
-          short[] d) {
+          short[] output) {
     int total = 0;
     for (int i = 0; i < LENGTH; i++) {
-      d[i] = (short)(a[i] * b[i] + a[i] * c[i]);
-      total += d[i];
+      output[i] = (short)(a[i] * b[i] + a[i] * c[i]);
+      total += output[i];
     }
     return total;
   }
@@ -63,11 +69,11 @@ public class TestSIMDMlaShort {
           short[] a,
           short[] b,
           short[] c,
-          short[] d) {
+          short[] output) {
     int total = 0;
     for (int i = 0; i < LENGTH; i++) {
-      d[i] = (short)((a[i] * b[i]) + (a[i] * c[i]) + (b[i] * c[i]));
-      total += d[i];
+      output[i] = (short)((a[i] * b[i]) + (a[i] * c[i]) + (b[i] * c[i]));
+      total += output[i];
     }
     return total;
   }
@@ -76,9 +82,9 @@ public class TestSIMDMlaShort {
           short[] a,
           short[] b,
           short[] c,
-          short[] d) {
+          short[] output) {
     for (int i = 0; i < LENGTH; i++) {
-      d[i] = (short)(a[i] * b[i] + c[i]);
+      output[i] = (short)(a[i] * b[i] + c[i]);
     }
   }
 
@@ -86,9 +92,9 @@ public class TestSIMDMlaShort {
           short[] a,
           short[] b,
           short[] c,
-          short[] d) {
+          short[] output) {
     for (int i = 0; i < LENGTH; i++) {
-      d[i] = (short)(a[i] * b[i] + a[i] * c[i]);
+      output[i] = (short)(a[i] * b[i] + a[i] * c[i]);
     }
   }
 
@@ -96,79 +102,135 @@ public class TestSIMDMlaShort {
           short[] a,
           short[] b,
           short[] c,
-          short[] d) {
+          short[] output) {
     for (int i = 0; i < LENGTH; i++) {
-      d[i] = (short)((a[i] * b[i]) + (a[i] * c[i]) + (b[i] * c[i]));
+      output[i] = (short)((a[i] * b[i]) + (a[i] * c[i]) + (b[i] * c[i]));
     }
   }
 
   public void timeVectSumOfMulAdd1(int iters) {
     int sum = 0;
-    TestSIMDMlaInit();
     for (int i = 0; i < iters; i++) {
-      sum = vectSumOfMulAdd1(a, b, c, d);
+      sum = vectSumOfMulAdd1(a, b, c, output);
     }
+  }
+
+  public boolean verifyVectSumOfMulAdd1() {
+    Arrays.fill(output, (short)0);
+    timeVectSumOfMulAdd1(1);
+    final int hashCode = Arrays.hashCode(output);
+    final int expectedHashCode = 1435107329;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectSumOfMulAdd2(int iters) {
     int sum = 0;
-    TestSIMDMlaInit();
     for (int i = 0; i < iters; i++) {
-      sum = vectSumOfMulAdd2(a, b, c, d);
+      sum = vectSumOfMulAdd2(a, b, c, output);
     }
+  }
+
+  public boolean verifyVectSumOfMulAdd2() {
+    Arrays.fill(output, (short)0);
+    timeVectSumOfMulAdd2(1);
+    final int hashCode = Arrays.hashCode(output);
+    final int expectedHashCode = 235798529;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectSumOfMulAdd3(int iters) {
     int sum = 0;
-    TestSIMDMlaInit();
     for (int i = 0; i < iters; i++) {
-      sum = vectSumOfMulAdd3(a, b, c, d);
+      sum = vectSumOfMulAdd3(a, b, c, output);
     }
+  }
+
+  public boolean verifyVectSumOfMulAdd3() {
+    Arrays.fill(output, (short)0);
+    timeVectSumOfMulAdd3(1);
+    final int hashCode = Arrays.hashCode(output);
+    final int expectedHashCode = -963510271;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectMulAdd1(int iters) {
-    TestSIMDMlaInit();
     for (int i = 0; i < iters; i++) {
-      vectMulAdd1(a, b, c, d);
+      vectMulAdd1(a, b, c, output);
     }
+  }
+
+  public boolean verifyVectMulAdd1() {
+    Arrays.fill(output, (short)0);
+    timeVectMulAdd1(1);
+    final int hashCode = Arrays.hashCode(output);
+    final int expectedHashCode = 1435107329;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectMulAdd2(int iters) {
-    TestSIMDMlaInit();
     for (int i = 0; i < iters; i++) {
-      vectMulAdd2(a, b, c, d);
+      vectMulAdd2(a, b, c, output);
     }
+  }
+
+  public boolean verifyVectMulAdd2() {
+    Arrays.fill(output, (short)0);
+    timeVectMulAdd2(1);
+    final int hashCode = Arrays.hashCode(output);
+    final int expectedHashCode = 235798529;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectMulAdd3(int iters) {
-    TestSIMDMlaInit();
     for (int i = 0; i < iters; i++) {
-      vectMulAdd3(a, b, c, d);
+      vectMulAdd3(a, b, c, output);
     }
   }
 
-  public boolean verifySIMDMlaShort() {
-    int expected = 7077888;
-    int found = 0;
-    TestSIMDMlaInit();
-    found += vectSumOfMulAdd1(a, b, c, d);
-    found += vectSumOfMulAdd2(a, b, c, d);
-    found += vectSumOfMulAdd3(a, b, c, d);
+  public boolean verifyVectMulAdd3() {
+    Arrays.fill(output, (short)0);
+    timeVectMulAdd3(1);
+    final int hashCode = Arrays.hashCode(output);
+    final int expectedHashCode = -963510271;
+    return hashCode == expectedHashCode;
+  }
 
-    if (found != expected) {
-      System.out.println("ERROR: Expected " + expected + " but found " + found);
-      return false;
+  public int verifySIMDMlaShort() {
+    int rc = 0;
+
+    if (!verifyVectSumOfMulAdd1()) {
+      ++rc;
     }
 
-    return true;
+    if (!verifyVectSumOfMulAdd2()) {
+      ++rc;
+    }
+
+    if (!verifyVectSumOfMulAdd3()) {
+      ++rc;
+    }
+
+    if (!verifyVectMulAdd1()) {
+      ++rc;
+    }
+
+    if (!verifyVectMulAdd2()) {
+      ++rc;
+    }
+
+    if (!verifyVectMulAdd2()) {
+      ++rc;
+    }
+
+    return rc;
   }
   // CHECKSTYLE.ON: .*
 
   public static final int ITER_COUNT = 200;
 
   public static void main(String[] argv) {
-    int rc = 0;
     TestSIMDMlaShort obj = new TestSIMDMlaShort();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeVectSumOfMulAdd1(ITER_COUNT);
@@ -200,10 +262,10 @@ public class TestSIMDMlaShort {
     after = System.currentTimeMillis();
     System.out.println("benchmarks/testsimd/TestSIMDMlaShortSimple3: " + (after - before));
 
-    if (!obj.verifySIMDMlaShort()) {
-      rc++;
+    int rc = obj.verifySIMDMlaShort();
+    if (rc != 0) {
+      System.out.println("ERROR: verifySIMDMlaShort failed.");
+      System.exit(rc);
     }
-    System.exit(rc);
   }
-
 }
