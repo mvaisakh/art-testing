@@ -38,16 +38,12 @@ import java.util.Random;
 
 public class StringEquals {
   private static Random rnd = new Random(0);
-  private static final int NUM_Equals = 1024;
-  private static final int STR_Length = 512;
-  private static String[] randomStrings = new String[NUM_Equals];
-  private static Boolean[] equalsResults = new Boolean[NUM_Equals - 1];
+  private static final int NUM_Equals = 256;
+  private static final int STR_Length = 128;
+  private String[] randomStrings;
+  public Boolean[] equalsResults;
 
-  static {
-    generateRandomStrings();
-  }
-
-  private static void generateRandomStrings() {
+  private void generateRandomStrings() {
     for (int i = 0; i < NUM_Equals; i++) {
       StringBuilder sb = new StringBuilder();
       for (int j = 0; j < STR_Length; j++) {
@@ -55,6 +51,12 @@ public class StringEquals {
       }
       randomStrings[i] = sb.toString();
     }
+  }
+
+  public void setupStrings() {
+    randomStrings = new String[NUM_Equals];
+    equalsResults = new Boolean[NUM_Equals - 1];
+    generateRandomStrings();
   }
 
   public void timeEquals(int iterations) {
@@ -67,6 +69,7 @@ public class StringEquals {
 
   public static void main(String[] args) {
     StringEquals eq = new StringEquals();
+    eq.setupStrings();
     long before = System.currentTimeMillis();
     eq.timeEquals(1500);
     eq.timeEquals(1500);
