@@ -35,10 +35,18 @@ public class StringOps {
   private static int RANDOM_STRING_32 = 2;
   private static int RANDOM_STRING_128 = 3;
   private static int RANDOM_STRING_512 = 4;
-  private static int NUM_LENGTH_TESTS = 5;
+  private static int RANDOM_STRING_2048 = 5;
+  private static int NUM_LENGTH_TESTS = 6;
 
   private static char MIN_RANDOM_CHAR = 65;
   private static char MAX_RANDOM_CHAR = 123;
+
+  /* For non-ASCII characters, use a range that includes most CJK
+   * characters as well as some other languages, but importantly no
+   * unallocated or surrogate codes */
+  private static char MIN_RANDOM_CHAR_NON_ASCII = 0x3000;
+  private static char MAX_RANDOM_CHAR_NON_ASCII = 0xcfff;
+
   private static char searchChar;
 
   /* Intentionally use the same seed each time for consistency across benchmark runs. */
@@ -51,6 +59,12 @@ public class StringOps {
   /* Same random string data as above for comparing different instances of the same char data. */
   private static Random rndAlt = new Random(SAME_SEED);
   private static String[] stringDataAlt = new String[NUM_LENGTH_TESTS];
+
+  /* Random non-ASCII string data.
+   * Alt data is not required here as non-ASCII strings are currently
+   * only used for timeStringGetCharsNoCheck */
+  private static Random rndNonAscii = new Random(SAME_SEED);
+  private static String[] stringDataNonAscii = new String[NUM_LENGTH_TESTS];
 
   /* Benchmark results cache for preventing DCE. */
   private static boolean[] stringEqualsResults = new boolean[NUM_LENGTH_TESTS];
@@ -66,18 +80,36 @@ public class StringOps {
   private static String[] stringNewStringFromBytesResult = new String[NUM_LENGTH_TESTS];
   private static String[] stringNewStringFromCharsResult = new String[NUM_LENGTH_TESTS];
   private static String[] stringNewStringFromStringResult = new String[NUM_LENGTH_TESTS];
-  private static String[] stringGetCharsNoCheckResult = new String[NUM_LENGTH_TESTS];
+  private static char[][] stringGetCharsNoCheckResults = new char [NUM_LENGTH_TESTS][];
+  private static char[][] stringGetCharsNoCheckNonAsciiResults = new char[NUM_LENGTH_TESTS][];
 
-  private static String generateRandomString(int len, Random rnd) {
+  private static String generateRandomStringFromRange(int len, Random rnd,
+                                                      char minValue, char maxValue) {
+    if(maxValue < minValue) {
+      throw new IllegalArgumentException("Cannot generate random string"
+                                          + " - maxValue is smaller than minValue");
+    }
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < len - 1; i++) {
-      /* Compose random string data from upper and lower case english alphabet entries plus a few
-       * harmless characters in-between. */
-      sb.append(Character.valueOf((char)(MIN_RANDOM_CHAR +
-                                         rnd.nextInt(MAX_RANDOM_CHAR - MIN_RANDOM_CHAR))));
+      sb.append(Character.valueOf((char)(minValue +
+                                         rnd.nextInt(maxValue - minValue))));
     }
-    sb.append(Character.valueOf(MAX_RANDOM_CHAR));
+    sb.append(Character.valueOf(maxValue));
     return sb.toString();
+  }
+
+  private static String generateRandomString(int len, Random rnd) {
+    /* Compose random string data from upper and lower case english alphabet entries plus a few
+     * harmless characters in-between. */
+    return generateRandomStringFromRange(len, rnd, MIN_RANDOM_CHAR, MAX_RANDOM_CHAR);
+  }
+
+  private static String generateRandomStringNonAscii(int len, Random rnd) {
+    /* Compose random string data from unicode Basic Multilingual Plane characters that take
+     * two bytes and therefore force string compression to be turned off */
+    return generateRandomStringFromRange(len, rnd,
+                                         MIN_RANDOM_CHAR_NON_ASCII,
+                                         MAX_RANDOM_CHAR_NON_ASCII);
   }
 
   private static void generateRandomStrings(Random rnd, String[] output) {
@@ -86,12 +118,34 @@ public class StringOps {
     output[RANDOM_STRING_32] = generateRandomString(32, rnd);
     output[RANDOM_STRING_128] = generateRandomString(128, rnd);
     output[RANDOM_STRING_512] = generateRandomString(512, rnd);
+    output[RANDOM_STRING_2048] = generateRandomString(2048, rnd);
+  }
+
+  private static void generateRandomStringsNonAscii(Random rnd, String[] output) {
+    output[RANDOM_STRING_8] = generateRandomStringNonAscii(8, rnd);
+    output[RANDOM_STRING_16] = generateRandomStringNonAscii(16, rnd);
+    output[RANDOM_STRING_32] = generateRandomStringNonAscii(32, rnd);
+    output[RANDOM_STRING_128] = generateRandomStringNonAscii(128, rnd);
+    output[RANDOM_STRING_512] = generateRandomStringNonAscii(512, rnd);
+    output[RANDOM_STRING_2048] = generateRandomStringNonAscii(2048, rnd);
+  }
+
+  private static void allocateResultCharArrays(char[][] resultArrays) {
+    resultArrays[RANDOM_STRING_8] = new char[8];
+    resultArrays[RANDOM_STRING_16] = new char[16];
+    resultArrays[RANDOM_STRING_32] = new char[32];
+    resultArrays[RANDOM_STRING_128] = new char[128];
+    resultArrays[RANDOM_STRING_512] = new char[512];
+    resultArrays[RANDOM_STRING_2048] = new char[2048];
   }
 
   static {
     searchChar = MAX_RANDOM_CHAR;
     generateRandomStrings(rnd, stringData);
     generateRandomStrings(rndAlt, stringDataAlt);
+    generateRandomStringsNonAscii(rndNonAscii, stringDataNonAscii);
+    allocateResultCharArrays(stringGetCharsNoCheckResults);
+    allocateResultCharArrays(stringGetCharsNoCheckNonAsciiResults);
   }
 
   /**
@@ -598,44 +652,134 @@ public class StringOps {
    * String.getCharsNoCheck
    */
 
-  public void timeStringGetCharsNoCheck008(int iterations) {
-    char[] chars = new char[8];
+  public void timeStringGetCharsNoCheck0008(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckResults[RANDOM_STRING_8];
+    String str = stringData[RANDOM_STRING_8];
     for (int i = 0; i < iterations; i++) {
-      stringData[RANDOM_STRING_8].getChars(0, 8, chars, 0);
+      str.getChars(0, 8, chars, 0);
     }
-    stringGetCharsNoCheckResult[RANDOM_STRING_8] = new String(chars);
   }
 
-  public void timeStringGetCharsNoCheck016(int iterations) {
-    char[] chars = new char[16];
+  public void timeStringGetCharsNoCheck0016(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckResults[RANDOM_STRING_16];
+    String str = stringData[RANDOM_STRING_16];
     for (int i = 0; i < iterations; i++) {
-      stringData[RANDOM_STRING_16].getChars(0, 16, chars, 0);
+      str.getChars(0, 16, chars, 0);
     }
-    stringGetCharsNoCheckResult[RANDOM_STRING_16] = new String(chars);
   }
 
-  public void timeStringGetCharsNoCheck032(int iterations) {
-    char[] chars = new char[32];
+  public void timeStringGetCharsNoCheck0032(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckResults[RANDOM_STRING_32];
+    String str = stringData[RANDOM_STRING_32];
     for (int i = 0; i < iterations; i++) {
-      stringData[RANDOM_STRING_32].getChars(0, 32, chars, 0);
+      str.getChars(0, 32, chars, 0);
     }
-    stringGetCharsNoCheckResult[RANDOM_STRING_32] = new String(chars);
   }
 
-  public void timeStringGetCharsNoCheck128(int iterations) {
-    char[] chars = new char[128];
+  public void timeStringGetCharsNoCheck0128(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckResults[RANDOM_STRING_128];
+    String str = stringData[RANDOM_STRING_128];
     for (int i = 0; i < iterations; i++) {
-      stringData[RANDOM_STRING_128].getChars(0, 128, chars, 0);
+      str.getChars(0, 128, chars, 0);
     }
-    stringGetCharsNoCheckResult[RANDOM_STRING_128] = new String(chars);
   }
 
-  public void timeStringGetCharsNoCheck512(int iterations) {
-    char[] chars = new char[512];
+  public void timeStringGetCharsNoCheck0512(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckResults[RANDOM_STRING_512];
+    String str = stringData[RANDOM_STRING_512];
     for (int i = 0; i < iterations; i++) {
-      stringData[RANDOM_STRING_512].getChars(0, 512, chars, 0);
+      str.getChars(0, 512, chars, 0);
     }
-    stringGetCharsNoCheckResult[RANDOM_STRING_512] = new String(chars);
+  }
+
+  public void timeStringGetCharsNoCheck2048(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckResults[RANDOM_STRING_2048];
+    String str = stringData[RANDOM_STRING_2048];
+    for (int i = 0; i < iterations; i++) {
+      str.getChars(0, 2048, chars, 0);
+    }
+  }
+
+  public void timeStringGetCharsNoCheckNonAscii0008(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckNonAsciiResults[RANDOM_STRING_8];
+    String str = stringDataNonAscii[RANDOM_STRING_8];
+    for (int i = 0; i < iterations; i++) {
+      str.getChars(0, 8, chars, 0);
+    }
+  }
+
+  public void timeStringGetCharsNoCheckNonAscii0016(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckNonAsciiResults[RANDOM_STRING_16];
+    String str = stringDataNonAscii[RANDOM_STRING_16];
+    for (int i = 0; i < iterations; i++) {
+      str.getChars(0, 16, chars, 0);
+    }
+  }
+
+  public void timeStringGetCharsNoCheckNonAscii0032(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckNonAsciiResults[RANDOM_STRING_32];
+    String str = stringDataNonAscii[RANDOM_STRING_32];
+    for (int i = 0; i < iterations; i++) {
+      str.getChars(0, 32, chars, 0);
+    }
+  }
+
+  public void timeStringGetCharsNoCheckNonAscii0128(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckNonAsciiResults[RANDOM_STRING_128];
+    String str = stringDataNonAscii[RANDOM_STRING_128];
+    for (int i = 0; i < iterations; i++) {
+      str.getChars(0, 128, chars, 0);
+    }
+  }
+
+  public void timeStringGetCharsNoCheckNonAscii0512(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckNonAsciiResults[RANDOM_STRING_512];
+    String str = stringDataNonAscii[RANDOM_STRING_512];
+    for (int i = 0; i < iterations; i++) {
+      str.getChars(0, 512, chars, 0);
+    }
+  }
+
+  public void timeStringGetCharsNoCheckNonAscii2048(int iterations) {
+    // Load into local reference.
+    char[] chars = stringGetCharsNoCheckNonAsciiResults[RANDOM_STRING_2048];
+    String str = stringDataNonAscii[RANDOM_STRING_2048];
+    for (int i = 0; i < iterations; i++) {
+      str.getChars(0, 2048, chars, 0);
+    }
+  }
+
+  public boolean verify() {
+    String expected;
+    String found;
+    // Verify getCharsNoCheck results.
+    for(int i = 0; i < stringGetCharsNoCheckResults.length; i++) {
+      expected = stringData[i];
+      found = new String(stringGetCharsNoCheckResults[i]);
+      if (!found.equals(expected)) {
+        return false;
+      }
+    }
+    // Verify non-ASCII getCharsNoCheck results.
+    for(int i = 0; i < stringGetCharsNoCheckNonAsciiResults.length; i++) {
+      expected = stringDataNonAscii[i];
+      found = new String(stringGetCharsNoCheckNonAsciiResults[i]);
+      if (!found.equals(expected)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private static final int ITER_COUNT = 22000;
@@ -705,11 +849,18 @@ public class StringOps {
     obj.timeStringNewStringFromString032(ITER_COUNT);
     obj.timeStringNewStringFromString128(ITER_COUNT);
     obj.timeStringNewStringFromString512(ITER_COUNT);
-    obj.timeStringGetCharsNoCheck008(ITER_COUNT);
-    obj.timeStringGetCharsNoCheck016(ITER_COUNT);
-    obj.timeStringGetCharsNoCheck032(ITER_COUNT);
-    obj.timeStringGetCharsNoCheck128(ITER_COUNT);
-    obj.timeStringGetCharsNoCheck512(ITER_COUNT);
+    obj.timeStringGetCharsNoCheck0008(ITER_COUNT);
+    obj.timeStringGetCharsNoCheck0016(ITER_COUNT);
+    obj.timeStringGetCharsNoCheck0032(ITER_COUNT);
+    obj.timeStringGetCharsNoCheck0128(ITER_COUNT);
+    obj.timeStringGetCharsNoCheck0512(ITER_COUNT);
+    obj.timeStringGetCharsNoCheck2048(ITER_COUNT);
+    obj.timeStringGetCharsNoCheckNonAscii0008(ITER_COUNT);
+    obj.timeStringGetCharsNoCheckNonAscii0016(ITER_COUNT);
+    obj.timeStringGetCharsNoCheckNonAscii0032(ITER_COUNT);
+    obj.timeStringGetCharsNoCheckNonAscii0128(ITER_COUNT);
+    obj.timeStringGetCharsNoCheckNonAscii0512(ITER_COUNT);
+    obj.timeStringGetCharsNoCheckNonAscii2048(ITER_COUNT);
 
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/StringOps: " + (after - before));
