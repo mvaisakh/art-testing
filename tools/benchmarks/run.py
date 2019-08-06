@@ -238,6 +238,13 @@ def GetBenchmarkResults(args):
         apk = os.path.join(utils.dir_build, 'bench.apk')
         apk_name = os.path.basename(apk)
         utils_adb.push(apk, args.target_copy_path, args.target)
+        resources_tar = os.path.join(utils.dir_build, 'resources.tar')
+        if os.path.isfile(resources_tar):
+            utils_adb.push(resources_tar, args.target_copy_path, args.target)
+            utils_adb.shell('tar xfv ' +
+                    utils.TargetPathJoin(args.target_copy_path, 'resources.tar') +
+                    ' -C ' + args.target_copy_path,
+                    args.target)
         remote_apk = utils.TargetPathJoin(args.target_copy_path, apk_name)
 
     if args.norun:
