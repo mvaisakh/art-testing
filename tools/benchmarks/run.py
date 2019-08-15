@@ -43,6 +43,7 @@ def BuildOptions():
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     utils.AddCommonRunOptions(parser)
     utils.AddOutputFormatOptions(parser, utils.default_output_formats + ['csv'])
+    utils.AddRunFilterOptions(parser)
     parser.add_argument('--dont-auto-calibrate',
                         action='store_true', default = False,
                         dest = 'no_auto_calibrate',
@@ -51,12 +52,7 @@ def BuildOptions():
     parser.add_argument('-n', '--norun', action='store_true',
                         help='''Build and configure everything, but do not run
                         the benchmarks.''')
-    parser.add_argument('-f', '--filter', action = 'append',
-                        help='''Quoted (benchmark name) filter pattern. If no
-                        filters match, filtering will be attempted with all the
-                        patterns prefixed and suffixed with `*`.''')
-    parser.add_argument('-F', '--filter-out', action = 'append',
-                        help='Filter out the benchmarks matching this pattern.')
+
 
     args = parser.parse_args()
 

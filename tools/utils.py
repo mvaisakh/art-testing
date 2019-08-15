@@ -276,7 +276,7 @@ def AddOutputFormatOptions(parser, formats=default_output_formats):
                           metavar='FILE',
                           help=format_help_message.format(type=f))
 
-def AddFilterOptions(parser):
+def AddReportFilterOptions(parser):
     parser.add_argument('-f', '--filter', action = 'append',
                         help='''Quoted (benchmark name) filter pattern. If no
                         filters match, filtering will be attempted with all the
@@ -285,6 +285,14 @@ def AddFilterOptions(parser):
                         help='''Filter out the benchmarks matching this pattern
                         from the results. Filters failing are **not** retried
                         with added wildcards.''')
+
+def AddRunFilterOptions(parser):
+    parser.add_argument('-f', '--filter', action = 'append',
+                        help='''Quoted (benchmark name) filter pattern. If no
+                        filters match, filtering will be attempted with all the
+                        patterns prefixed and suffixed with `*`.''')
+    parser.add_argument('-F', '--filter-out', action = 'append',
+                        help='Filter out the benchmarks matching this pattern.')
 
 def CheckDependencies(dependencies):
     for d in dependencies:

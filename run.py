@@ -32,6 +32,7 @@ def BuildOptions():
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     utils.AddCommonRunOptions(parser)
     utils.AddOutputFormatOptions(parser, utils.default_output_formats)
+    utils.AddRunFilterOptions(parser)
     args = parser.parse_args()
 
     if args.mode and not args.target:
