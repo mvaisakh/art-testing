@@ -176,3 +176,5 @@ if __name__ == "__main__":
         print("Tests FAILED.")
     else:
         print("Tests passed.")
+
+    sys.exit(rc)
