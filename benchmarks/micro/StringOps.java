@@ -85,7 +85,7 @@ public class StringOps {
 
   private static String generateRandomStringFromRange(int len, Random rnd,
                                                       char minValue, char maxValue) {
-    if(maxValue < minValue) {
+    if (maxValue < minValue) {
       throw new IllegalArgumentException("Cannot generate random string"
                                           + " - maxValue is smaller than minValue");
     }
@@ -764,7 +764,7 @@ public class StringOps {
     String expected;
     String found;
     // Verify getCharsNoCheck results.
-    for(int i = 0; i < stringGetCharsNoCheckResults.length; i++) {
+    for (int i = 0; i < stringGetCharsNoCheckResults.length; i++) {
       expected = stringData[i];
       found = new String(stringGetCharsNoCheckResults[i]);
       if (!found.equals(expected)) {
@@ -772,7 +772,7 @@ public class StringOps {
       }
     }
     // Verify non-ASCII getCharsNoCheck results.
-    for(int i = 0; i < stringGetCharsNoCheckNonAsciiResults.length; i++) {
+    for (int i = 0; i < stringGetCharsNoCheckNonAsciiResults.length; i++) {
       expected = stringDataNonAscii[i];
       found = new String(stringGetCharsNoCheckNonAsciiResults[i]);
       if (!found.equals(expected)) {
