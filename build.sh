@@ -130,7 +130,6 @@ set -f
 
 if [[ -z $JAVA_BENCHMARK_FILES ]]; then
   JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
-
 fi
 
 # Reenable wildcard expansion.
@@ -176,7 +175,17 @@ else
   CROSS_COMPILE_FLAGS="-target $JAVA_VERSION -source $JAVA_VERSION"
 fi
 
-verbose_safe javac -encoding UTF-8 $CROSS_COMPILE_FLAGS -cp $DIR_BENCHMARKS -cp $DIR_FRAMEWORK -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
+for jar_file in "${DIR_BENCHMARKS}"/lib/*.jar
+do
+  # Extract jar file and remove META-INF, which is not needed and can cause
+  # issues with target runs.
+  (cd $DIR_BUILD/classes && jar xfv "${jar_file}" && rm -rf META-INF)
+done
+
+if [[ -d "${DIR_BENCHMARKS}"/resources ]]; then
+  tar cfv $DIR_BUILD/resources.tar -C "${DIR_BENCHMARKS}" ./resources
+fi
+verbose_safe javac -encoding UTF-8 $CROSS_COMPILE_FLAGS -cp $DIR_BENCHMARKS:$DIR_BUILD/classes -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
 verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
 DX=$(which dx)
 if [ $TARGET_BUILD = "true" ] || [ -n "$DX" ]; then
