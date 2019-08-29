@@ -54,10 +54,12 @@ public class RunBench {
           benchmarkTargetRunTimeNs);
       Benchmark.Result[] results = benchmark.run();
       int verifyFailures = 0;
-      if (verify)
+      if (verify) {
         verifyFailures = benchmark.verify();
-      for (Benchmark.Result result : results)
+      }
+      for (Benchmark.Result result : results) {
         System.out.println(result.toString());
+      }
       if (verifyFailures > 0) {
         return 1;
       }

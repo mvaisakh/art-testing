@@ -177,24 +177,24 @@ public class Benchmark {
     public boolean accept(Method method);
   }
 
-  private final static class SetupMethodSelector implements MethodSelector {
+  private static final class SetupMethodSelector implements MethodSelector {
     public boolean accept(Method method) {
       return method.getName().startsWith(SETUP_METHOD_PREFIX) && method.getParameterCount() == 0;
     }
   }
 
-  private static boolean DoesMethodHaveOneIntParam(Method method) {
+  private static boolean doesMethodHaveOneIntParam(Method method) {
     return method.getParameterCount() == 1 && method.getParameterTypes()[0] == int.class;
   }
 
-  private final static class TimeBenchmarkMethodSelector implements MethodSelector {
+  private static final class TimeBenchmarkMethodSelector implements MethodSelector {
     public boolean accept(Method method) {
       return method.getName().startsWith(TIME_BENCH_METHOD_PREFIX)
-          && DoesMethodHaveOneIntParam(method);
+          && doesMethodHaveOneIntParam(method);
     }
   }
 
-  private final static class ParticularBenchmarkMethodSelector implements MethodSelector {
+  private static final class ParticularBenchmarkMethodSelector implements MethodSelector {
     private String particularBenchMethodName;
 
     public ParticularBenchmarkMethodSelector(String methodName) {
@@ -203,11 +203,11 @@ public class Benchmark {
 
     public boolean accept(Method method) {
       return method.getName().equals(particularBenchMethodName)
-          && DoesMethodHaveOneIntParam(method);
+          && doesMethodHaveOneIntParam(method);
     }
   }
 
-  private final static class VerifyMethodSelector implements MethodSelector {
+  private static final class VerifyMethodSelector implements MethodSelector {
     public boolean accept(Method method) {
       return method.getName().startsWith(VERIFY_BENCH_METHOD_PREFIX)
           && method.getReturnType() == boolean.class
