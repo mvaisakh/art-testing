@@ -198,7 +198,7 @@ if __name__ == "__main__":
               filter_stats_warnings=args.output_for_linaro_automation)
 
     if not utils.HaveSameKeys(res_1, res_2):
-        res_1, res_2, diff = utils.KeepSameKeys(res_1, res_2)
+        diff = utils.KeepSameKeys(res_1, res_2)
         utils.Warning("Computing geomean on a subset of statistics which only " \
                       "includes keys common to both datasets.\n" \
                       "Removed Keys: " + str(diff))
