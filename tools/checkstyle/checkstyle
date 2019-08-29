@@ -3,34 +3,25 @@
 SCRIPT_PATH=$(dirname $0)
 
 CONFIG=$SCRIPT_PATH/config.xml
-CHECKSTYLE_JAR=$SCRIPT_PATH/checkstyle-6.14.1-all.jar
+CHECKSTYLE_VERSION=6.14.1
+CHECKSTYLE_JAR="$SCRIPT_PATH/checkstyle-$CHECKSTYLE_VERSION.jar"
 
-if [ ! -f $CHECKSTYLE_JAR ]; then
-  DOWNLOAD_URL=http://sourceforge.net/projects/checkstyle/files/checkstyle/6.14.1/checkstyle-6.14.1-all.jar/download 
-  SOURCES_URL=https://github.com/checkstyle/checkstyle/tree/checkstyle-6.14.1
-  DOWNLOAD_COMMAND="wget $DOWNLOAD_URL -O $CHECKSTYLE_JAR"
+if [ ! -s $CHECKSTYLE_JAR ]; then
+  DOWNLOAD_URL="https://github.com/checkstyle/checkstyle/releases/download/checkstyle-$CHECKSTYLE_VERSION/checkstyle-$CHECKSTYLE_VERSION-all.jar"
+  SOURCES_URL="https://github.com/checkstyle/checkstyle/tree/checkstyle-$CHECKSTYLE_VERSION"
 
   echo "Downloading the checkstyle jar file at $DOWNLOAD_URL.
   The sources can be found at $SOURCES_URL."
-  # Do not prompt for user input when run non-interactively.
-  if [ -z $PS1 ]; then
-    $DOWNLOAD_COMMAND
-  else
-    read -p "Download (y/n)?" -n 1 -r
-    if [[ ! $REPLY =~ ^y$ ]]
-    then
-      echo -e "\nCannot run checkstyle. Exiting."
-      exit 1
-    else
-      $DOWNLOAD_COMMAND
-    fi
+
+  if ! wget "$DOWNLOAD_URL" -O "$CHECKSTYLE_JAR"; then
+    echo "Download failed."
+    exit 1
   fi
 fi
 
-output=$(java  -jar $CHECKSTYLE_JAR -c $CONFIG "$@")
-echo "$output"
-
-# We want to return an error code if linting errors were found.
-if echo "$output" | grep "error" &> /dev/null ; then
-  exit 1
+if [ "$#" -lt 1 ]; then
+  echo "No argument provided. Exiting."
+  exit 0
 fi
+
+java  -jar $CHECKSTYLE_JAR -c $CONFIG "$@"

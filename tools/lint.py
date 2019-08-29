@@ -62,11 +62,7 @@ def Lint(filename):
 def EnsureCheckstyleAvailable():
   # Run the checkstyle script once to ensure the checkstyle jar file as
   # available.
-  p = subprocess.Popen([os.path.join(utils.dir_tools, 'checkstyle', 'checkstyle')],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  # We do not care about any errors. The script will download the jar file if
-  # necessary.
-  out, err = p.communicate()
+  p = subprocess.check_output([os.path.join(utils.dir_tools, 'checkstyle', 'checkstyle')])
 
 
 def LintFiles(files, jobs = 1):
