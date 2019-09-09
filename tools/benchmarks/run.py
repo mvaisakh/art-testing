@@ -164,7 +164,7 @@ def RunBench(apk, classname,
 
         try:
             for line in outerr.rstrip().splitlines():
-                if not line.endswith('per iteration'):
+                if not line.startswith('benchmarks/'):
                     continue
                 name = line.split(":")[0].rstrip()
                 score = float(line.split(":")[1].strip().split(" ")[0].strip())
