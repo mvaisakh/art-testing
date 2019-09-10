@@ -51,11 +51,9 @@ if __name__ == "__main__":
     result = OrderedDict()
     result[utils.benchmarks_label] = GetAndPrintBenchmarkResults(args)
 
-    # TODO: it is disabled due to migration to a new approach to run
-    # benchmarks via chroot.
-    #if args.target:
-    #    result[utils.compilation_statistics_label] = \
-    #        GetAndPrintCompilationStatisticsResults(args)
+    if args.target:
+        result[utils.compilation_statistics_label] = \
+            GetAndPrintCompilationStatisticsResults(args)
 
     utils.OutputObject(result, 'pkl', args.output_pkl)
     utils.OutputObject(result, 'json', args.output_json)
