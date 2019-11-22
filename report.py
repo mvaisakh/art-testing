@@ -28,7 +28,7 @@ def BuildOptions():
         # Print default values.
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('result_file', metavar = 'res.json')
-    utils.AddFilterOptions(parser)
+    utils.AddReportFilterOptions(parser)
     return parser.parse_args()
 
 def Report(data):
