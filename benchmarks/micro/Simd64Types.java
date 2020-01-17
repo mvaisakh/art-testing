@@ -23,88 +23,96 @@
 
 package benchmarks.micro;
 
+import java.util.Arrays;
+
 public class Simd64Types {
   // NOTE: in this benchmark, each array element is 8-byte long.
   // The array length is kept relatively small on purpose,
   // to make sure all long[] and double[] arrays in this benchmark can fit into
-  // most last level caches (e.g. L2 cache) in modern CPUs.
-  static final int LENGTH = 4 * 1024;
-  static long [] la = new long[LENGTH];
-  static long [] lb = new long[LENGTH];
-  static long [] lc = new long[LENGTH];
-  static double [] da = new double[LENGTH];
-  static double [] db = new double[LENGTH];
-  static double [] dc = new double[LENGTH];
+  // first level caches (e.g. L1 cache) in modern CPUs.
+  static final int LENGTH = 3 * 1024;
+  long[] la;
+  long[] lb;
+  long[] lc;
+  double[] da;
+  double[] db;
+  double[] dc;
 
-  public static void init() {
+  // The method is automatically called by the Benchmark framework.
+  public void setupArrays() {
+    la = new long[LENGTH];
+    lb = new long[LENGTH];
+    lc = new long[LENGTH];
+    da = new double[LENGTH];
+    db = new double[LENGTH];
+    dc = new double[LENGTH];
+
     for (int i = 0; i < LENGTH; i++) {
       la[i] = i + 3L;
       lb[i] = i + 2L;
-      lc[i] = i + 1L;
       da[i] = i + 3.0d;
       db[i] = i + 2.0d;
-      dc[i] = i + 1.0d;
     }
   }
 
-  public static void vectAddLong() {
+  public static void vectAddLong(long[] la, long[] lb, long[] lc) {
     for (int i = 0; i < LENGTH; i++) {
       lc[i] = la[i] + lb[i];
     }
   }
 
-  public static void vectAddDouble() {
+  public static void vectAddDouble(double[] da, double[] db, double[] dc) {
     for (int i = 0; i < LENGTH; i++) {
       dc[i] = da[i] + db[i];
     }
   }
 
   public void timeVectAddLong(int iters) {
-    init();
     for (int i = 0; i < iters; i++) {
-      vectAddLong();
+      vectAddLong(la, lb, lc);
     }
+  }
+
+  public boolean verifyVectAddLong() {
+    Arrays.fill(lc, 0);
+    timeVectAddLong(1);
+    final int hashCode = Arrays.hashCode(lc);
+    final int expectedHashCode = 1992969217;
+    return hashCode == expectedHashCode;
   }
 
   public void timeVectAddDouble(int iters) {
-    init();
     for (int i = 0; i < iters; i++) {
-      vectAddDouble();
+      vectAddDouble(da, db, dc);
     }
   }
 
-  public boolean verifySimd64BitTypes() {
-    init();
-    vectAddLong();
-    vectAddDouble();
+  public boolean verifyVectAddDouble() {
+    Arrays.fill(dc, 0.0);
+    timeVectAddDouble(1);
+    final int hashCode = Arrays.hashCode(dc);
+    final int expectedHashCode = 1937416705;
+    return hashCode == expectedHashCode;
+  }
 
-    long expected1 = 16793600L;
-    long found1 = 0L;
-    double expected2 = 16793600D;
-    double found2 = 0D;
-
-    for (int i = 0; i < LENGTH; i++) {
-      found1 += lc[i];
-      found2 += dc[i];
+  public int verifySimd64BitTypes() {
+    int rc = 0;
+    if (!verifyVectAddLong()) {
+      ++rc;
     }
 
-    if (found1 != expected1) {
-      System.out.println("ERROR: Expected " + expected1 + " but found " + found1);
-      return false;
-    }
-    if (found2 != expected2) {
-      System.out.println("ERROR: Expected " + expected2 + " but found " + found2);
-      return false;
+    if (!verifyVectAddDouble()) {
+      ++rc;
     }
 
-    return true;
+    return rc;
   }
 
   public static final int ITER_COUNT = 50000;
 
   public static void main(String[] argv) {
-    int rc = 0;
     Simd64Types obj = new Simd64Types();
+    obj.setupArrays();
 
     long before = System.currentTimeMillis();
     obj.timeVectAddLong(ITER_COUNT);
@@ -115,10 +123,6 @@ public class Simd64Types {
     obj.timeVectAddDouble(ITER_COUNT);
     after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/Simd64Types.VectAddDouble: " + (after - before));
-
-    if (!obj.verifySimd64BitTypes()) {
-      rc++;
-    }
-    System.exit(rc);
+    System.exit(obj.verifySimd64BitTypes());
   }
 }
