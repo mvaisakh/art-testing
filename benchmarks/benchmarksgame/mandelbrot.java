@@ -23,8 +23,9 @@
 
 package benchmarks.benchmarksgame;
 
-
+// CHECKSTYLE.OFF: TypeName
 public class mandelbrot {
+// CHECKSTYLE.ON: TypeName
   private static final int PREDEFINED_SIZE = 200;
 
   private static final int BUFFER_SIZE = 8192;
@@ -51,12 +52,14 @@ public class mandelbrot {
     final double Ci = (y * fac - 1.0);
     final byte[] bufLocal = buf;
     for (int x = 0; x < size; x++) {
+      // CHECKSTYLE.OFF: LocalVariableName
       double Zr = 0.0;
       double Zi = 0.0;
       double Cr = (x * fac - 1.5);
       int i = 50;
       double ZrN = 0;
       double ZiN = 0;
+      // CHECKSTYLE.ON: LocalVariableName
       do {
         Zi = 2.0 * Zr * Zi + Ci;
         Zr = ZrN - ZiN + Cr;

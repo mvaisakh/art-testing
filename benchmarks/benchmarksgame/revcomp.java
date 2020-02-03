@@ -24,7 +24,9 @@ package benchmarks.benchmarksgame;
 
 import java.io.*;
 
+// CHECKSTYLE.OFF: TypeName
 public class revcomp {
+// CHECKSTYLE.ON: TypeName
   private ReversibleByteArray buf = new ReversibleByteArray();
   InputStream stream = new ByteArrayInputStream(fastaStr.getBytes());
   static final byte[] cmp = new byte[128];
@@ -49,7 +51,8 @@ public class revcomp {
   static class ReversibleByteArray extends java.io.ByteArrayOutputStream {
     void reverse() throws Exception {
       if (count > 0) {
-        int begin = 0, end = count - 1;
+        int begin = 0;
+        int end = count - 1;
         while (buf[begin++] != '\n') ;
         while (begin <= end) {
           if (buf[begin] == '\n') begin++;
@@ -71,7 +74,8 @@ public class revcomp {
     stream.reset();
 
     while ((read = stream.read(line)) != -1) {
-      int i = 0, last = 0;
+      int i = 0;
+      int last = 0;
       while (i < read) {
         if (line[i] == '>') {
           buf.write(line, last, i - last);

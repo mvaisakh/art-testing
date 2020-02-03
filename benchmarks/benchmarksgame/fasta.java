@@ -29,8 +29,10 @@ package benchmarks.benchmarksgame;
 import java.io.IOException;
 import java.io.OutputStream;
 
+// CHECKSTYLE.OFF: TypeName
 public class fasta {
-  private final static class NullOutputStream extends OutputStream {
+// CHECKSTYLE.ON: TypeName
+  private static final class NullOutputStream extends OutputStream {
     @Override
     public void write(int b) throws IOException {
       // Do nothing
@@ -97,12 +99,14 @@ public class fasta {
   }
 
   // naive
+  // CHECKSTYLE.OFF: .*
   public static final byte selectRandom(frequency[] a) {
     int len = a.length;
     double r = random(1.0);
     for (int i = 0; i < len; i++) if (r < a[i].p) return a[i].c;
     return a[len - 1].c;
   }
+  // CHECKSTYLE.ON: .*
 
   static int BUFFER_SIZE = 1024;
   static int index = 0;
@@ -156,7 +160,9 @@ public class fasta {
     if (index != 0) writer.write(bbuffer, 0, index);
   }
 
+  // CHECKSTYLE.OFF: TypeName
   public static class frequency {
+  // CHECKSTYLE.ON: TypeName
     public byte c;
     public double p;
 

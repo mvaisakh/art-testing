@@ -27,11 +27,15 @@ package benchmarks.benchmarksgame;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+// CHECKSTYLE.OFF: TypeName
 public class spectralnorm {
+// CHECKSTYLE.ON: TypeName
 
   private static final NumberFormat formatter = new DecimalFormat("#.000000000");
 
+  // CHECKSTYLE.OFF: MethodName
   private final double Approximate(int n) {
+  // CHECKSTYLE.ON: MethodName
     // create unit vector
     double[] u = new double[n];
     for (int i = 0; i < n; i++) u[i] = 1;
@@ -47,7 +51,8 @@ public class spectralnorm {
 
     // B=AtA         A multiplied by A transposed
     // v.Bv /(v.v)   eigenvalue of v
-    double vBv = 0, vv = 0;
+    double vBv = 0;
+    double vv = 0;
     for (int i = 0; i < n; i++) {
       vBv += u[i] * v[i];
       vv += v[i] * v[i];
@@ -57,6 +62,7 @@ public class spectralnorm {
   }
 
   /* return element i,j of infinite matrix A */
+  // CHECKSTYLE.OFF: MethodName|ParameterName
   private final double A(int i, int j) {
     return 1.0 / ((i + j) * (i + j + 1) / 2 + i + 1);
   }
@@ -83,6 +89,7 @@ public class spectralnorm {
     MultiplyAv(n, v, u);
     MultiplyAtv(n, u, AtAv);
   }
+  // CHECKSTYLE.ON: MethodName|ParameterName
 
   private static final int APPROXIMATE_N = 100;
 

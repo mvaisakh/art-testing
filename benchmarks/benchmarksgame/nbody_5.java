@@ -23,7 +23,9 @@
 
 package benchmarks.benchmarksgame;
 
+// CHECKSTYLE.OFF: TypeName
 public final class nbody_5 {
+// CHECKSTYLE.ON: TypeName
 
   static final class NBodySystem {
     private static final double PI = 3.141592653589793;
@@ -40,7 +42,9 @@ public final class nbody_5 {
     private static final int vz = 5;
     private static final int mass = 6;
 
+    // CHECKSTYLE.OFF: MemberName
     private final double[] _bodies = {
+    // CHECKSTYLE.ON: MemberName
       // sun begin
       0,
       0,
@@ -159,7 +163,9 @@ public final class nbody_5 {
     public double energy() {
       final double[] bodies = _bodies;
 
+      // CHECKSTYLE.OFF: MultipleVariableDeclarations
       double dx, dy, dz, distance;
+      // CHECKSTYLE.ON: MultipleVariableDeclarations
       double e = 0.0;
 
       for (int i = 0; i < BODY_COUNT; ++i) {

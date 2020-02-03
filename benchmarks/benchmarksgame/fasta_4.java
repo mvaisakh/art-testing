@@ -30,8 +30,10 @@ package benchmarks.benchmarksgame;
 import java.io.IOException;
 import java.io.OutputStream;
 
+// CHECKSTYLE.OFF: TypeName
 public class fasta_4 {
-  private final static class NullOutputStream extends OutputStream {
+// CHECKSTYLE.ON: TypeName
+  private static final class NullOutputStream extends OutputStream {
     @Override
     public void write(int b) throws IOException {
       // Do nothing
@@ -266,5 +268,19 @@ public class fasta_4 {
       last = (last * IA + IC) % IM;
       return max * last * oneOverIM;
     }
+  }
+
+  public static void main(String[] args) {
+    fasta_4 obj = new fasta_4();
+
+    final long before = System.currentTimeMillis();
+    obj.timeFasta(1700);
+    final long after = System.currentTimeMillis();
+
+    if (!obj.verifyFasta()) {
+      System.out.println("ERROR: verifyFasta failed.");
+      System.exit(1);
+    }
+    System.out.println("benchmarks/benchmarksgame/fasta: " + (after - before));
   }
 }

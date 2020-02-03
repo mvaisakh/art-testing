@@ -72,7 +72,9 @@ final class NBodySystem {
   }
 
   public double energy() {
+    // CHECKSTYLE.OFF: MultipleVariableDeclarations
     double dx, dy, dz, distance;
+    // CHECKSTYLE.ON: MultipleVariableDeclarations
     double e = 0.0;
 
     for (int i = 0; i < bodies.length; ++i) {
@@ -98,7 +100,9 @@ final class Body {
   static final double SOLAR_MASS = 4 * PI * PI;
   static final double DAYS_PER_YEAR = 365.24;
 
+  // CHECKSTYLE.OFF: MultipleVariableDeclarations|EmptyLineSeparator
   public double x, y, z, vx, vy, vz, mass;
+  // CHECKSTYLE.ON: MultipleVariableDeclarations|EmptyLineSeparator
 
   public Body() {}
 
@@ -164,7 +168,9 @@ final class Body {
   }
 }
 
+// CHECKSTYLE.OFF: TypeName
 public final class nbody_3 {
+// CHECKSTYLE.ON: TypeName
   private NBodySystem bodies;
 
   public nbody_3() {

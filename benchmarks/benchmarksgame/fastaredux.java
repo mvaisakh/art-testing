@@ -25,7 +25,9 @@ package benchmarks.benchmarksgame;
 
 import java.io.*;
 
+// CHECKSTYLE.OFF: TypeName
 public class fastaredux {
+// CHECKSTYLE.ON: TypeName
 
   static final int LINE_LENGTH = 60;
   static final int OUT_BUFFER_SIZE = 256 * 1024;
@@ -95,7 +97,7 @@ public class fastaredux {
 
   static final class Out {
 
-    static byte buf[] = new byte[OUT_BUFFER_SIZE];
+    static byte[] buf = new byte[OUT_BUFFER_SIZE];
     static final int lim = OUT_BUFFER_SIZE - 2 * LINE_LENGTH - 1;
     static int ct = 0;
     static OutputStream stream;
@@ -158,9 +160,10 @@ public class fastaredux {
       System.arraycopy(desc.getBytes(), 0, Out.buf, Out.ct, desc.length());
       Out.ct += desc.length();
 
-      byte buf[] = new byte[alu.length + LINE_LENGTH];
-      for (int i = 0; i < buf.length; i += alu.length)
+      byte[] buf = new byte[alu.length + LINE_LENGTH];
+      for (int i = 0; i < buf.length; i += alu.length) {
         System.arraycopy(alu, 0, buf, i, Math.min(alu.length, buf.length - i));
+      }
 
       int pos = 0;
       while (n > 0) {

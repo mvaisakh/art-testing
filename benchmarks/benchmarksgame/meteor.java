@@ -38,8 +38,11 @@ import java.util.TreeSet;
  * @author Tony Seebregts
  */
 
-public class meteor { // CONSTANTS
+// CHECKSTYLE.OFF: TypeName
+public class meteor {
+// CHECKSTYLE.OFF: TypeName
 
+  // CONSTANTS
   private static final int[] SHIFT = {0, 6, 11, 17, 22, 28, 33, 39, 44, 50};
   private static final long[][] MASK = {
     {0x01L, 0x02L, 0x04L, 0x08L, 0x10L},
@@ -204,21 +207,31 @@ public class meteor { // CONSTANTS
 
       ArrayList[][] array = new ArrayList[10][10];
 
-      for (int i = 0; i < 10; i++)
-        for (int j = 0; j < 10; j++) array[i][j] = new ArrayList<Shape>();
+      for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+          array[i][j] = new ArrayList<Shape>();
+        }
+      }
 
       // ... generate list
 
-      for (Shape mutant : list)
-        for (int row = 0; row <= mutant.maxRow; row++)
+      for (Shape mutant : list) {
+        for (int row = 0; row <= mutant.maxRow; row++) {
           for (int col = mutant.minCol; col <= mutant.maxCol; col++) {
-            if (!mutant.islet) array[row][col].add(new Shape(mutant, row, col));
-            else if ((row != 0) || (col != 0)) array[row][col].add(new Shape(mutant, row, col));
+            if (!mutant.islet) {
+              array[row][col].add(new Shape(mutant, row, col));
+            } else if ((row != 0) || (col != 0)) {
+              array[row][col].add(new Shape(mutant, row, col));
+            }
           }
+        }
+      }
 
-      for (int row = 0; row < 10; row++)
-        for (int col = 0; col < 10; col++)
+      for (int row = 0; row < 10; row++) {
+        for (int col = 0; col < 10; col++) {
           shapes[row][col] = (Shape[]) array[row][col].toArray(new Shape[0]);
+        }
+      }
     }
 
     @SuppressWarnings("unchecked")

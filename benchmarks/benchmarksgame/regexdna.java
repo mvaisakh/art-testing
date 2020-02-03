@@ -23,7 +23,9 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
+// CHECKSTYLE.OFF: TypeName
 public final class regexdna {
+// CHECKSTYLE.ON: TypeName
 
   private static final Map<String, String> replacements = new HashMap<String, String>();
   private InputStream stream;

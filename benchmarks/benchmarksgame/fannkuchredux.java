@@ -23,7 +23,9 @@
 
 package benchmarks.benchmarksgame;
 
+// CHECKSTYLE.OFF: TypeName
 public class fannkuchredux {
+// CHECKSTYLE.ON: TypeName
   public int fannkuch(int n) {
     int[] perm = new int[n];
     int[] perm1 = new int[n];

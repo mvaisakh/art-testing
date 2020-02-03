@@ -24,7 +24,9 @@ package benchmarks.benchmarksgame;
 
 import java.math.BigInteger;
 
+// CHECKSTYLE.OFF: TypeName
 public class pidigits {
+// CHECKSTYLE.ON: TypeName
   static final int L = 10;
   private static final int PREDEFINED_N_DIGITS = 27;
 

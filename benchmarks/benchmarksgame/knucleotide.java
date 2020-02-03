@@ -35,7 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+// CHECKSTYLE.OFF: TypeName
 public class knucleotide {
+// CHECKSTYLE.ON: TypeName
 
   private byte[] temp = null;
   private byte[] buffer = null;
@@ -99,6 +101,7 @@ public class knucleotide {
       List<Entry<Key, Value>> sequence2 = new ArrayList<>();
 
       for (Entry<Key, Value> entry : MAP.entrySet()) {
+        // CHECKSTYLE.OFF: MissingSwitchDefault
         switch (Long.numberOfLeadingZeros(entry.getKey().key)) {
           case 61:
             sequence1.add(entry);
@@ -106,6 +109,7 @@ public class knucleotide {
           case 59:
             sequence2.add(entry);
         }
+        // CHECKSTYLE.ON: MissingSwitchDefault
       }
       printSequence(sequence1);
       printSequence(sequence2);

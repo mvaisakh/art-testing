@@ -22,7 +22,9 @@
 
 package benchmarks.benchmarksgame;
 
+// CHECKSTYLE.OFF: TypeName
 public class binarytrees_2 {
+// CHECKSTYLE.ON: TypeName
   private static final int PREDEFINED_DEPTH = 7;
   private static final int minDepth = 4;
 
@@ -48,7 +50,8 @@ public class binarytrees_2 {
   }
 
   private static class TreeNode {
-    private TreeNode left, right;
+    private TreeNode left;
+    private TreeNode right;
 
     private static TreeNode bottomUpTree(int depth) {
       if (depth > 0) {
