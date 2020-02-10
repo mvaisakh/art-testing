@@ -177,6 +177,7 @@ fi
 
 for jar_file in "${DIR_BENCHMARKS}"/lib/*.jar
 do
+  jar_file="$(realpath "${jar_file}")"
   # Extract jar file and remove META-INF, which is not needed and can cause
   # issues with target runs.
   (cd $DIR_BUILD/classes && jar xfv "${jar_file}" && rm -rf META-INF)
