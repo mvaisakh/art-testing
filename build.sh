@@ -22,7 +22,7 @@ DIR_BUILD=$DIR_ROOT/out/build
 DIR_BENCHMARKS=$DIR_ROOT/benchmarks
 DIR_FRAMEWORK=$DIR_ROOT/framework
 JAVA_VERSION=1.8
-
+CROSS_COMPILE_FLAGS="-target $JAVA_VERSION -source $JAVA_VERSION"
 
 # Set to true to build for the target.
 TARGET_BUILD=false
@@ -31,8 +31,6 @@ VERBOSE=false
 # Set to false to not treat build warnings as errors.
 WERROR=true
 JAVA_BENCHMARK_FILES=
-
-
 
 # Helpers.
 
@@ -161,19 +159,10 @@ echo "$BENCHMARK_LIST_TEMPLATE" > $DIR_FRAMEWORK/org/linaro/bench/BenchmarkList.
 # Framework java files are compiled unconditionally.
 JAVA_FRAMEWORK_FILES="$(find $DIR_FRAMEWORK -type f -name '*'.java)"
 
-
-
 # Build everything.
 
 verbose_safe rm -rf $DIR_BUILD
 verbose_safe mkdir -p $DIR_BUILD/classes/
-
-JAVAC_RUNTIME_VERSION=$(javac -version 2>&1)
-if [[ $JAVAC_RUNTIME_VERSION =~ "javac 9" ]]; then
-  CROSS_COMPILE_FLAGS="--release 8"
-else
-  CROSS_COMPILE_FLAGS="-target $JAVA_VERSION -source $JAVA_VERSION"
-fi
 
 for jar_file in "${DIR_BENCHMARKS}"/lib/*.jar
 do
@@ -183,21 +172,35 @@ do
   (cd $DIR_BUILD/classes && jar xfv "${jar_file}" && rm -rf META-INF)
 done
 
-if [[ -d "${DIR_BENCHMARKS}"/resources ]]; then
-  tar cfv $DIR_BUILD/resources.tar -C "${DIR_BENCHMARKS}" ./resources
-fi
-verbose_safe javac -encoding UTF-8 $CROSS_COMPILE_FLAGS -cp $DIR_BENCHMARKS:$DIR_BUILD/classes -d $DIR_BUILD/classes/ $JAVA_FRAMEWORK_FILES $JAVA_BENCHMARK_FILES
-verbose_safe jar cf $DIR_BUILD/bench.jar $DIR_BUILD/classes/
+javac_cmd_options=("-encoding" "UTF-8" \
+  "-cp" "${DIR_BENCHMARKS}:${DIR_BUILD}/classes" \
+  "-d" "$DIR_BUILD/classes/" \
+  $JAVA_FRAMEWORK_FILES \
+  $JAVA_BENCHMARK_FILES)
+
 DX=$(which dx)
+# Use different javac for target and host builds:
+#  For target: the art/tools/javac-helper.sh is used to invoke javac with the correct bootclasspath.
+#  For host: javac from PATH is used.
 if [ $TARGET_BUILD = "true" ] || [ -n "$DX" ]; then
   if [ $TARGET_BUILD = "false" ]; then
     info "This is not a target build (\`-t\` was not specified), but" \
       "the \`dx\` command was found, so the APK will be built. (\`dx\`: $DX)"
   fi
+  if [[ -d "${DIR_BENCHMARKS}"/resources ]]; then
+    tar cfv $DIR_BUILD/resources.tar -C "${DIR_BENCHMARKS}" ./resources
+  fi
+  verbose_safe ${ANDROID_BUILD_TOP}/art/tools/javac-helper.sh --show-commands --core-only \
+    $CROSS_COMPILE_FLAGS \
+    "${javac_cmd_options[@]}"
   if hash dx 2> /dev/null; then
     verbose_safe dx --dex --output $DIR_BUILD/bench.apk $DIR_BUILD/classes/
   else
     warning "\`dx\` command not found. bench.apk won't be generated." \
       "Are you running from an Android environment?"
   fi
+else
+  verbose_safe javac \
+    "${javac_cmd_options[@]}"
+  (cd $DIR_BUILD/classes && jar cf ../bench.jar .)
 fi
