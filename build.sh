@@ -68,6 +68,35 @@ verbose_safe() {
   "$@" || error "FAILED command:\n$*";
 }
 
+# This function transforms the provided list of java file names
+# to the list of benchmark names.
+# The benchmark name is its fully-qualified class name with '/' instead of '.'.
+#
+# Args:
+#   $1: The list of file names.
+transform_java_file_names_to_benchmark_names() {
+  local java_file_names="$1"
+
+  # Remove the `.java` extension.
+  local benchmark_names=${java_file_names//.java/}
+  # Remove the leading full or relative path.
+  benchmark_names=${benchmark_names//$DIR_ROOT\//}
+  # Trim trailing whitespaces.
+  benchmark_names=${benchmark_names/%[[:space:]]/}
+  echo "${benchmark_names}"
+}
+
+# Find all available benchmarks.
+find_all_benchmarks() {
+  find $DIR_BENCHMARKS -type f -name '*'.java
+}
+
+# List all available benchmarks by their name.
+list_all_benchmarks() {
+  local benchmarks_java_files="$(find_all_benchmarks)"
+  transform_java_file_names_to_benchmark_names "${benchmarks_java_files}"
+}
+
 # Arguments handling
 
 usage="Usage: $(basename "$0") [FILES]
@@ -89,6 +118,7 @@ Options:
     -h           Show this help message.
     -t           Build for the target. Requires building from an Android
                  environment.
+    -l           List all available benchmarks and exit.
     -v           Verbose. Print the commands executed.
     -W           Do not treat build warnings as errors.
     -b BENCHMARK DEPRECATED
@@ -100,6 +130,10 @@ while getopts ':htlvWb:' option; do
   case "$option" in
     h) echo "$usage"; exit ;;
     t) TARGET_BUILD=true ;;
+    l)
+       list_all_benchmarks
+       exit 0
+       ;;
     v) VERBOSE=true ;;
     W) WERROR=false ;;
     b) JAVA_BENCHMARK_FILES=$OPTARG
@@ -127,7 +161,7 @@ set -f
 # Find what Java files we need to compile.
 
 if [[ -z $JAVA_BENCHMARK_FILES ]]; then
-  JAVA_BENCHMARK_FILES="$(find $DIR_BENCHMARKS -type f -name '*'.java)"
+  JAVA_BENCHMARK_FILES="$(find_all_benchmarks)"
 fi
 
 # Reenable wildcard expansion.
@@ -136,12 +170,8 @@ set +f
 # Transform the list of java files in a list of strings that will be provided to
 # the benchmark framework to indicate what benchmark classes are available.
 # Remove the `.java` extension.
-JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_FILES//.java/}
-# Remove the leading full or relative path.
-JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//.\//}
-JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES//$DIR_ROOT\//}
-# Trim trailing whitespaces.
-JAVA_BENCHMARK_CLASSES=${JAVA_BENCHMARK_CLASSES/%[[:space:]]/}
+JAVA_BENCHMARK_CLASSES="$(transform_java_file_names_to_benchmark_names "${JAVA_BENCHMARK_FILES}")"
+
 # Make it a list of literal string.
 tmp=""
 for cl in ${JAVA_BENCHMARK_CLASSES}
