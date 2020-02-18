@@ -286,6 +286,25 @@ public class Intrinsics {
     }
   }
 
+  private static int[] resultsFloatIsInfinite = new int[NUM_INVOKES];
+  private static int[] resultsDoubleIsInfinite = new int[NUM_INVOKES];
+
+  public void timeFloatIsInfinite(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsFloatIsInfinite[i] = Float.isInfinite((float)i) ? 0 : i;
+      }
+    }
+  }
+
+  public void timeDoubleIsInfinite(int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+      for (int i = 0; i < NUM_INVOKES; ++i) {
+        resultsDoubleIsInfinite[i] = Double.isInfinite((double)i) ? 0 : i;
+      }
+    }
+  }
+
   /**
    * Verify.
    **/
@@ -325,6 +344,9 @@ public class Intrinsics {
     obj.timeBitCountLong(100000);
     obj.timeBitCountIntegerRandom(100000);
     obj.timeBitCountLongRandom(100000);
+
+    obj.timeFloatIsInfinite(100000);
+    obj.timeDoubleIsInfinite(100000);
 
     long after = System.currentTimeMillis();
     System.out.println("benchmarks/micro/intrinsics/Intrinsics: " + (after - before));
