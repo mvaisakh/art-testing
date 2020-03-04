@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,26 +51,51 @@ public class Benchmark {
 
   private static final int ITERATIONS_LIMIT = 0x400000;
 
+  // Default target running time for benchmarks.
+  public static final long DEFAULT_TARGET_RUNNING_TIME_MS = 400;
+
+  // The constant to indicate the unknown value of the calibration time.
+  private static final long UNKNOWN_CALIBRATION_TIME = -1;
+
   /*
    * BenchmarkMethod is a class to work with methods containing benchmarking code.
    * Those methods run benchmarking code a number of iterations. The number of
-   * iterations can either be provided by the methods via IterationsAnnotation
+   * iterations can be explicitly provided in the constructor or via methods IterationsAnnotation
    * or be calculated using calibration process.
    */
   private static class BenchmarkMethod {
+    // The constant to indicate the unknown value of the iteration count.
+    private static final int UNKNOWN_ITERATION_COUNT = -1;
+
     private Object parent;
     private Method method;
     private int iterationsCount;
     private String id;
     private boolean doWarmup;
 
-    public BenchmarkMethod(Object parent, Method method) {
+    // Construct BenchmarkMethod with the provided iteration count.
+    // Arguments:
+    //   parent - an instance of the class containing benchmarking methods.
+    //   method - a method containing benchmarking code.
+    //   iterationCount - a number of iterations the method to run
+    //                    benchmarking code. UNKNOWN_ITERATION_COUNT can be used
+    //                    if the iteration count is provided later.
+    public BenchmarkMethod(Object parent, Method method, int iterationCount) {
       this.parent = parent;
       this.method = method;
       this.id = benchmarkIdentifier(method);
       this.doWarmup = true;
+      this.iterationsCount = iterationCount;
+    }
 
-      this.iterationsCount = -1;
+    // Construct BenchmarkMethod based on the annotation if the method provides it.
+    // If the method does not have the annotation, the iteration count will be set to
+    // UNKNOWN_ITERATION_COUNT.
+    // Arguments:
+    //   parent - an instance of the class containing benchmarking methods.
+    //   method - a method containing benchmarking code.
+    public BenchmarkMethod(Object parent, Method method) {
+      this(parent, method, UNKNOWN_ITERATION_COUNT);
       IterationsAnnotation annotation = method.getAnnotation(IterationsAnnotation.class);
       if (annotation != null) {
         this.doWarmup = !annotation.noWarmup();
@@ -83,22 +109,33 @@ public class Benchmark {
       return id;
     }
 
-    public boolean needsCalibration() {
-      return iterationsCount == -1;
+    public String getName() {
+      return method.getName();
     }
 
-    public void calibrateIterations(long calibrationMinTimeNs, long targetRunTimeNs) {
+    public int getIterationCount() {
+      return iterationsCount;
+    }
+
+    public boolean needsCalibration() {
+      return iterationsCount == UNKNOWN_ITERATION_COUNT;
+    }
+
+    public void calibrateIterations() {
       // Estimate how long it takes to run one iteration.
       long iterations = 1;
       long duration = -1;
-      while ((duration < calibrationMinTimeNs) && (iterations < ITERATIONS_LIMIT)) {
+      if (Benchmark.calibrationTimeNs == UNKNOWN_CALIBRATION_TIME) {
+        Benchmark.calibrationTimeNs = Benchmark.calculateCalibrationTimeNs();
+      }
+      while ((duration < calibrationTimeNs) && (iterations < ITERATIONS_LIMIT)) {
         iterations *= 2;
         duration = timeIterations((int) iterations);
       }
       // Estimate the number of iterations to run based on the calibration
       // phase, and benchmark the function.
       double iterTime = duration / (double) iterations;
-      this.iterationsCount = (int) Math.max(1.0, targetRunTimeNs / iterTime);
+      this.iterationsCount = (int) Math.max(1.0, Benchmark.targetRunningTimeNs / iterTime);
     }
 
     public Result run() {
@@ -194,19 +231,6 @@ public class Benchmark {
     }
   }
 
-  private static final class ParticularBenchmarkMethodSelector implements MethodSelector {
-    private String particularBenchMethodName;
-
-    public ParticularBenchmarkMethodSelector(String methodName) {
-      particularBenchMethodName = methodName;
-    }
-
-    public boolean accept(Method method) {
-      return method.getName().equals(particularBenchMethodName)
-          && doesMethodHaveOneIntParam(method);
-    }
-  }
-
   private static final class VerifyMethodSelector implements MethodSelector {
     public boolean accept(Method method) {
       return method.getName().startsWith(VERIFY_BENCH_METHOD_PREFIX)
@@ -215,12 +239,115 @@ public class Benchmark {
     }
   }
 
-  private Object benchInstance;
-  private List<Method> setupMethods;
-  private List<BenchmarkMethod> benchMethods;
-  private List<Method> verifyMethods;
+  /*
+   * This class allows to access information encoded into the benchmark specification.
+   * The benchmark specification format:
+   *   <benchmark_class_name>[:<benchmark_method>:<iterations>]+
+   */
+  private static class BenchmarkSpecification {
+    String[] parts;
 
-  public Benchmark(String benchName, long calibrationMinTimeNs, long benchmarkTargetRunTimeNs) {
+    public BenchmarkSpecification(String str) {
+      parts = str.split(":");
+      if (parts.length < 3  || (parts.length % 2) != 1) {
+        throw new IllegalArgumentException("The provided benchmark specification is invalid.");
+      }
+    }
+
+    public String getClassName() {
+      return parts[0];
+    }
+
+    public int getMethodCount() {
+      // The method count is the number of parts minus 1 for the class name and divided by 2
+      // because it is in format <method name>:<iteration count>
+      return (parts.length - 1) / 2;
+    }
+
+    private int getMethodPartIndex(int index) {
+      return 2 * index + 1; // skipping the class name.
+    }
+
+    public String getMethodName(int index) {
+      return parts[getMethodPartIndex(index)];
+    }
+
+    public int getMethodIterationCount(int index) {
+      return Integer.parseInt(parts[getMethodPartIndex(index) + 1]);
+    }
+  }
+
+  // The target running time for benchmarks.
+  private static long targetRunningTimeNs =
+        TimeUnit.NANOSECONDS.convert(DEFAULT_TARGET_RUNNING_TIME_MS, TimeUnit.MILLISECONDS);
+  // The time used for calibration of benchmarks. It is usually less than the target running time
+  // to have the calibration process as quick as possible. UNKNOWN_CALIBRATION_TIME means the time
+  // has not been provided by an user. It will be calculated based on the target running time.
+  private static long calibrationTimeNs = UNKNOWN_CALIBRATION_TIME;
+
+  private Object benchInstance;
+  private List<Method> setupMethods = new ArrayList<Method>();
+  private List<BenchmarkMethod> benchMethods = new ArrayList<BenchmarkMethod>();
+  private List<Method> verifyMethods = new ArrayList<Method>();
+
+  private void findSetupAndVerifyMethods() {
+    // Each method declared in benchmarkClass is checked whether it is
+    // one of special methods ('setup', 'verify').
+    // Found methods are stored into corresponding lists.
+    MethodSelector setupMethodsSelector = new SetupMethodSelector();
+    MethodSelector verifyMethodsSelector = new VerifyMethodSelector();
+
+    for (Method method : benchInstance.getClass().getDeclaredMethods()) {
+      if (setupMethodsSelector.accept(method)) {
+        setupMethods.add(method);
+      } else if (verifyMethodsSelector.accept(method)) {
+        verifyMethods.add(method);
+      }
+    }
+  }
+
+  private void findTimeBenchmarkMethods() {
+    // Each method declared in benchmarkClass is checked whether it is
+    // a special method 'time'.
+    MethodSelector benchMethodsSelector = new TimeBenchmarkMethodSelector();
+    for (Method method : benchInstance.getClass().getDeclaredMethods()) {
+      if (benchMethodsSelector.accept(method)) {
+        benchMethods.add(new BenchmarkMethod(benchInstance, method));
+      }
+    }
+  }
+
+  private void createBenchInstance(String className) {
+    try {
+      Class<?> clazz = Class.forName(className);
+      benchInstance = clazz.newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to create a benchmark instance: " + className, e);
+    }
+  }
+
+  // Construct Benchmark based on BenchmarkSpecification, without calibration.
+  private Benchmark(BenchmarkSpecification benchmarkSpecification) {
+    createBenchInstance(benchmarkSpecification.getClassName());
+    findSetupAndVerifyMethods();
+    for (int i = 0; i < benchmarkSpecification.getMethodCount(); ++i) {
+      String methodName = benchmarkSpecification.getMethodName(i);
+      int iterationCount = benchmarkSpecification.getMethodIterationCount(i);
+      try {
+        Method method = benchInstance.getClass().getDeclaredMethod(methodName, int.class);
+        benchMethods.add(new BenchmarkMethod(benchInstance, method, iterationCount));
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to get the benchmark method: " + methodName, e);
+      }
+    }
+    // After all methods are processed the benchmark is setup.
+    setup();
+  }
+
+  // Construct Benchmark based on the name format:
+  //   path/to/BenchmarkClass(.Benchmark)?
+  // All benchmarking methods of Benchmark are calibrated if needed.
+  private Benchmark(String benchName) {
     if (benchName == null) {
       throw new NullPointerException("The provided benchmark name is null.");
     }
@@ -245,44 +372,28 @@ public class Benchmark {
     String benchmarkClass = matcher.group(2);
     String benchmarkMethodName = matcher.group(3);
 
-    // Each method declared in benchmarkClass is checked whether it is
-    // one of special methods ('time', 'setup', 'verify').
-    // Found methods are stored into corresponding lists.
-    setupMethods = new ArrayList<Method>();
-    benchMethods = new ArrayList<BenchmarkMethod>();
-    verifyMethods = new ArrayList<Method>();
+    createBenchInstance(benchmarkClassPath + benchmarkClass);
+    findSetupAndVerifyMethods();
+
     try {
-      Class<?> clazz = Class.forName(benchmarkClassPath + benchmarkClass);
-      benchInstance = clazz.newInstance();
-
-      MethodSelector setupMethodsSelector = new SetupMethodSelector();
-      MethodSelector benchMethodsSelector =
-          (benchmarkMethodName != null)
-              ? new ParticularBenchmarkMethodSelector(
-                  TIME_BENCH_METHOD_PREFIX + benchmarkMethodName)
-              : new TimeBenchmarkMethodSelector();
-      MethodSelector verifyMethodsSelector = new VerifyMethodSelector();
-
-      for (Method method : clazz.getDeclaredMethods()) {
-        if (setupMethodsSelector.accept(method)) {
-          setupMethods.add(method);
-        } else if (benchMethodsSelector.accept(method)) {
-          benchMethods.add(new BenchmarkMethod(benchInstance, method));
-        } else if (verifyMethodsSelector.accept(method)) {
-          verifyMethods.add(method);
-        }
+      if (benchmarkMethodName == null) {
+        findTimeBenchmarkMethods();
+      } else {
+        Method method = benchInstance.getClass().getDeclaredMethod(TIME_BENCH_METHOD_PREFIX
+            + benchmarkMethodName, int.class);
+        benchMethods.add(new BenchmarkMethod(benchInstance, method));
       }
-
-      if (benchMethods.isEmpty()) {
-        throw new RuntimeException("No benchmark method in the benchmark: " + benchName);
-      }
-
-      // After all methods are processed a benchmarks is setup. This includes
-      // the iteration calibration process if it is needed.
-      setup(calibrationMinTimeNs, benchmarkTargetRunTimeNs);
     } catch (Exception e) {
       throw new RuntimeException("Failed to create a benchmark: " + benchName, e);
     }
+
+    if (benchMethods.isEmpty()) {
+      throw new RuntimeException("No benchmark method in the benchmark: " + benchName);
+    }
+
+    // After all methods are processed the benchmark is setup and calibrated.
+    setup();
+    calibrate();
   }
 
   public Result[] run() {
@@ -322,15 +433,21 @@ public class Benchmark {
     return verifyFailures;
   }
 
-  private void setup(long calibrationMinTimeNs, long benchmarkTargetRunTimeNs) {
+  private void setup() {
     try {
       for (Method method : setupMethods) {
         method.invoke(benchInstance);
       }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
+  private void calibrate() {
+    try {
       for (BenchmarkMethod method : benchMethods) {
         if (method.needsCalibration()) {
-          method.calibrateIterations(calibrationMinTimeNs, benchmarkTargetRunTimeNs);
+          method.calibrateIterations();
         }
       }
     } catch (Exception e) {
@@ -350,5 +467,57 @@ public class Benchmark {
     // Filter the "time" prefix.
     String benchName = method.getName().substring(4);
     return path + className + "." + benchName;
+  }
+
+  // Return the string representation of the benchmark.
+  // Its format:
+  //   <benchmark_class_name>[:<benchmark_method>:<iterations>]+
+  public String toString() {
+    StringBuilder resultBuilder = new StringBuilder();
+    resultBuilder.append(benchInstance.getClass().getName());
+    for (BenchmarkMethod method : benchMethods) {
+      resultBuilder.append(':').append(method.getName());
+      resultBuilder.append(':').append(method.getIterationCount());
+    }
+    return resultBuilder.toString();
+  }
+
+  // Return an instance of Benchmark based on the provided string.
+  public static Benchmark fromString(String str) {
+    if (str == null) {
+      throw new NullPointerException("The provided string is null.");
+    }
+    if (str.isEmpty()) {
+      throw new IllegalArgumentException("The provided string is empty.");
+    }
+    if (str.indexOf(':') != -1) {
+      // Provided str has the benchmark specification format:
+      // <benchmark_class_name>[:<benchmark_method>:<iterations>]+
+      return new Benchmark(new BenchmarkSpecification(str));
+    } else {
+      // Assume that the provided str has the benchmark name format:
+      // path/to/BenchmarkClass(.Benchmark)?
+      return new Benchmark(str);
+    }
+  }
+
+  public static void setTargetRunningTime(long time) {
+    targetRunningTimeNs =
+      TimeUnit.NANOSECONDS.convert(Long.valueOf(time), TimeUnit.MILLISECONDS);
+  }
+
+  public static long getTargetRunningTimeNs() {
+    return targetRunningTimeNs;
+  }
+
+  public static void setCalibrationTime(long time) {
+    calibrationTimeNs =
+      TimeUnit.NANOSECONDS.convert(Long.valueOf(time), TimeUnit.MILLISECONDS);
+  }
+
+  public static long calculateCalibrationTimeNs() {
+    // As we want the calibration process to be quick, the calibration time is chosen
+    // to be the tenth of the target running time.
+    return targetRunningTimeNs / 10;
   }
 }
