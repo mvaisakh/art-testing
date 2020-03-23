@@ -194,13 +194,18 @@ JAVA_FRAMEWORK_FILES="$(find $DIR_FRAMEWORK -type f -name '*'.java)"
 verbose_safe rm -rf $DIR_BUILD
 verbose_safe mkdir -p $DIR_BUILD/classes/
 
-for jar_file in "${DIR_BENCHMARKS}"/lib/*.jar
-do
-  jar_file="$(realpath "${jar_file}")"
-  # Extract jar file and remove META-INF, which is not needed and can cause
-  # issues with target runs.
-  (cd $DIR_BUILD/classes && jar xfv "${jar_file}" && rm -rf META-INF)
-done
+jar_files=("${DIR_BENCHMARKS}"/lib/*.jar)
+# The ${DIR_BENCHMARKS}/lib directory might contain jar files needed for benchmarks.
+# We need to check whether there are any jar files before trying to process them.
+if [[ -f "${jar_files[0]}" ]]; then
+  for jar_file in "${jar_files[@]}"
+  do
+    jar_file="$(realpath "${jar_file}")"
+    # Extract jar file and remove META-INF, which is not needed and can cause
+    # issues with target runs.
+    (cd $DIR_BUILD/classes && jar xfv "${jar_file}" && rm -rf META-INF)
+  done
+fi
 
 javac_cmd_options=("-encoding" "UTF-8" \
   "-cp" "${DIR_BENCHMARKS}:${DIR_BUILD}/classes" \
